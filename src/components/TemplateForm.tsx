@@ -1,6 +1,9 @@
+// Client form for filling in a template's variables, previewing the
+// assembled prompt, generating via Claude, and saving the result.
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fillTemplate } from "@/lib/fillTemplate";
 import { getProjectContext } from "@/lib/projectContext";
 import { getLastSaved, saveLastOutput, type SavedOutput } from "@/lib/savedOutputs";
@@ -23,22 +26,23 @@ export function TemplateForm({ template }: TemplateFormProps) {
   const [output, setOutput] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastSaved, setLastSaved] = useState<SavedOutput | null>(null);
+  const [lastSaved, setLastSaved] = useState<SavedOutput | null>(() =>
+    getLastSaved(template.slug)
+  );
 
-  useEffect(() => {
-    setLastSaved(getLastSaved(template.slug));
-  }, [template.slug]);
-
+  /** Updates the in-progress value for one variable. */
   function handleChange(name: string, value: string) {
     setValues((current) => ({ ...current, [name]: value }));
   }
 
+  /** Substitutes the current variable values and saved project context into the template body. */
   function buildPrompt(): string {
     const context = getProjectContext().trim();
     const filled = fillTemplate(template.body, values);
     return context ? `Project context: ${context}\n\n${filled}` : filled;
   }
 
+  /** Shows the assembled prompt without sending it to Claude. */
   function handlePreview(event: React.FormEvent) {
     event.preventDefault();
     setPreview(buildPrompt());
@@ -46,6 +50,7 @@ export function TemplateForm({ template }: TemplateFormProps) {
     setError(null);
   }
 
+  /** Sends the assembled prompt to /api/generate and displays the result or an error. */
   async function handleGenerate() {
     const prompt = buildPrompt();
     setPreview(prompt);
@@ -75,6 +80,7 @@ export function TemplateForm({ template }: TemplateFormProps) {
     }
   }
 
+  /** Persists the current generated output as the template's last-saved record. */
   function handleSave() {
     if (!output) {
       return;

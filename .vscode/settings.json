@@ -1,0 +1,15 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+  "editor.rulers": [80],
+  "files.exclude": {
+    "node_modules": true,
+    ".next": true
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "github.copilot.enable": {
+    "*": true
+  }
+}

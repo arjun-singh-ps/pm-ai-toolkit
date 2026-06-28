@@ -1,3 +1,5 @@
+// Root layout: wraps every page with the shared top navigation.
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
   description: "AI-assisted delivery toolkit for banking programme managers",
 };
 
+/** Shared shell rendered around every route: fonts, global CSS, and the top nav. */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,7 +38,7 @@ export default function RootLayout({
               href="/"
               className="text-sm font-medium text-black dark:text-zinc-50"
             >
-              Templates
+              Programmes
             </Link>
             <Link
               href="/settings"

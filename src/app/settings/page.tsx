@@ -1,6 +1,8 @@
+// Settings page: lets the user view and update their saved project context.
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getProjectContext, setProjectContext } from "@/lib/projectContext";
 
 /**
@@ -9,13 +11,10 @@ import { getProjectContext, setProjectContext } from "@/lib/projectContext";
  * so each template doesn't need to ask for the same background every time.
  */
 export default function SettingsPage() {
-  const [context, setContext] = useState("");
+  const [context, setContext] = useState(() => getProjectContext());
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
-  useEffect(() => {
-    setContext(getProjectContext());
-  }, []);
-
+  /** Persists the textarea content as the new project context. */
   function handleSave(event: React.FormEvent) {
     event.preventDefault();
     setProjectContext(context);

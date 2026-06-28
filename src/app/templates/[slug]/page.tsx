@@ -1,3 +1,5 @@
+// Template detail page: shows one template's title, description, and fill-in form.
+
 import { notFound } from "next/navigation";
 import { getTemplateBySlug } from "@/lib/prompts";
 import { TemplateForm } from "@/components/TemplateForm";

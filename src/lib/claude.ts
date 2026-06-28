@@ -3,12 +3,16 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
-const MODEL = "claude-sonnet-4-6";
+export const CLAUDE_MODEL = "claude-sonnet-4-6";
 const MAX_OUTPUT_TOKENS = 2048;
 
 let client: Anthropic | null = null;
 
-function getClient(): Anthropic {
+/**
+ * Returns the singleton Anthropic client. Shared by the legacy single-shot
+ * generateFromPrompt below and by the agent chat engine (src/lib/agentEngine.ts).
+ */
+export function getClient(): Anthropic {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error("ANTHROPIC_API_KEY is not set. Add it to .env.local.");
   }
@@ -28,7 +32,7 @@ export async function generateFromPrompt(prompt: string): Promise<string> {
   const anthropic = getClient();
 
   const response = await anthropic.messages.create({
-    model: MODEL,
+    model: CLAUDE_MODEL,
     max_tokens: MAX_OUTPUT_TOKENS,
     messages: [{ role: "user", content: prompt }],
   });

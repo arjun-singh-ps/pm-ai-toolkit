@@ -1,65 +1,43 @@
-// Settings page: lets the user view and update their saved project context.
+// Settings page: regulatory framework reference (the one piece with no
+// auth dependency). Account and API key management arrive once Supabase
+// Auth is built — shown as an honest "not yet available" note rather than
+// fake UI. The old global, localStorage-based project context concept has
+// been replaced by per-programme notes (see ProgrammeNotesForm).
 
-"use client";
+import { REGULATORY_FRAMEWORKS } from "@/lib/constants";
 
-import { useState } from "react";
-import { getProjectContext, setProjectContext } from "@/lib/projectContext";
-
-/**
- * Lets the user set project context once (e.g. programme type, methodology,
- * delivery phase). It's automatically prepended to every prompt generation
- * so each template doesn't need to ask for the same background every time.
- */
+/** Settings page: regulatory framework reference, with a note on what's still to come. */
 export default function SettingsPage() {
-  const [context, setContext] = useState(() => getProjectContext());
-  const [savedAt, setSavedAt] = useState<string | null>(null);
-
-  /** Persists the textarea content as the new project context. */
-  function handleSave(event: React.FormEvent) {
-    event.preventDefault();
-    setProjectContext(context);
-    setSavedAt(new Date().toLocaleString());
-  }
-
   return (
     <div className="flex flex-1 justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-col gap-6 px-6 py-16">
+      <main className="flex w-full max-w-3xl flex-col gap-8 px-6 py-16">
         <div>
-          <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-            Project Context
-          </h1>
+          <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">Settings</h1>
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-            Set background context once (e.g. delivery methodology, regulatory
-            environment, programme phase). It will be added to every prompt you
-            generate, so you don&apos;t need to repeat it each time.
-          </p>
-          <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-            Do not include client names, programme names, or financial data —
-            this is stored only in your browser, but treat it the same as any
-            other prompt input.
+            Account and API key management will be available once login is added. Programme-level
+            settings (notes, regulatory frameworks) are edited from each programme directly.
           </p>
         </div>
 
-        <form onSubmit={handleSave} className="flex flex-col gap-3">
-          <textarea
-            rows={6}
-            value={context}
-            onChange={(event) => setContext(event.target.value)}
-            placeholder="e.g. Agile delivery, regulated UK retail banking environment, mid-implementation phase."
-            className="rounded-md border border-black/10 bg-white p-3 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-
-          <button
-            type="submit"
-            className="self-start rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-          >
-            Save context
-          </button>
-
-          {savedAt && (
-            <p className="text-sm text-zinc-500">Saved at {savedAt}</p>
-          )}
-        </form>
+        <div>
+          <h2 className="mb-2 text-sm font-medium uppercase tracking-wide text-zinc-400">
+            Regulatory frameworks
+          </h2>
+          <p className="mb-3 text-sm text-zinc-600 dark:text-zinc-400">
+            Available frameworks a programme can select at setup. The Governance Guardian agent,
+            which checks compliance against these, hasn&apos;t been built yet.
+          </p>
+          <ul className="flex flex-wrap gap-2">
+            {REGULATORY_FRAMEWORKS.map((framework) => (
+              <li
+                key={framework}
+                className="rounded-full border border-black/10 px-3 py-1 text-sm text-zinc-700 dark:border-white/10 dark:text-zinc-300"
+              >
+                {framework}
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
     </div>
   );

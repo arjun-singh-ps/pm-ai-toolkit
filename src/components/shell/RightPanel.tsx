@@ -1,12 +1,16 @@
 // Right panel of the three-panel shell: Artefacts / KPIs / Gate tabs.
-// Artefacts is wired to real data; KPIs and Gate remain honest empty-state
-// placeholders until their backing logic exists.
+// Artefacts and Gate are wired to real data; KPIs remains an honest
+// empty-state placeholder until a KPI-writing agent exists.
 
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Artefact } from "@/types/artefact";
+import type { Persona } from "@/types/programme";
+import { listAgentsForPhase } from "@/agents/registry";
+import { NEXT_PHASE } from "@/lib/constants";
+import { ArtefactModal } from "@/components/ArtefactModal";
 
 type Tab = "artefacts" | "kpis" | "gate";
 
@@ -28,44 +32,82 @@ const STATUS_COLOR: Record<Artefact["status"], string> = {
   approved: "text-green-600 dark:text-green-400",
 };
 
-interface RightPanelProps {
-  programmeId: string;
+interface GateAgentChecklist {
+  name: string;
+  displayName: string;
+  artefacts: { name: string; approved: boolean }[];
 }
 
-/** Tabbed right panel: Artefacts tab lists every artefact for the programme with an Approve action. */
-export function RightPanel({ programmeId }: RightPanelProps) {
+interface RightPanelProps {
+  programmeId: string;
+  phase: string;
+  persona: Persona;
+}
+
+/** Tabbed right panel: Artefacts (approve drafts) and Gate (phase checklist) are wired to real data. */
+export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("artefacts");
   const [artefacts, setArtefacts] = useState<Artefact[]>([]);
+  const [gate, setGate] = useState<{ clear: boolean; agents: GateAgentChecklist[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [isAdvancing, setIsAdvancing] = useState(false);
+  const [advanceError, setAdvanceError] = useState<string | null>(null);
+  const [viewingArtefactId, setViewingArtefactId] = useState<string | null>(null);
 
-  async function loadArtefacts() {
+  const nextPhase = NEXT_PHASE[phase];
+  const nextPhaseAvailable = Boolean(nextPhase) && listAgentsForPhase(persona, nextPhase).length > 0;
+
+  async function loadData() {
     try {
-      const response = await fetch(`/api/artefacts?programmeId=${programmeId}`);
-      const data = await response.json();
-      setArtefacts(data.artefacts ?? []);
+      const [artefactsResponse, gateResponse] = await Promise.all([
+        fetch(`/api/artefacts?programmeId=${programmeId}`),
+        fetch(`/api/gate/${phase}?programmeId=${programmeId}`),
+      ]);
+      const artefactsData = await artefactsResponse.json();
+      const gateData = await gateResponse.json();
+      setArtefacts(artefactsData.artefacts ?? []);
+      setGate(gateData);
     } finally {
       setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    void loadArtefacts();
+    void loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [programmeId]);
+  }, [programmeId, phase]);
 
-  /** Approves one artefact, refreshes this panel's list, and revalidates the sidebar's lock state. */
+  /** Approves one artefact, refreshes this panel's data, and revalidates the sidebar's lock state. */
   async function handleApprove(id: string) {
     setApprovingId(id);
     try {
       const response = await fetch(`/api/artefacts/${id}/approve`, { method: "POST" });
       if (response.ok) {
-        await loadArtefacts();
+        await loadData();
         router.refresh();
+        setViewingArtefactId(null);
       }
     } finally {
       setApprovingId(null);
+    }
+  }
+
+  /** Advances the programme to the next phase. The server re-checks the gate independently. */
+  async function handleAdvance() {
+    setIsAdvancing(true);
+    setAdvanceError(null);
+    try {
+      const response = await fetch(`/api/programmes/${programmeId}/advance-phase`, { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) {
+        setAdvanceError(data.error ?? "Failed to advance phase.");
+        return;
+      }
+      router.refresh();
+    } finally {
+      setIsAdvancing(false);
     }
   }
 
@@ -102,23 +144,102 @@ export function RightPanel({ programmeId }: RightPanelProps) {
                   <p className={`text-xs ${STATUS_COLOR[artefact.status]}`}>
                     {STATUS_LABEL[artefact.status]} · v{artefact.version}
                   </p>
-                  {artefact.status !== "approved" && (
+                  <div className="mt-2 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => handleApprove(artefact.id)}
-                      disabled={approvingId === artefact.id}
-                      className="mt-2 rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+                      onClick={() => setViewingArtefactId(artefact.id)}
+                      className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
                     >
-                      {approvingId === artefact.id ? "Approving..." : "Approve"}
+                      View
                     </button>
-                  )}
+                    {artefact.status !== "approved" && (
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(artefact.id)}
+                        disabled={approvingId === artefact.id}
+                        className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+                      >
+                        {approvingId === artefact.id ? "Approving..." : "Approve"}
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
           ))}
+
         {activeTab === "kpis" && "No KPI data recorded for this programme yet."}
-        {activeTab === "gate" && "Phase gate status not yet available."}
+
+        {activeTab === "gate" &&
+          (isLoading || !gate ? (
+            "Loading gate status..."
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className={gate.clear ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}>
+                {gate.clear ? "✅ Phase gate clear" : "⏳ Phase gate not yet clear"}
+              </p>
+
+              <ul className="flex flex-col gap-2">
+                {gate.agents.map((agent) => (
+                  <li key={agent.name}>
+                    <p className="text-xs font-medium text-black dark:text-zinc-50">{agent.displayName}</p>
+                    <ul className="ml-3 mt-1 flex flex-col gap-0.5">
+                      {agent.artefacts.map((artefact) => (
+                        <li key={artefact.name} className="text-xs">
+                          {artefact.approved ? "✅" : "⬜"} {artefact.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+
+              {nextPhase === undefined ? (
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  🏁 This is the final phase of this persona.
+                </p>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleAdvance}
+                    disabled={!gate.clear || !nextPhaseAvailable || isAdvancing}
+                    title={
+                      !nextPhaseAvailable
+                        ? `${nextPhase} phase agents are not yet available`
+                        : !gate.clear
+                          ? "Approve every artefact above first"
+                          : undefined
+                    }
+                    className="mt-1 self-start rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-zinc-400 opacity-50 enabled:border-black/20 enabled:text-black enabled:opacity-100 enabled:hover:bg-black/5 dark:border-white/10 dark:enabled:text-zinc-50 dark:enabled:hover:bg-white/5"
+                  >
+                    {isAdvancing
+                      ? "Advancing..."
+                      : `Advance to ${nextPhase[0].toUpperCase() + nextPhase.slice(1)}`}
+                  </button>
+
+                  {advanceError && (
+                    <p className="text-xs text-red-600 dark:text-red-400">{advanceError}</p>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
       </div>
+
+      {viewingArtefactId &&
+        (() => {
+          const viewingArtefact = artefacts.find((artefact) => artefact.id === viewingArtefactId);
+          if (!viewingArtefact) return null;
+          return (
+            <ArtefactModal
+              artefact={viewingArtefact}
+              onClose={() => setViewingArtefactId(null)}
+              onApprove={handleApprove}
+              isApproving={approvingId === viewingArtefact.id}
+            />
+          );
+        })()}
     </aside>
   );
 }

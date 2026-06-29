@@ -2,12 +2,6 @@
 
 import type { Persona } from "@/types/programme";
 
-/**
- * Stand-in for a real logged-in user until Supabase Auth is added. Written
- * into artefacts.approved_by and any "owner" field in artefact content.
- */
-export const DEFAULT_OWNER = "owner";
-
 /** Regulatory frameworks selectable at programme setup, per CLAUDE.md's Governance Guardian spec. */
 export const REGULATORY_FRAMEWORKS = [
   "PRA",
@@ -24,4 +18,10 @@ export const REGULATORY_FRAMEWORKS = [
 export const INITIAL_PHASE_BY_PERSONA: Record<Persona, string> = {
   legacy: "foundation",
   agentic: "envision",
+};
+
+/** The phase that follows each phase, once its gate is clear. */
+export const NEXT_PHASE: Record<string, string> = {
+  foundation: "forge",
+  forge: "amplify",
 };

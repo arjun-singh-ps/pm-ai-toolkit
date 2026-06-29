@@ -28,7 +28,7 @@ export default async function ProgrammeLayout({ children, params }: ProgrammeLay
         <Header programme={programme} />
         <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-black">{children}</main>
       </div>
-      <RightPanel programmeId={programme.id} />
+      <RightPanel programmeId={programme.id} phase={programme.active_phase} persona={programme.persona} />
     </div>
   );
 }

@@ -11,6 +11,15 @@ import { knowledgeForgeAgent } from "@/agents/modernisation/foundation/knowledge
 import { backlogArchitectureAgent } from "@/agents/modernisation/foundation/backlogArchitecture";
 import { deliveryIntelligenceAgent } from "@/agents/modernisation/foundation/deliveryIntelligence";
 import { launchReadinessAgent } from "@/agents/modernisation/foundation/launchReadiness";
+import { pilotIgnitionAgent } from "@/agents/modernisation/forge/pilotIgnition";
+import { signalWatchAgent } from "@/agents/modernisation/forge/signalWatch";
+import { scaleBlueprintAgent } from "@/agents/modernisation/forge/scaleBlueprint";
+import { backlogPulseAgent } from "@/agents/modernisation/amplify/backlogPulse";
+import { contextFlywheelAgent } from "@/agents/modernisation/amplify/contextFlywheel";
+import { factoryBuildAgent } from "@/agents/modernisation/amplify/factoryBuild";
+import { launchRunwayAgent } from "@/agents/modernisation/amplify/launchRunway";
+import { deliveryHeartbeatAgent } from "@/agents/modernisation/amplify/deliveryHeartbeat";
+import { evolutionEngineAgent } from "@/agents/modernisation/amplify/evolutionEngine";
 
 /**
  * Foundation-phase agents in their required completion order. This list is
@@ -27,8 +36,23 @@ export const FOUNDATION_AGENTS: AgentConfig[] = [
   launchReadinessAgent,
 ];
 
+/** Forge-phase agents, same linear-dependency convention as Foundation. */
+export const FORGE_AGENTS: AgentConfig[] = [pilotIgnitionAgent, signalWatchAgent, scaleBlueprintAgent];
+
+/** Amplify-phase agents, same linear-dependency convention as Foundation and Forge. */
+export const AMPLIFY_AGENTS: AgentConfig[] = [
+  backlogPulseAgent,
+  contextFlywheelAgent,
+  factoryBuildAgent,
+  launchRunwayAgent,
+  deliveryHeartbeatAgent,
+  evolutionEngineAgent,
+];
+
+const ALL_AGENTS: AgentConfig[] = [...FOUNDATION_AGENTS, ...FORGE_AGENTS, ...AMPLIFY_AGENTS];
+
 const REGISTRY: Record<string, AgentConfig> = Object.fromEntries(
-  FOUNDATION_AGENTS.map((agent) => [agent.name, agent])
+  ALL_AGENTS.map((agent) => [agent.name, agent])
 );
 
 /** Looks up one agent config by its stable name, or null if it doesn't exist (yet). */
@@ -38,5 +62,5 @@ export function getAgent(name: string): AgentConfig | null {
 
 /** Returns every agent config for a given persona + phase, in build order. */
 export function listAgentsForPhase(persona: Persona, phase: string): AgentConfig[] {
-  return FOUNDATION_AGENTS.filter((agent) => agent.persona === persona && agent.phase === phase);
+  return ALL_AGENTS.filter((agent) => agent.persona === persona && agent.phase === phase);
 }

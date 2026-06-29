@@ -3,6 +3,7 @@
 
 import { NextResponse } from "next/server";
 import { runAgentTurn } from "@/lib/agentEngine";
+import { getCurrentUserEmail } from "@/lib/auth";
 
 interface RouteParams {
   params: Promise<{ agentName: string }>;
@@ -17,8 +18,13 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "'programmeId' and 'message' are required." }, { status: 400 });
   }
 
+  const userEmail = await getCurrentUserEmail();
+  if (!userEmail) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   try {
-    const result = await runAgentTurn(body.programmeId, agentName, body.message);
+    const result = await runAgentTurn(body.programmeId, agentName, body.message, userEmail);
 
     if (result.blocked) {
       return NextResponse.json({ error: result.reason ?? "This agent is not available." }, { status: 403 });

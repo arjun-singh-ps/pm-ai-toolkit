@@ -5,6 +5,7 @@ import {
   FOUNDATION_AGENTS,
   FORGE_AGENTS,
   AMPLIFY_AGENTS,
+  CROSS_CUTTING_AGENTS,
 } from "@/agents/registry";
 
 describe("agent registry", () => {
@@ -79,5 +80,28 @@ describe("agent registry", () => {
 
   it("listAgentsForPhase returns all 6 Amplify agents for the legacy persona", () => {
     expect(listAgentsForPhase("legacy", "amplify")).toHaveLength(6);
+  });
+
+  it("contains Governance Guardian with no dependencies and its 3 artefacts", () => {
+    expect(CROSS_CUTTING_AGENTS.map((agent) => agent.name)).toEqual(["governance-guardian"]);
+    const guardian = getAgent("governance-guardian");
+    expect(guardian?.dependsOnAgents).toEqual([]);
+    expect(guardian?.produces.map((spec) => spec.name)).toEqual([
+      "Compliance Charter",
+      "Governance Pulse",
+      "Regulatory Gap Matrix",
+    ]);
+  });
+
+  it("never returns cross-cutting agents from listAgentsForPhase for any real phase", () => {
+    const realPhases = ["foundation", "forge", "amplify", "envision", "shape", "incubate", "prove", "scale"];
+    for (const phase of realPhases) {
+      expect(listAgentsForPhase("legacy", phase)).not.toContainEqual(
+        expect.objectContaining({ name: "governance-guardian" })
+      );
+      expect(listAgentsForPhase("agentic", phase)).not.toContainEqual(
+        expect.objectContaining({ name: "governance-guardian" })
+      );
+    }
   });
 });

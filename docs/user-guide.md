@@ -58,9 +58,9 @@ Once inside a programme, you'll see three panels:
   - **Gate** — a checklist of every artefact required to clear the current phase, and an
     **Advance to [next phase]** button.
 
-At the top, **History** and **KPIs** links open full-page views of the same data, and **Project
-Charter**-style cross-cutting buttons (Governance Guardian, Cost Compass, Roadmap Architect,
-Comms Architect) are visible but disabled — "coming in a later milestone."
+At the top, **History** and **KPIs** links open full-page views of the same data. Of the 4
+cross-cutting buttons, **Governance Guardian** is clickable — see §4.1 below; **Cost Compass**,
+**Roadmap Architect**, and **Comms Architect** remain disabled ("coming in a later milestone").
 
 ## 4. Talking to an agent
 
@@ -75,6 +75,22 @@ Comms Architect) are visible but disabled — "coming in a later milestone."
    a line like "📄 Recorded artefact: Programme Charter" appear in the chat.
 5. You can keep chatting in the same conversation — history persists, so leaving and coming
    back later picks up exactly where you left off.
+
+### 4.1 Governance Guardian — available any time, not just at the start
+
+Unlike the phase agents in the sidebar, **Governance Guardian** (the header button) is available
+the moment you create a programme — it isn't locked behind any phase progression. Click it to
+chat directly; it reviews your programme's existing artefacts (if any) against the regulatory
+frameworks you selected when creating the programme, and can produce a **Compliance Charter**,
+**Governance Pulse**, and **Regulatory Gap Matrix**.
+
+- If you haven't selected any regulatory frameworks for this programme, it'll tell you to add
+  some (via the programme creation form's checkboxes — there's no way to edit them after
+  creation yet) rather than producing a generic compliance document.
+- If nothing's been built yet, it'll say so and ask you to come back once some artefacts exist.
+- Its artefacts show up in the **Artefacts** tab and **History** like any other, but — unlike
+  phase agents' artefacts — they never appear in the **Gate** tab checklist and never block
+  phase progression. Governance review runs alongside delivery, not as a gate on it.
 
 ## 5. Reviewing and approving artefacts
 

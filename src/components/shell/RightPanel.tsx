@@ -11,6 +11,7 @@ import type { Persona } from "@/types/programme";
 import { listAgentsForPhase } from "@/agents/registry";
 import { NEXT_PHASE } from "@/lib/constants";
 import { ArtefactModal } from "@/components/ArtefactModal";
+import { ARTEFACT_RECORDED_EVENT } from "@/lib/clientEvents";
 
 type Tab = "artefacts" | "kpis" | "gate";
 
@@ -76,6 +77,15 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
 
   useEffect(() => {
     void loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [programmeId, phase]);
+
+  useEffect(() => {
+    function handleArtefactRecorded() {
+      void loadData();
+    }
+    window.addEventListener(ARTEFACT_RECORDED_EVENT, handleArtefactRecorded);
+    return () => window.removeEventListener(ARTEFACT_RECORDED_EVENT, handleArtefactRecorded);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programmeId, phase]);
 

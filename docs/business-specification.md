@@ -81,14 +81,23 @@ Five phases (Envision, Shape, Incubate, Prove, Scale), 15 agents total, per the 
 Scale-phase agents are intended to act as strategic advisers with no fixed artefacts, never as
 deliverable generators.
 
-## 3. Cross-cutting agents (NOT BUILT)
+## 3. Cross-cutting agents
 
 Nine named in the original vision: Orchestrator, Persona Selector, Artefact State, KPI Monitor,
 Responsible AI, Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect.
 
-Four of these (Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect) have
-visible, disabled buttons in the chat header today, as placeholders. The other five have no UI
-presence yet. **None have backing logic.**
+**Governance Guardian (BUILT)** — the first cross-cutting agent. Available immediately on any
+programme, regardless of phase, via a header button (not the phase-scoped sidebar). Reviews the
+programme's existing artefacts (any status — approved and draft, status-labeled) against its
+selected regulatory frameworks and produces: Compliance Charter, Governance Pulse, Regulatory
+Gap Matrix. If no frameworks are selected or no artefacts exist yet, it says so plainly rather
+than producing generic output — directly satisfying rule #10 below. Its artefacts are tagged
+`phase: "cross-cutting"`, so they show up in the Artefacts tab and History but never count
+toward any phase's gate checklist — cross-cutting work doesn't block phase progression.
+
+Cost Compass, Roadmap Architect, and Comms Architect remain visible, disabled header buttons —
+placeholders for later. Orchestrator, Persona Selector, Artefact State, KPI Monitor, and
+Responsible AI have no UI presence yet and no backing logic.
 
 ## 4. Business rules (status per rule)
 
@@ -103,7 +112,7 @@ presence yet. **None have backing logic.**
 | 7 | Scale-phase agents are strategic advisers only, no fixed artefacts | N/A — Scale phase not built. |
 | 8 | Responsible AI guardrails surfaced proactively | **Partially enforced** — every artefact is labelled "AI-generated, review before use"; no dedicated guardrail agent exists. |
 | 9 | Never conflate "Prompt Catalogue" with "Agent Prompt Fabric" | N/A — neither artefact exists yet (not in the Foundation phase). |
-| 10 | Governance Guardian must reference selected regulatory frameworks | N/A — Governance Guardian not built. Regulatory frameworks ARE captured at programme creation and stored, ready for when it is. |
+| 10 | Governance Guardian must reference selected regulatory frameworks | **Enforced via agent prompting** — its system prompt requires referencing the programme's actual selected frameworks and existing artefact content, and explicitly refuses to produce generic output when frameworks or artefacts are missing; verified live, not just in the prompt text. |
 
 ## 5. Data captured today
 
@@ -144,7 +153,14 @@ was no real "review" step despite that being a core business rule. Every artefac
 **View** action opening its full structured content (all sections, version, recorder, approver,
 disclaimer) before approving.
 
-## 8. Known product gaps (intentional, not bugs)
+## 8. Artefacts now appear immediately after being recorded (bug fix)
+
+Found while testing Governance Guardian end-to-end (not specific to it — this affected every
+agent): recording an artefact via chat never told the Artefacts/Gate tabs to refresh, so a newly
+recorded artefact was invisible until the page was manually reloaded. Fixed — the Artefacts tab
+now updates immediately after any agent's conversation records something.
+
+## 9. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing.
 - Governance/compliance review is **not actually performed** — regulatory frameworks are

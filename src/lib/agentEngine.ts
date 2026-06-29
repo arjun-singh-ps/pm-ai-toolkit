@@ -11,6 +11,7 @@ import { getProgramme } from "@/lib/programmes";
 import { loadOrCreateSession, saveSessionMessages, type ChatMessage } from "@/lib/chatSessions";
 import { recordArtefactDraft } from "@/lib/artefacts";
 import { recordCost } from "@/lib/costRecords";
+import { getExtraContext } from "@/lib/crossCuttingContext";
 import type { AgentConfig } from "@/agents/types";
 import type { Programme } from "@/types/programme";
 
@@ -100,7 +101,9 @@ export async function runAgentTurn(
 
   const session = await loadOrCreateSession(programmeId, agent);
   const messages: ChatMessage[] = [...session.messages, { role: "user", content: userMessage }];
-  const systemPrompt = buildSystemPrompt(agent, programme);
+  const baseSystemPrompt = buildSystemPrompt(agent, programme);
+  const extraContext = await getExtraContext(agentName, programmeId);
+  const systemPrompt = extraContext ? `${baseSystemPrompt}\n\n${extraContext}` : baseSystemPrompt;
 
   const recordedArtefacts: string[] = [];
   let totalTokensIn = 0;

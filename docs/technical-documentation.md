@@ -63,11 +63,65 @@ Supabase's REST API directly; it is **not** this app's own access-control mechan
 
 Agents are **plain typed config objects**, not classes — see `src/agents/types.ts`
 (`AgentConfig`: name, displayName, persona, phase, systemPrompt, produces, dependsOnAgents).
-Each agent is one small file under `src/agents/modernisation/{foundation,forge,amplify}/`,
-aggregated into a single lookup in `src/agents/registry.ts` (`getAgent`, `listAgentsForPhase`,
-`FOUNDATION_AGENTS`, `FORGE_AGENTS`, `AMPLIFY_AGENTS`). The registry is the single source of
-truth — the sidebar, the gating logic, and the chat API route all read agent metadata from
-here, never hardcoded elsewhere.
+Each phase-scoped agent is one small file under
+`src/agents/modernisation/{foundation,forge,amplify}/`; cross-cutting agents (§4.1) live under
+`src/agents/cross-cutting/` instead. All of them aggregate into a single lookup in
+`src/agents/registry.ts` (`getAgent`, `listAgentsForPhase`, `FOUNDATION_AGENTS`, `FORGE_AGENTS`,
+`AMPLIFY_AGENTS`, `CROSS_CUTTING_AGENTS`). The registry is the single source of truth — the
+sidebar, the gating logic, and the chat API route all read agent metadata from here, never
+hardcoded elsewhere.
+
+### 4.1 Cross-cutting agents — a phase-independent variant of the same config
+
+The first cross-cutting agent, Governance Guardian, reuses `AgentConfig` as-is rather than a
+separate type — no code path needed to change. Two sentinel-like choices make this work:
+
+- `phase: "cross-cutting"` never matches a real `programme.active_phase`, so
+  `listAgentsForPhase` (and therefore the Sidebar and `isPhaseGateClear`) never returns it —
+  confirmed by a dedicated test (`tests/unit/registry.test.ts`) iterating every real phase
+  across both personas. **Any future "list a programme's available agents" code must filter
+  `phase === "cross-cutting"` directly — never reuse `listAgentsForPhase` for that.**
+- `persona: "legacy"` is a pragmatic stand-in (Agentic Delivery isn't built, so there's no real
+  second case to handle yet) — conceptually this agent should be persona-agnostic, but the type
+  doesn't support that today. Revisit if/when Agentic Delivery is built.
+- `dependsOnAgents: []` — no gating, available the instant a programme exists. The existing
+  generic chat route (`src/app/programme/[id]/agents/[agentName]/page.tsx`) needed **zero
+  changes** — `canRunAgent` already returns `{allowed: true}` unconditionally for an empty
+  dependency list. Entry point is `src/components/shell/Header.tsx`'s Governance Guardian
+  button (a `Link`, not the disabled placeholder the other 3 cross-cutting buttons still are).
+
+### 4.2 Portfolio-wide context — and the client-bundle trap it almost reintroduced
+
+Cross-cutting agents need to see more than standard programme context — Governance Guardian
+specifically needs the programme's existing artefacts to avoid producing generic output (rule
+#10). The original plan was a `buildExtraContext` function **field on `AgentConfig` itself**,
+populated per-agent. That would have been wrong: `src/agents/registry.ts` is imported directly
+by `RightPanel.tsx` (a `"use client"` component, for `listAgentsForPhase`), and ES module
+bundling pulls in a file's entire top-level import graph regardless of which export is actually
+used — so a server-only data-fetching import (e.g. `listArtefactsForProgramme`, which touches
+Supabase) sitting anywhere in `src/agents/cross-cutting/governanceGuardian.ts` would get bundled
+into the browser the moment that file is reachable from the registry. This is the same class of
+mistake as the original `fs`-in-client-bundle incident, just one hop further through the import
+graph — caught before shipping, not after, this time.
+
+**Actual mechanism, split across three files to keep the boundary explicit:**
+- `src/agents/cross-cutting/governanceGuardian.ts` — pure `AgentConfig` metadata only. No
+  Supabase/fs imports. Safe to be reachable from the client via the registry.
+- `src/agents/cross-cutting/artefactSummary.ts` — pure formatting logic (`formatArtefactSummary`,
+  unit-tested in `tests/unit/artefactSummary.test.ts`): sorts approved artefacts before
+  drafts/in-progress (rather than excluding non-approved ones — under-inclusion was judged the
+  bigger risk against rule #10, since this agent is openable before anything is approved) and
+  truncates each section body to ~500 characters with an explicit `[truncated]` marker (rejected
+  a headings-only-plus-fetch-tool alternative: it would let the model skim headings and go
+  generic without bothering to fetch bodies, and would compete with `MAX_TOOL_ITERATIONS`, which
+  is sized for `record_artefact` calls).
+- `src/lib/governanceGuardianContext.ts` (server-only) — calls `listArtefactsForProgramme` +
+  `formatArtefactSummary`.
+- `src/lib/crossCuttingContext.ts` (server-only) — a small `agentName → builder` map, imported
+  only by `src/lib/agentEngine.ts`. `runAgentTurn` calls `getExtraContext(agentName, programmeId)`
+  generically and appends a non-null result to the system prompt; adding the next cross-cutting
+  agent (e.g. a future Cost Compass needing `cost_records` instead of artefacts) means adding one
+  entry to this map and one new server-only context file — `agentEngine.ts` itself doesn't change.
 
 ### Adding a new agent
 1. Create `src/agents/<persona>/<phase>/<agentName>.ts` exporting one `AgentConfig`.
@@ -148,7 +202,9 @@ logout. Calls `supabase.auth.signOut()` via the server client so the cookie is a
 2. Calls `canRunAgent` (gating, §7); refuses with a reason if blocked.
 3. Loads/creates the `chat_sessions` row, appends the user message.
 4. Builds the system prompt (`buildSystemPrompt`, exported and unit-tested): programme
-   name/persona/phase/client/regulatory frameworks/notes, then the agent's own brief.
+   name/persona/phase/client/regulatory frameworks/notes, then the agent's own brief. Appends
+   `getExtraContext(agentName, programmeId)` (§4.2) if non-null — this is the only place
+   cross-cutting agents' portfolio-wide context enters the conversation.
 5. Calls Claude with a shared `record_artefact` tool, looping up to `MAX_TOOL_ITERATIONS` (5)
    times while Claude keeps calling the tool.
 6. **Every `tool_use` block gets a paired `tool_result`, unconditionally**, regardless of why
@@ -216,9 +272,10 @@ figures are used for real spend reporting.
 | `/api/gate/[phase]` | GET | Phase-gate checklist (every agent's artefacts + approved flag) |
 | `/auth/callback` | GET | Exchanges an email-confirmation code for a session (§5.4) |
 
-No routes exist yet for the cross-cutting agents (Governance Guardian, Cost Compass, Roadmap
-Architect, Comms Architect) — their header buttons are `disabled` with a tooltip, deliberately
-not dead links.
+Governance Guardian needed **no new routes** — `/api/agents/[agentName]/chat` and
+`/api/agents/[agentName]/session` are already generic by agent name (§4.1). No routes exist for
+the remaining 3 cross-cutting agents (Cost Compass, Roadmap Architect, Comms Architect) — their
+header buttons stay `disabled` with a tooltip, deliberately not dead links.
 
 ## 10. UI structure
 
@@ -235,11 +292,25 @@ approving it; Gate tab live; KPIs tab an honest empty state). Agent chat lives a
 `src/app/programme/[id]/agents/[agentName]/page.tsx` — one generic route for every agent, gated
 server-side by `canRunAgent` before rendering `ChatPanel`.
 
+**Bug fixed during the Governance Guardian build, affecting every agent, not just that one**:
+`ChatPanel` and `RightPanel` are sibling client components with no direct prop path between them
+(both are children of the server-component layout). Recording an artefact via chat never told
+`RightPanel` to refetch, so a newly recorded artefact was invisible in the Artefacts/Gate tabs
+until the page was manually reloaded — only the explicit Approve flow (which calls its own
+`loadData()` directly) updated immediately. Fixed with a small browser event,
+`ARTEFACT_RECORDED_EVENT` (`src/lib/clientEvents.ts`): `ChatPanel` dispatches it on `window` after
+any `recordedArtefacts.length > 0` (and also calls `router.refresh()`, so the Sidebar's
+server-rendered lock/status dots update too); `RightPanel` listens for it and calls its own
+`loadData()`. No state library needed for one signal between two siblings.
+
 ## 11. Testing
 
 `npm test` runs Vitest over `tests/unit/**/*.test.ts` only — no live Supabase or Claude calls.
-Currently covers: `registry.ts` lookups, `gating.ts`'s dependency/gate logic (injected fake data),
-`cost.ts`'s decimal arithmetic, `agentEngine.ts`'s `buildSystemPrompt`. Full conversational flows,
+Currently covers: `registry.ts` lookups (including that cross-cutting agents never leak into
+`listAgentsForPhase` for any real phase/persona combination), `gating.ts`'s dependency/gate logic
+(injected fake data), `cost.ts`'s decimal arithmetic, `agentEngine.ts`'s `buildSystemPrompt`,
+and `artefactSummary.ts`'s `formatArtefactSummary` (truncation, status-ordering, empty-state).
+Full conversational flows,
 real Supabase round-trips, auth flows, and visual/colour-coding checks are verified manually
 against the live dev server and real Supabase project — not automated. `npm run lint` and `npm
 run build` are run after every change as a correctness gate (the build step has caught real

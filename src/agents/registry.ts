@@ -20,6 +20,7 @@ import { factoryBuildAgent } from "@/agents/modernisation/amplify/factoryBuild";
 import { launchRunwayAgent } from "@/agents/modernisation/amplify/launchRunway";
 import { deliveryHeartbeatAgent } from "@/agents/modernisation/amplify/deliveryHeartbeat";
 import { evolutionEngineAgent } from "@/agents/modernisation/amplify/evolutionEngine";
+import { governanceGuardianAgent } from "@/agents/cross-cutting/governanceGuardian";
 
 /**
  * Foundation-phase agents in their required completion order. This list is
@@ -49,7 +50,22 @@ export const AMPLIFY_AGENTS: AgentConfig[] = [
   evolutionEngineAgent,
 ];
 
-const ALL_AGENTS: AgentConfig[] = [...FOUNDATION_AGENTS, ...FORGE_AGENTS, ...AMPLIFY_AGENTS];
+/**
+ * Cross-cutting agents: available regardless of phase, surfaced via the
+ * header button rather than the phase-scoped sidebar. `phase:
+ * "cross-cutting"` on these configs never matches a real
+ * programme.active_phase, so listAgentsForPhase below never returns them —
+ * any future "list a programme's available agents" code must filter
+ * `phase === "cross-cutting"` directly, not reuse listAgentsForPhase.
+ */
+export const CROSS_CUTTING_AGENTS: AgentConfig[] = [governanceGuardianAgent];
+
+const ALL_AGENTS: AgentConfig[] = [
+  ...FOUNDATION_AGENTS,
+  ...FORGE_AGENTS,
+  ...AMPLIFY_AGENTS,
+  ...CROSS_CUTTING_AGENTS,
+];
 
 const REGISTRY: Record<string, AgentConfig> = Object.fromEntries(
   ALL_AGENTS.map((agent) => [agent.name, agent])

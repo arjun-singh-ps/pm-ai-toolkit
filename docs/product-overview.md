@@ -43,16 +43,26 @@ produced → approve it → the next step unlocks.**
   Every artefact starts as a draft and must be explicitly **approved** by you before it counts.
 - **Phase gate** — the checklist of every artefact required to complete a phase. Once every
   artefact in the current phase is approved, the gate is "clear" and the next phase can unlock.
+- **Cross-cutting agent** — unlike phase agents, available immediately on any programme via a
+  header button rather than the sidebar, and not gated behind phase progression. Governance
+  Guardian (below) is the first one built.
 
 ## What exists today
 
 The **Modernising Legacy Journey** persona is **fully built and complete**: all three phases
 (Foundation, Forge, Amplify), 16 agents in total, each producing real artefacts via
 conversation, with approval and phase-gating enforced end to end — including the phase
-transitions themselves, not just checklists. Everything else described in the product vision
-(the Agentic Delivery persona, and the cross-cutting agents like Governance Guardian or Cost
-Compass) is either a visible-but-disabled placeholder or not present yet. See
-`docs/business-specification.md` for the exact build status of every piece.
+transitions themselves, not just checklists.
+
+**Governance Guardian** is live — the regulatory frameworks you select when creating a
+programme (PRA, FCA, DORA, etc.) are no longer just stored and forgotten; this agent reviews
+your programme's actual artefacts against them and produces a Compliance Charter, Governance
+Pulse, and Regulatory Gap Matrix, grounded in your real content rather than generic boilerplate.
+
+Everything else described in the product vision (the Agentic Delivery persona, and the other 3
+cross-cutting agents — Cost Compass, Roadmap Architect, Comms Architect) is either a
+visible-but-disabled placeholder or not present yet. See `docs/business-specification.md` for
+the exact build status of every piece.
 
 ## Who it's for
 

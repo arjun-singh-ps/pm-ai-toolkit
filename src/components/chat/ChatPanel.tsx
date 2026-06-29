@@ -4,8 +4,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import type { DisplayMessage } from "@/lib/chatSessions";
+import { ARTEFACT_RECORDED_EVENT } from "@/lib/clientEvents";
 
 interface ChatPanelProps {
   programmeId: string;
@@ -15,6 +17,7 @@ interface ChatPanelProps {
 
 /** Chat UI for one agent: history, message input, and inline artefact-recorded notices. */
 export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPanelProps) {
+  const router = useRouter();
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -75,11 +78,19 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPane
         return;
       }
 
-      const artefactLines = (data.recordedArtefacts ?? []).map(
-        (name: string) => `📄 Recorded artefact: ${name}`
-      );
+      const recordedArtefacts: string[] = data.recordedArtefacts ?? [];
+      const artefactLines = recordedArtefacts.map((name) => `📄 Recorded artefact: ${name}`);
       const replyText = [data.reply, ...artefactLines].filter(Boolean).join("\n\n");
       setMessages((current) => [...current, { role: "assistant", text: replyText }]);
+
+      if (recordedArtefacts.length > 0) {
+        // Tell the sibling RightPanel (Artefacts/Gate tabs) to refetch, and
+        // refresh server components (e.g. the Sidebar's lock/status dots) —
+        // neither happens automatically since ChatPanel and RightPanel have
+        // no direct prop path between them.
+        window.dispatchEvent(new Event(ARTEFACT_RECORDED_EVENT));
+        router.refresh();
+      }
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
     } finally {

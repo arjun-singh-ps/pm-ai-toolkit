@@ -46,12 +46,12 @@ produced → approve it → the next step unlocks.**
 
 ## What exists today
 
-The **Modernising Legacy Journey** persona's **Foundation and Forge phases** are fully working:
-10 agents across the two phases, each producing real artefacts via conversation, with approval
-and phase-gating enforced end to end — including the actual phase transition itself (Foundation
-→ Forge), not just a checklist. Everything else described in the product vision (the Amplify
-phase, the Agentic Delivery persona, and the cross-cutting agents like Governance Guardian or
-Cost Compass) is either a visible-but-disabled placeholder or not present yet. See
+The **Modernising Legacy Journey** persona is **fully built and complete**: all three phases
+(Foundation, Forge, Amplify), 16 agents in total, each producing real artefacts via
+conversation, with approval and phase-gating enforced end to end — including the phase
+transitions themselves, not just checklists. Everything else described in the product vision
+(the Agentic Delivery persona, and the cross-cutting agents like Governance Guardian or Cost
+Compass) is either a visible-but-disabled placeholder or not present yet. See
 `docs/business-specification.md` for the exact build status of every piece.
 
 ## Who it's for

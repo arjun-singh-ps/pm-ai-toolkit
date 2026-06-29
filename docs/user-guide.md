@@ -80,13 +80,16 @@ Comms Architect) are visible but disabled — "coming in a later milestone."
 Once every artefact in the current phase is approved, the **Gate** tab's checklist turns fully
 green and the **Advance to [next phase]** button becomes clickable — until then, it's correctly
 greyed out, and hovering it tells you exactly what's still missing. Clicking it moves the
-programme into the next phase (e.g. Foundation → Forge): the sidebar immediately updates to
-show that phase's agents, with its first agent unlocked and the rest gated behind it, same as
-before. This is enforced on the server, not just by the button being disabled — even if you
+programme into the next phase (Foundation → Forge → Amplify): the sidebar immediately updates
+to show that phase's agents, with its first agent unlocked and the rest gated behind it, same
+as before. This is enforced on the server, not just by the button being disabled — even if you
 could somehow trigger the action early, it would be rejected with the same missing-artefacts
-message. If a phase you'd advance into hasn't been built yet (e.g. Amplify, after Forge), the
-button stays disabled regardless of how complete the current phase is — there's nowhere to send
-you yet.
+message.
+
+Once a programme reaches **Amplify** — the last phase of the Modernising Legacy Journey
+persona — the Gate tab shows "🏁 This is the final phase of this persona." instead of an
+Advance button. There's nowhere further to go within this persona; this is the intended end
+state, not a stuck gate.
 
 ## 6. Setting programme notes
 

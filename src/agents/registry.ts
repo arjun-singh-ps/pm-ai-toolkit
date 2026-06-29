@@ -14,6 +14,12 @@ import { launchReadinessAgent } from "@/agents/modernisation/foundation/launchRe
 import { pilotIgnitionAgent } from "@/agents/modernisation/forge/pilotIgnition";
 import { signalWatchAgent } from "@/agents/modernisation/forge/signalWatch";
 import { scaleBlueprintAgent } from "@/agents/modernisation/forge/scaleBlueprint";
+import { backlogPulseAgent } from "@/agents/modernisation/amplify/backlogPulse";
+import { contextFlywheelAgent } from "@/agents/modernisation/amplify/contextFlywheel";
+import { factoryBuildAgent } from "@/agents/modernisation/amplify/factoryBuild";
+import { launchRunwayAgent } from "@/agents/modernisation/amplify/launchRunway";
+import { deliveryHeartbeatAgent } from "@/agents/modernisation/amplify/deliveryHeartbeat";
+import { evolutionEngineAgent } from "@/agents/modernisation/amplify/evolutionEngine";
 
 /**
  * Foundation-phase agents in their required completion order. This list is
@@ -33,7 +39,17 @@ export const FOUNDATION_AGENTS: AgentConfig[] = [
 /** Forge-phase agents, same linear-dependency convention as Foundation. */
 export const FORGE_AGENTS: AgentConfig[] = [pilotIgnitionAgent, signalWatchAgent, scaleBlueprintAgent];
 
-const ALL_AGENTS: AgentConfig[] = [...FOUNDATION_AGENTS, ...FORGE_AGENTS];
+/** Amplify-phase agents, same linear-dependency convention as Foundation and Forge. */
+export const AMPLIFY_AGENTS: AgentConfig[] = [
+  backlogPulseAgent,
+  contextFlywheelAgent,
+  factoryBuildAgent,
+  launchRunwayAgent,
+  deliveryHeartbeatAgent,
+  evolutionEngineAgent,
+];
+
+const ALL_AGENTS: AgentConfig[] = [...FOUNDATION_AGENTS, ...FORGE_AGENTS, ...AMPLIFY_AGENTS];
 
 const REGISTRY: Record<string, AgentConfig> = Object.fromEntries(
   ALL_AGENTS.map((agent) => [agent.name, agent])

@@ -20,7 +20,7 @@ without a human approving it first.
 
 | Persona | Phases | Status |
 |---|---|---|
-| **Modernising Legacy Journey** | Foundation → Forge → Amplify | **Foundation and Forge built.** Amplify not started. |
+| **Modernising Legacy Journey** | Foundation → Forge → Amplify | **Fully built — this persona is complete.** |
 | **Agentic Delivery** | Envision → Shape → Incubate → Prove → Scale | Not started. Visible in the UI as a disabled option when creating a programme. |
 
 ### 2.1 Modernising Legacy Journey — Foundation phase (BUILT)
@@ -53,14 +53,28 @@ has no dependency — entering Forge at all already implies the Foundation gate 
 | 2 | Signal Watch | Intelligence Pulse |
 | 3 | Scale Blueprint | Scale Compass, Operations Playbook |
 
-The Forge→Amplify gate is checked the same way as Foundation→Forge, and correctly stays
-disabled — not because the gate logic is special-cased, but because `listAgentsForPhase`
-returns zero agents for Amplify (not built), which the advance-phase route checks before even
-evaluating the gate.
+The Forge→Amplify transition works the same way as Foundation→Forge.
 
-### 2.3 Modernising Legacy Journey — Amplify phase (NOT BUILT)
-Six agents per the original vision: Backlog Pulse, Context Flywheel, Factory Build, Launch
-Runway, Delivery Heartbeat, Evolution Engine.
+### 2.3 Modernising Legacy Journey — Amplify phase (BUILT)
+
+Six agents, same linear-dependency convention as Foundation and Forge:
+
+| Order | Agent | Artefacts produced |
+|---|---|---|
+| 1 | Backlog Pulse | Living Backlog |
+| 2 | Context Flywheel | Evolving Intelligence Fabric |
+| 3 | Factory Build | Experience Blueprints, Modernised Service Catalogue |
+| 4 | Launch Runway | Quality Gate Report, Launch Playbook |
+| 5 | Delivery Heartbeat | Delivery Signal Report, Deployment Covenant, Live Pulse Monitor |
+| 6 | Evolution Engine | Capability Evolution Plan |
+
+Amplify is the **last** phase of this persona — there's no further phase to advance into, which
+is a meaningfully different end state from Forge→Amplify (where the next phase exists in
+principle but isn't built yet). The Gate tab distinguishes the two: once a programme enters
+Amplify, the right panel shows "🏁 This is the final phase of this persona." instead of a
+permanently-disabled "Advance" button, since the latter would read like a bug rather than an
+intentional stopping point. Confirmed visually via a Playwright screenshot during this build,
+not just by code review.
 
 ### 2.4 Agentic Delivery persona (NOT BUILT)
 Five phases (Envision, Shape, Incubate, Prove, Scale), 15 agents total, per the original vision.
@@ -82,8 +96,8 @@ presence yet. **None have backing logic.**
 |---|---|---|
 | 1 | Never generate an artefact without confirming programme name, persona, phase first | **Enforced structurally** — the UI pins these via navigation before any chat is possible; the engine refuses to run an agent without a resolved programme. |
 | 2 | Every artefact includes version, date, programme name, owner, AI-generated disclaimer | **Enforced** — merged server-side into every artefact, never trusted from the model. |
-| 3 | Artefact dependencies checked before an agent can run | **Enforced** for the Foundation phase's linear chain. Not yet relevant to other phases (not built). |
-| 4 | Phase gates checked before unlocking the next phase | **Enforced**, server-side, for Foundation → Forge and Forge → Amplify (the latter additionally blocked by Amplify having no agents yet). |
+| 3 | Artefact dependencies checked before an agent can run | **Enforced** for the linear chain within each of Foundation, Forge, and Amplify. |
+| 4 | Phase gates checked before unlocking the next phase | **Enforced**, server-side, for Foundation → Forge and Forge → Amplify. Amplify has no further phase to unlock — correctly shown as a "final phase" end state, not a stuck gate. |
 | 5 | Skipped input → warn of risk, proceed with a stated assumption, flag in the artefact | **Enforced via agent prompting** — agents are instructed to do this; not independently validated by code. |
 | 6 | Tone varies by audience (engineering / SteerCo / board) | **Not enforced** — no audience-selection mechanism exists yet. |
 | 7 | Scale-phase agents are strategic advisers only, no fixed artefacts | N/A — Scale phase not built. |

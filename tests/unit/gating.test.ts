@@ -97,4 +97,31 @@ describe("isPhaseGateClear", () => {
     expect(incompleteResult.clear).toBe(false);
     expect(incompleteResult.missing).toEqual(["Operations Playbook"]);
   });
+
+  it("generalizes to the Amplify phase's artefact set", async () => {
+    const allApproved: ArtefactStatusRow[] = [
+      "Living Backlog",
+      "Evolving Intelligence Fabric",
+      "Experience Blueprints",
+      "Modernised Service Catalogue",
+      "Quality Gate Report",
+      "Launch Playbook",
+      "Delivery Signal Report",
+      "Deployment Covenant",
+      "Live Pulse Monitor",
+      "Capability Evolution Plan",
+    ].map((name) => ({ artefact_name: name, status: "approved" }));
+
+    const clearResult = await isPhaseGateClear("p1", "legacy", "amplify", fakeFetcher(allApproved));
+    expect(clearResult.clear).toBe(true);
+
+    const incompleteResult = await isPhaseGateClear(
+      "p1",
+      "legacy",
+      "amplify",
+      fakeFetcher(allApproved.slice(0, -1))
+    );
+    expect(incompleteResult.clear).toBe(false);
+    expect(incompleteResult.missing).toEqual(["Capability Evolution Plan"]);
+  });
 });

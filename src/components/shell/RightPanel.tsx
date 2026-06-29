@@ -182,26 +182,34 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
                 ))}
               </ul>
 
-              <button
-                type="button"
-                onClick={handleAdvance}
-                disabled={!gate.clear || !nextPhaseAvailable || isAdvancing}
-                title={
-                  !nextPhaseAvailable
-                    ? `${nextPhase ?? "The next"} phase agents are not yet available`
-                    : !gate.clear
-                      ? "Approve every artefact above first"
-                      : undefined
-                }
-                className="mt-1 self-start rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-zinc-400 opacity-50 enabled:border-black/20 enabled:text-black enabled:opacity-100 enabled:hover:bg-black/5 dark:border-white/10 dark:enabled:text-zinc-50 dark:enabled:hover:bg-white/5"
-              >
-                {isAdvancing
-                  ? "Advancing..."
-                  : `Advance to ${nextPhase ? nextPhase[0].toUpperCase() + nextPhase.slice(1) : "next phase"}`}
-              </button>
+              {nextPhase === undefined ? (
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  🏁 This is the final phase of this persona.
+                </p>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleAdvance}
+                    disabled={!gate.clear || !nextPhaseAvailable || isAdvancing}
+                    title={
+                      !nextPhaseAvailable
+                        ? `${nextPhase} phase agents are not yet available`
+                        : !gate.clear
+                          ? "Approve every artefact above first"
+                          : undefined
+                    }
+                    className="mt-1 self-start rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-zinc-400 opacity-50 enabled:border-black/20 enabled:text-black enabled:opacity-100 enabled:hover:bg-black/5 dark:border-white/10 dark:enabled:text-zinc-50 dark:enabled:hover:bg-white/5"
+                  >
+                    {isAdvancing
+                      ? "Advancing..."
+                      : `Advance to ${nextPhase[0].toUpperCase() + nextPhase.slice(1)}`}
+                  </button>
 
-              {advanceError && (
-                <p className="text-xs text-red-600 dark:text-red-400">{advanceError}</p>
+                  {advanceError && (
+                    <p className="text-xs text-red-600 dark:text-red-400">{advanceError}</p>
+                  )}
+                </>
               )}
             </div>
           ))}

@@ -58,12 +58,11 @@ must be revisited once Supabase Auth is added (RLS policies keyed on `auth.uid()
 
 Agents are **plain typed config objects**, not classes — see `src/agents/types.ts`
 (`AgentConfig`: name, displayName, persona, phase, systemPrompt, produces, dependsOnAgents).
-Each agent is one small file under `src/agents/modernisation/foundation/` or
-`src/agents/modernisation/forge/`, aggregated into a single lookup in `src/agents/registry.ts`
-(`getAgent`, `listAgentsForPhase`,
-`FOUNDATION_AGENTS`, `FORGE_AGENTS`). The registry is the single source of truth — the sidebar,
-the gating logic, and the chat API route all read agent metadata from here, never hardcoded
-elsewhere.
+Each agent is one small file under `src/agents/modernisation/{foundation,forge,amplify}/`,
+aggregated into a single lookup in `src/agents/registry.ts` (`getAgent`, `listAgentsForPhase`,
+`FOUNDATION_AGENTS`, `FORGE_AGENTS`, `AMPLIFY_AGENTS`). The registry is the single source of
+truth — the sidebar, the gating logic, and the chat API route all read agent metadata from
+here, never hardcoded elsewhere.
 
 ### Adding a new agent
 1. Create `src/agents/<persona>/<phase>/<agentName>.ts` exporting one `AgentConfig`.
@@ -122,6 +121,14 @@ reject if `isPhaseGateClear` says the current phase isn't clear → otherwise up
 `active_phase`. The Gate tab button in `RightPanel.tsx` mirrors this client-side (label and
 enabled state) purely for UX — the server-side check is what's actually load-bearing.
 
+Amplify is the last phase of this persona, so `NEXT_PHASE` has no `"amplify"` key at all —
+distinct from Forge's case, where `NEXT_PHASE["forge"] = "amplify"` exists but resolved to zero
+agents at the time. `RightPanel.tsx` distinguishes the two: `nextPhase === undefined` renders a
+static "final phase" message instead of a disabled button, so the UI reads as an intentional
+end state rather than a stuck one. This is a client-only copy branch — the route's logic was
+already correct for both cases (a missing key and an empty agent list both fail the same
+`if (!nextPhase || ...)` check) and needed no change.
+
 ## 7. Cost tracking (`src/lib/cost.ts`)
 
 `calculateCostUsd(tokensIn, tokensOut)` uses `decimal.js`, never floating point, per the "all
@@ -166,6 +173,13 @@ real Supabase round-trips, and visual/colour-coding checks are verified manually
 dev server and real Supabase project — not automated. `npm run lint` and `npm run build` are run
 after every change as a correctness gate (the build step has caught real server/client boundary
 mistakes during this project).
+
+There's no Playwright/E2E suite set up in this repo yet (`tests/e2e/` doesn't exist), but a
+one-off Playwright script (`npm install --no-save playwright`, then a small `.mjs` driving
+`chromium.launch()`) was used during the Amplify build to actually screenshot a client-rendered
+UI branch that `curl` can't see (`RightPanel.tsx`'s Gate tab fetches its data after mount, so
+server-rendered HTML never contains it). Worth reaching for again whenever a change touches
+client-only rendering logic that the Sidebar/server-component pattern doesn't cover.
 
 ## 11. Environment variables (`.env.local`, never committed)
 

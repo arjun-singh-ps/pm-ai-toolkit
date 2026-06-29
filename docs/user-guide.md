@@ -75,7 +75,20 @@ Comms Architect) are visible but disabled — "coming in a later milestone."
 5. Once **every** artefact a locked agent depends on is approved, that agent unlocks
    automatically in the sidebar — no extra action needed.
 
-## 5. Setting programme notes
+## 5. Advancing to the next phase
+
+Once every artefact in the current phase is approved, the **Gate** tab's checklist turns fully
+green and the **Advance to [next phase]** button becomes clickable — until then, it's correctly
+greyed out, and hovering it tells you exactly what's still missing. Clicking it moves the
+programme into the next phase (e.g. Foundation → Forge): the sidebar immediately updates to
+show that phase's agents, with its first agent unlocked and the rest gated behind it, same as
+before. This is enforced on the server, not just by the button being disabled — even if you
+could somehow trigger the action early, it would be rejected with the same missing-artefacts
+message. If a phase you'd advance into hasn't been built yet (e.g. Amplify, after Forge), the
+button stays disabled regardless of how complete the current phase is — there's nowhere to send
+you yet.
+
+## 6. Setting programme notes
 
 Click the programme name area or navigate to the programme's default screen (centre panel, no
 agent selected) to find **Programme Notes** — free text describing things like delivery
@@ -83,14 +96,14 @@ methodology, regulatory environment, or current phase context. Anything you save
 automatically shared with every agent's conversation for this programme, so you don't need to
 repeat the same background information to each one.
 
-## 6. Tracking progress
+## 7. Tracking progress
 
 - **History** (top of centre panel): every artefact ever produced for this programme, with a
   search box (filters by artefact name) and a status dropdown filter.
 - **Gate tab**: the fastest way to see exactly what's left before the current phase is
   considered complete.
 
-## 7. Settings
+## 8. Settings
 
 The top-nav **Settings** link currently shows only the list of available regulatory frameworks
 for reference. Account and API-key management will appear here once login is added — there's no

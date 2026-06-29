@@ -58,16 +58,20 @@ must be revisited once Supabase Auth is added (RLS policies keyed on `auth.uid()
 
 Agents are **plain typed config objects**, not classes — see `src/agents/types.ts`
 (`AgentConfig`: name, displayName, persona, phase, systemPrompt, produces, dependsOnAgents).
-Each agent is one small file under `src/agents/modernisation/foundation/`, aggregated into a
-single lookup in `src/agents/registry.ts` (`getAgent`, `listAgentsForPhase`,
-`FOUNDATION_AGENTS`). The registry is the single source of truth — the sidebar, the gating
-logic, and the chat API route all read agent metadata from here, never hardcoded elsewhere.
+Each agent is one small file under `src/agents/modernisation/foundation/` or
+`src/agents/modernisation/forge/`, aggregated into a single lookup in `src/agents/registry.ts`
+(`getAgent`, `listAgentsForPhase`,
+`FOUNDATION_AGENTS`, `FORGE_AGENTS`). The registry is the single source of truth — the sidebar,
+the gating logic, and the chat API route all read agent metadata from here, never hardcoded
+elsewhere.
 
 ### Adding a new agent
 1. Create `src/agents/<persona>/<phase>/<agentName>.ts` exporting one `AgentConfig`.
 2. Write its `systemPrompt` (role + artefacts it produces); append
    `COMMON_AGENT_INSTRUCTIONS` from `src/agents/sharedInstructions.ts`.
-3. Set `dependsOnAgents` to the agent name(s) whose artefacts must be approved first.
+3. Set `dependsOnAgents` to the agent name(s) whose artefacts must be approved first — empty
+   for the first agent of a new phase, since entering that phase already implies the previous
+   phase's gate was clear (see Forge's `pilot-ignition.ts` for the pattern).
 4. Add it to the relevant list in `src/agents/registry.ts`.
 5. Nothing else needs to change — the chat engine, UI, gating, and approval flow are all
    agent-agnostic. This was proven during the Foundation build: agents 2–7 needed zero new code
@@ -102,7 +106,21 @@ logic, and the chat API route all read agent metadata from here, never hardcoded
 **injectable fetch function**, defaulting to a real Supabase query — this is what makes them
 unit-testable without a live database (see `tests/unit/gating.test.ts`), and is also reused by
 `src/components/shell/Sidebar.tsx` to compute lock state from an already-fetched artefact list
-without a duplicate query.
+without a duplicate query. `isPhaseGateClear` takes `phase` as a plain string, so it required
+zero changes to generalize to the Forge phase — confirmed by a Forge-specific test case.
+
+### Phase advancement (`src/app/api/programmes/[id]/advance-phase/route.ts`)
+
+The only path allowed to change `programmes.active_phase`. The generic
+`PATCH /api/programmes/[id]` route can technically still accept an `active_phase` field (no
+caller uses it that way today — only `ProgrammeNotesForm` PATCHes `notes`), but only this
+dedicated route re-checks the gate, so it's the only one that should ever be used for phase
+transitions. Logic: look up the programme → compute the next phase via `NEXT_PHASE`
+(`src/lib/constants.ts`) → reject if the next phase has no agents
+(`listAgentsForPhase(...).length === 0`, which is what keeps Forge→Amplify correctly blocked) →
+reject if `isPhaseGateClear` says the current phase isn't clear → otherwise update
+`active_phase`. The Gate tab button in `RightPanel.tsx` mirrors this client-side (label and
+enabled state) purely for UX — the server-side check is what's actually load-bearing.
 
 ## 7. Cost tracking (`src/lib/cost.ts`)
 
@@ -116,7 +134,8 @@ figures are used for real spend reporting.
 | Route | Method | Purpose |
 |---|---|---|
 | `/api/programmes` | GET, POST | List / create programmes |
-| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, active_phase, regulatory_frameworks |
+| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, regulatory_frameworks (PATCH should not be used to change active_phase — see §6.1) |
+| `/api/programmes/[id]/advance-phase` | POST | Gate-enforced phase transition — the only path allowed to change active_phase |
 | `/api/agents/[agentName]/chat` | POST | Run one chat turn (the only path to `agentEngine.ts`) |
 | `/api/agents/[agentName]/session` | GET | Fetch display-ready chat history for hydrating the UI |
 | `/api/artefacts` | GET | List artefacts for a programme |
@@ -164,6 +183,6 @@ browser-side Supabase access — currently all DB access is server-only via the 
 - No auth — `DEFAULT_OWNER` constant (`src/lib/constants.ts`) stands in for a real user.
   Migrating to real auth means swapping this constant for `session.user.id` and re-enabling RLS.
 - Cost pricing constants are placeholders (§7).
-- `dependsOnAgents` for the Foundation phase is a simplifying linear-chain assumption (each
-  agent depends only on the one immediately before it), not derived from any explicit
-  cross-agent dependency analysis in the original product brief.
+- `dependsOnAgents` for the Foundation and Forge phases is a simplifying linear-chain
+  assumption (each agent depends only on the one immediately before it), not derived from any
+  explicit cross-agent dependency analysis in the original product brief.

@@ -25,3 +25,9 @@ export const INITIAL_PHASE_BY_PERSONA: Record<Persona, string> = {
   legacy: "foundation",
   agentic: "envision",
 };
+
+/** The phase that follows each phase, once its gate is clear. */
+export const NEXT_PHASE: Record<string, string> = {
+  foundation: "forge",
+  forge: "amplify",
+};

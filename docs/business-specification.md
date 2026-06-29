@@ -20,7 +20,7 @@ without a human approving it first.
 
 | Persona | Phases | Status |
 |---|---|---|
-| **Modernising Legacy Journey** | Foundation → Forge → Amplify | **Foundation built.** Forge and Amplify not started. |
+| **Modernising Legacy Journey** | Foundation → Forge → Amplify | **Foundation and Forge built.** Amplify not started. |
 | **Agentic Delivery** | Envision → Shape → Incubate → Prove → Scale | Not started. Visible in the UI as a disabled option when creating a programme. |
 
 ### 2.1 Modernising Legacy Journey — Foundation phase (BUILT)
@@ -38,12 +38,25 @@ Seven agents, run in strict linear order — each requires the previous agent's 
 | 6 | Delivery Intelligence | Command Centre, Signal Engine, Quality Covenant |
 | 7 | Launch Readiness | Forge Charter, Crew Blueprint, Forge Compass |
 
-The phase gate (all 14 artefacts above approved) is checked and visible in the UI, but **Forge
-itself is not built** — the gate correctly reports "clear" once satisfied, but there is nowhere
-to advance to yet.
+The phase gate (all 14 artefacts above approved) is checked, visible in the UI, and **advancing
+to Forge actually works** — re-checked server-side, never just a disabled button — via
+`POST /api/programmes/[id]/advance-phase`.
 
-### 2.2 Modernising Legacy Journey — Forge phase (NOT BUILT)
-Three agents per the original vision: Pilot Ignition, Signal Watch, Scale Blueprint.
+### 2.2 Modernising Legacy Journey — Forge phase (BUILT)
+
+Three agents, same linear-dependency convention as Foundation (Pilot Ignition's first agent
+has no dependency — entering Forge at all already implies the Foundation gate was clear):
+
+| Order | Agent | Artefacts produced |
+|---|---|---|
+| 1 | Pilot Ignition | Pilot Intelligence Pack, Steel Thread Proof, Adoption Accelerator |
+| 2 | Signal Watch | Intelligence Pulse |
+| 3 | Scale Blueprint | Scale Compass, Operations Playbook |
+
+The Forge→Amplify gate is checked the same way as Foundation→Forge, and correctly stays
+disabled — not because the gate logic is special-cased, but because `listAgentsForPhase`
+returns zero agents for Amplify (not built), which the advance-phase route checks before even
+evaluating the gate.
 
 ### 2.3 Modernising Legacy Journey — Amplify phase (NOT BUILT)
 Six agents per the original vision: Backlog Pulse, Context Flywheel, Factory Build, Launch
@@ -70,7 +83,7 @@ presence yet. **None have backing logic.**
 | 1 | Never generate an artefact without confirming programme name, persona, phase first | **Enforced structurally** — the UI pins these via navigation before any chat is possible; the engine refuses to run an agent without a resolved programme. |
 | 2 | Every artefact includes version, date, programme name, owner, AI-generated disclaimer | **Enforced** — merged server-side into every artefact, never trusted from the model. |
 | 3 | Artefact dependencies checked before an agent can run | **Enforced** for the Foundation phase's linear chain. Not yet relevant to other phases (not built). |
-| 4 | Phase gates checked before unlocking the next phase | **Enforced** for Foundation → Forge (gate check works; Forge itself doesn't exist to unlock into). |
+| 4 | Phase gates checked before unlocking the next phase | **Enforced**, server-side, for Foundation → Forge and Forge → Amplify (the latter additionally blocked by Amplify having no agents yet). |
 | 5 | Skipped input → warn of risk, proceed with a stated assumption, flag in the artefact | **Enforced via agent prompting** — agents are instructed to do this; not independently validated by code. |
 | 6 | Tone varies by audience (engineering / SteerCo / board) | **Not enforced** — no audience-selection mechanism exists yet. |
 | 7 | Scale-phase agents are strategic advisers only, no fixed artefacts | N/A — Scale phase not built. |

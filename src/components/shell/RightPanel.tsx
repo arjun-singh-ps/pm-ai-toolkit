@@ -7,6 +7,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Artefact } from "@/types/artefact";
+import type { Persona } from "@/types/programme";
+import { listAgentsForPhase } from "@/agents/registry";
+import { NEXT_PHASE } from "@/lib/constants";
 
 type Tab = "artefacts" | "kpis" | "gate";
 
@@ -37,16 +40,22 @@ interface GateAgentChecklist {
 interface RightPanelProps {
   programmeId: string;
   phase: string;
+  persona: Persona;
 }
 
 /** Tabbed right panel: Artefacts (approve drafts) and Gate (phase checklist) are wired to real data. */
-export function RightPanel({ programmeId, phase }: RightPanelProps) {
+export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("artefacts");
   const [artefacts, setArtefacts] = useState<Artefact[]>([]);
   const [gate, setGate] = useState<{ clear: boolean; agents: GateAgentChecklist[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [isAdvancing, setIsAdvancing] = useState(false);
+  const [advanceError, setAdvanceError] = useState<string | null>(null);
+
+  const nextPhase = NEXT_PHASE[phase];
+  const nextPhaseAvailable = Boolean(nextPhase) && listAgentsForPhase(persona, nextPhase).length > 0;
 
   async function loadData() {
     try {
@@ -79,6 +88,23 @@ export function RightPanel({ programmeId, phase }: RightPanelProps) {
       }
     } finally {
       setApprovingId(null);
+    }
+  }
+
+  /** Advances the programme to the next phase. The server re-checks the gate independently. */
+  async function handleAdvance() {
+    setIsAdvancing(true);
+    setAdvanceError(null);
+    try {
+      const response = await fetch(`/api/programmes/${programmeId}/advance-phase`, { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) {
+        setAdvanceError(data.error ?? "Failed to advance phase.");
+        return;
+      }
+      router.refresh();
+    } finally {
+      setIsAdvancing(false);
     }
   }
 
@@ -158,12 +184,25 @@ export function RightPanel({ programmeId, phase }: RightPanelProps) {
 
               <button
                 type="button"
-                disabled
-                title="Forge phase agents are not yet available"
-                className="mt-1 self-start rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-zinc-400 opacity-50 dark:border-white/10"
+                onClick={handleAdvance}
+                disabled={!gate.clear || !nextPhaseAvailable || isAdvancing}
+                title={
+                  !nextPhaseAvailable
+                    ? `${nextPhase ?? "The next"} phase agents are not yet available`
+                    : !gate.clear
+                      ? "Approve every artefact above first"
+                      : undefined
+                }
+                className="mt-1 self-start rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-zinc-400 opacity-50 enabled:border-black/20 enabled:text-black enabled:opacity-100 enabled:hover:bg-black/5 dark:border-white/10 dark:enabled:text-zinc-50 dark:enabled:hover:bg-white/5"
               >
-                Advance to Forge
+                {isAdvancing
+                  ? "Advancing..."
+                  : `Advance to ${nextPhase ? nextPhase[0].toUpperCase() + nextPhase.slice(1) : "next phase"}`}
               </button>
+
+              {advanceError && (
+                <p className="text-xs text-red-600 dark:text-red-400">{advanceError}</p>
+              )}
             </div>
           ))}
       </div>

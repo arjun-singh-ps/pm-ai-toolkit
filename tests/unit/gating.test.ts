@@ -74,4 +74,27 @@ describe("isPhaseGateClear", () => {
     expect(result.clear).toBe(true);
     expect(result.missing).toEqual([]);
   });
+
+  it("generalizes to the Forge phase's artefact set", async () => {
+    const allApproved: ArtefactStatusRow[] = [
+      "Pilot Intelligence Pack",
+      "Steel Thread Proof",
+      "Adoption Accelerator",
+      "Intelligence Pulse",
+      "Scale Compass",
+      "Operations Playbook",
+    ].map((name) => ({ artefact_name: name, status: "approved" }));
+
+    const clearResult = await isPhaseGateClear("p1", "legacy", "forge", fakeFetcher(allApproved));
+    expect(clearResult.clear).toBe(true);
+
+    const incompleteResult = await isPhaseGateClear(
+      "p1",
+      "legacy",
+      "forge",
+      fakeFetcher(allApproved.slice(0, -1))
+    );
+    expect(incompleteResult.clear).toBe(false);
+    expect(incompleteResult.missing).toEqual(["Operations Playbook"]);
+  });
 });

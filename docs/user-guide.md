@@ -4,11 +4,26 @@
 > a new page. Every step below should match what's actually on screen. See the maintenance rule
 > in `CLAUDE.md`.
 
-This guide covers what's actually usable today: the Modernising Legacy Journey persona's
-Foundation phase, with its 7 agents. For what's still aspirational, see
+This guide covers what's actually usable today: the Modernising Legacy Journey persona (all
+three phases, 16 agents) plus accounts. For what's still aspirational, see
 `docs/business-specification.md`.
 
-## 1. Create a programme
+## 1. Sign up and sign in
+
+This is a **shared workspace** — every signed-in account sees and can act on every programme,
+not just its own.
+
+- **New here**: go to `/signup`, enter your email and a password (6+ characters), and submit.
+  You'll see "Check your email for a confirmation link" — click that link to finish creating
+  your account and land in the app, logged in.
+- **Already have an account**: go to `/login`, enter your email and password.
+- **Signing out**: click **Sign out** next to your email in the top nav. You'll be sent to
+  `/login`, and every page/action requires signing in again from there.
+
+Every page except `/login` and `/signup` requires a session — visiting any programme URL while
+signed out redirects you to `/login` automatically.
+
+## 2. Create a programme
 
 From the homepage (`/`):
 
@@ -24,7 +39,7 @@ From the homepage (`/`):
 
 Existing programmes are listed above the form — click one to re-enter it at any time.
 
-## 2. The programme screen layout
+## 3. The programme screen layout
 
 Once inside a programme, you'll see three panels:
 
@@ -34,21 +49,20 @@ Once inside a programme, you'll see three panels:
   - **Blue** — in progress (at least one draft artefact exists).
   - **Green** — complete (every artefact this agent produces is approved).
   Locked agents aren't clickable — hover over one to see exactly what it's waiting on.
-- **Centre panel**: by default, shows **Programme Notes** (see §5). Click an unlocked agent in
+- **Centre panel**: by default, shows **Programme Notes** (see §7). Click an unlocked agent in
   the sidebar to open a chat with it instead.
 - **Right panel**: three tabs —
-  - **Artefacts** — every artefact produced so far, with an **Approve** button on anything not
-    yet approved.
+  - **Artefacts** — every artefact produced so far, with **View** (read the full content) and
+    **Approve** buttons.
   - **KPIs** — currently always empty; no agent writes KPI data yet.
-  - **Gate** — a checklist of every artefact required to clear the current phase, and a
-    permanently disabled **Advance to Forge** button (the next phase doesn't exist yet, so this
-    correctly never enables).
+  - **Gate** — a checklist of every artefact required to clear the current phase, and an
+    **Advance to [next phase]** button.
 
 At the top, **History** and **KPIs** links open full-page views of the same data, and **Project
 Charter**-style cross-cutting buttons (Governance Guardian, Cost Compass, Roadmap Architect,
 Comms Architect) are visible but disabled — "coming in a later milestone."
 
-## 3. Talking to an agent
+## 4. Talking to an agent
 
 1. Click an unlocked agent in the sidebar (only **Scope Sprint** is unlocked at the very start
    of a new programme — every other agent depends on the one before it).
@@ -62,20 +76,32 @@ Comms Architect) are visible but disabled — "coming in a later milestone."
 5. You can keep chatting in the same conversation — history persists, so leaving and coming
    back later picks up exactly where you left off.
 
-## 4. Reviewing and approving artefacts
+## 5. Reviewing and approving artefacts
 
 1. Open the **Artefacts** tab in the right panel.
 2. Each artefact shows its name, status (Draft / In progress / Approved), and version.
-3. **Read the content before approving** — every artefact is explicitly AI-generated and
-   "must be reviewed by a human before being relied upon" (this disclaimer is embedded in the
-   artefact itself, not just UI chrome).
+3. Click **View** to open the full artefact — every section, plus version, who recorded it, and
+   (once approved) who approved it. **Read this before approving** — every artefact is
+   explicitly AI-generated and "must be reviewed by a human before being relied upon" (this
+   disclaimer is shown in the viewer, embedded in the artefact itself, not just UI chrome). You
+   can also Approve directly from inside this view.
 4. Click **Approve** when you're satisfied. This is permanent for that version — if the agent
    later produces revised content for the same artefact, it reverts to Draft and needs
    re-approval.
 5. Once **every** artefact a locked agent depends on is approved, that agent unlocks
    automatically in the sidebar — no extra action needed.
 
-## 5. Advancing to the next phase
+### Have feedback on a generated artefact?
+
+There's no separate "reject" or "request changes" button — instead, go back to that agent's
+chat and just say what you want changed (e.g. "the Pilot Shortlist needs a fourth candidate" or
+"reduce the timeline in the Scale Compass to 6 weeks"). The agent will produce revised content
+for the same artefact name, which **bumps its version and reverts it to Draft** even if you'd
+already approved the old version — so it always needs a fresh approval, and you'll never end up
+approving content you haven't actually re-reviewed. Open **View** again to check the new
+version before approving it.
+
+## 6. Advancing to the next phase
 
 Once every artefact in the current phase is approved, the **Gate** tab's checklist turns fully
 green and the **Advance to [next phase]** button becomes clickable — until then, it's correctly
@@ -91,7 +117,7 @@ persona — the Gate tab shows "🏁 This is the final phase of this persona." i
 Advance button. There's nowhere further to go within this persona; this is the intended end
 state, not a stuck gate.
 
-## 6. Setting programme notes
+## 7. Setting programme notes
 
 Click the programme name area or navigate to the programme's default screen (centre panel, no
 agent selected) to find **Programme Notes** — free text describing things like delivery
@@ -99,18 +125,19 @@ methodology, regulatory environment, or current phase context. Anything you save
 automatically shared with every agent's conversation for this programme, so you don't need to
 repeat the same background information to each one.
 
-## 7. Tracking progress
+## 8. Tracking progress
 
 - **History** (top of centre panel): every artefact ever produced for this programme, with a
   search box (filters by artefact name) and a status dropdown filter.
 - **Gate tab**: the fastest way to see exactly what's left before the current phase is
   considered complete.
 
-## 8. Settings
+## 9. Settings
 
 The top-nav **Settings** link currently shows only the list of available regulatory frameworks
-for reference. Account and API-key management will appear here once login is added — there's no
-fake functionality in the meantime.
+for reference. Account/API-key management isn't there — your account itself is managed via
+sign-in/sign-out in the top nav (§1); there's no profile/password-change page yet, and no fake
+functionality standing in for it.
 
 ## Troubleshooting
 

@@ -6,11 +6,12 @@
 ## 1. Stack
 
 - **Framework**: Next.js 16 (App Router), TypeScript strict mode
-- **Database**: Supabase (Postgres), accessed only via the service-role key, server-side
+- **Database**: Supabase (Postgres), app logic accessed only via the service-role key, server-side
+- **Auth**: Supabase Auth (email + password, email confirmation required), via `@supabase/ssr`
 - **AI**: Anthropic Claude API (`claude-sonnet-4-6`), `@anthropic-ai/sdk`
 - **Styling**: Tailwind CSS
-- **Testing**: Vitest (unit only — no Playwright/E2E yet)
-- **Decimal arithmetic**: `decimal.js` (for cost calculations — see §7)
+- **Testing**: Vitest (unit only — no Playwright/E2E suite yet)
+- **Decimal arithmetic**: `decimal.js` (for cost calculations — see §8)
 
 ## 2. Architecture overview
 
@@ -30,14 +31,18 @@ clearly if the relevant env var is missing).
 `src/lib/fillTemplate.ts` (gone now, but the pattern remains) and `src/agents/registry.ts` are
 deliberately pure/browser-safe, while `src/lib/supabase.ts`, `src/lib/claude.ts`,
 `src/lib/agentEngine.ts`, `src/lib/gating.ts`, `src/lib/programmes.ts`, `src/lib/artefacts.ts`,
-`src/lib/chatSessions.ts`, and `src/lib/costRecords.ts` are server-only and must never be
-imported by a client component — only by API routes or server components/layouts.
+`src/lib/chatSessions.ts`, `src/lib/costRecords.ts`, `src/lib/auth.ts`, and
+`src/lib/supabaseServer.ts` are server-only and must never be imported by a client component —
+only by API routes or server components/layouts. `src/lib/supabaseBrowser.ts` is the deliberate
+exception, built specifically to be client-safe (§5.1).
 
 ## 3. Data model
 
-5 tables, defined in `supabase/migrations/0001_init.sql`. RLS is **disabled on all of them** —
-there is no auth yet, so all access is mediated by the service-role key inside API routes. This
-must be revisited once Supabase Auth is added (RLS policies keyed on `auth.uid()`).
+5 tables, defined in `supabase/migrations/0001_init.sql`. **RLS is enabled on all of them**
+(`supabase/migrations/0002_enable_rls.sql`), with a single `to authenticated using (true) with
+check (true)` policy per table — any logged-in user, full access, matching the shared-workspace
+model. This is a backstop against the now-public anon/publishable key being used to call
+Supabase's REST API directly; it is **not** this app's own access-control mechanism (see §5.2).
 
 - **`programmes`**: `id, name, client, persona, active_phase, regulatory_frameworks[], notes,
   created_at`
@@ -76,11 +81,71 @@ here, never hardcoded elsewhere.
    agent-agnostic. This was proven during the Foundation build: agents 2–7 needed zero new code
    beyond their config files.
 
-## 5. Chat engine (`src/lib/agentEngine.ts`)
+## 5. Authentication (`src/lib/auth.ts`, `src/lib/supabaseBrowser.ts`, `src/lib/supabaseServer.ts`, `src/proxy.ts`)
 
-`runAgentTurn(programmeId, agentName, userMessage)`:
+### 5.1 Three Supabase client instances, not one
+
+- `src/lib/supabaseBrowser.ts` — `createBrowserClient`, for client-component login/signup forms.
+  Uses the public anon/publishable key.
+- `src/lib/supabaseServer.ts` — `createServerClient` with an **async** `cookies()` adapter (Next
+  16 requires `await cookies()`), for Server Components, Route Handlers, and Server Actions.
+- `src/proxy.ts` — its own `createServerClient` instance with `NextRequest`/`NextResponse`
+  cookie glue, distinct from the one above (different cookie store APIs; don't try to share an
+  instance between them).
+
+All three use `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` — never the
+service-role key. Identity is proven by the session cookie, not by which key is used.
+
+### 5.2 `src/proxy.ts` — the app's actual access control
+
+Named `proxy.ts`, not `middleware.ts` — Next.js 16 renamed the convention; the exported function
+is `proxy`, not `middleware` (the old name still works but logs a deprecation warning). Lives
+under `src/` per this project's directory structure.
+
+Runs on every request except static assets (`config.matcher`). Calls `await
+supabase.auth.getUser()` — **not** `getSession()`, which only reads the cookie's JWT without
+revalidating it against Supabase and so can be spoofed/stale. No valid user and the path isn't
+`/login`, `/signup`, or `/auth/callback` → redirect to `/login` for page requests, 401 JSON for
+`/api/*` requests. The classic `@supabase/ssr` middleware bug: constructing a fresh
+`NextResponse.redirect(...)` loses any session cookie the Supabase client just refreshed — the
+refreshed cookies must be copied onto the redirect response explicitly, which `proxy.ts` does.
+
+**This is the real authorization boundary for this app.** RLS (§3) is a separate, secondary
+backstop for a path this proxy doesn't cover — direct calls to Supabase's REST API using the
+public anon key, bypassing Next.js entirely.
+
+### 5.3 Knowing *who*, not just *whether*
+
+`src/lib/auth.ts`'s `getCurrentUserEmail()` calls `getUser()` (again, not `getSession()`) via the
+server client and returns the email or `null`. `proxy.ts` already gates *whether* a request is
+authenticated; routes that need to know *who* is acting — `POST /api/agents/[agentName]/chat`,
+`POST /api/artefacts/[id]/approve` — call this separately and 401 if `null`, then thread the real
+email into `runAgentTurn`/`recordArtefactDraft`/`approveArtefact` (§6, §3) instead of the old
+`DEFAULT_OWNER` placeholder constant, which has been deleted from `src/lib/constants.ts`.
+
+**Known tradeoff, accepted deliberately**: the user's **email** is stored (in `approved_by` and
+artefact content's `owner` field), not their Supabase Auth UUID. Human-readable, no profiles
+table needed — but if a user later changes their Auth email, historical records won't follow
+them. Acceptable for this product's current scope; revisit if it ever matters.
+
+### 5.4 Email confirmation flow
+
+Sign-up (`src/components/SignupForm.tsx`) calls `signUp()` with `emailRedirectTo` pointing at
+`/auth/callback`, then shows a "check your email" message — no session exists yet, since
+confirmation is required (a project setting, not something this app's code controls). Clicking
+the emailed link hits `src/app/auth/callback/route.ts`, which exchanges the link's `code` for a
+session (`exchangeCodeForSession`) and redirects to `/`. Sign-in (`LoginForm.tsx`) needs no
+callback — `signInWithPassword()` establishes a session directly, no redirect round-trip.
+
+Sign-out is a Server Action (`src/app/actions/auth.ts`'s `signOutAction`), invoked via a `<form
+action={signOutAction}>` — deliberately a POST, never a GET/link, so prefetching can't trigger a
+logout. Calls `supabase.auth.signOut()` via the server client so the cookie is actually cleared.
+
+## 6. Chat engine (`src/lib/agentEngine.ts`)
+
+`runAgentTurn(programmeId, agentName, userMessage, userEmail)`:
 1. Looks up the agent config; refuses if unknown.
-2. Calls `canRunAgent` (gating, §6); refuses with a reason if blocked.
+2. Calls `canRunAgent` (gating, §7); refuses with a reason if blocked.
 3. Loads/creates the `chat_sessions` row, appends the user message.
 4. Builds the system prompt (`buildSystemPrompt`, exported and unit-tested): programme
    name/persona/phase/client/regulatory frameworks/notes, then the agent's own brief.
@@ -98,7 +163,7 @@ here, never hardcoded elsewhere.
    content **server-side**, never trusting the model for these.
 9. Persists the full message history and a `cost_records` row, every turn.
 
-## 6. Gating (`src/lib/gating.ts`)
+## 7. Gating (`src/lib/gating.ts`)
 
 `canRunAgent(programmeId, agentName, fetchArtefactStatuses?)` and
 `isPhaseGateClear(programmeId, persona, phase, fetchArtefactStatuses?)`. Both take an
@@ -129,50 +194,56 @@ end state rather than a stuck one. This is a client-only copy branch — the rou
 already correct for both cases (a missing key and an empty agent list both fail the same
 `if (!nextPhase || ...)` check) and needed no change.
 
-## 7. Cost tracking (`src/lib/cost.ts`)
+## 8. Cost tracking (`src/lib/cost.ts`)
 
 `calculateCostUsd(tokensIn, tokensOut)` uses `decimal.js`, never floating point, per the "all
 financial calculations use Decimal" rule. **The per-million-token prices ($3 input / $15 output)
 are approximate and must be verified against Anthropic's current pricing page** before these
 figures are used for real spend reporting.
 
-## 8. API routes
+## 9. API routes
 
 | Route | Method | Purpose |
 |---|---|---|
 | `/api/programmes` | GET, POST | List / create programmes |
-| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, regulatory_frameworks (PATCH should not be used to change active_phase — see §6.1) |
+| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, regulatory_frameworks (PATCH should not be used to change active_phase — see §7.1) |
 | `/api/programmes/[id]/advance-phase` | POST | Gate-enforced phase transition — the only path allowed to change active_phase |
-| `/api/agents/[agentName]/chat` | POST | Run one chat turn (the only path to `agentEngine.ts`) |
+| `/api/agents/[agentName]/chat` | POST | Run one chat turn (the only path to `agentEngine.ts`); 401s without a session (§5.3) |
 | `/api/agents/[agentName]/session` | GET | Fetch display-ready chat history for hydrating the UI |
 | `/api/artefacts` | GET | List artefacts for a programme |
 | `/api/artefacts/[id]` | GET | Fetch one artefact's full content |
-| `/api/artefacts/[id]/approve` | POST | Explicit human approval action |
+| `/api/artefacts/[id]/approve` | POST | Explicit human approval action; 401s without a session (§5.3) |
 | `/api/gate/[phase]` | GET | Phase-gate checklist (every agent's artefacts + approved flag) |
+| `/auth/callback` | GET | Exchanges an email-confirmation code for a session (§5.4) |
 
 No routes exist yet for the cross-cutting agents (Governance Guardian, Cost Compass, Roadmap
 Architect, Comms Architect) — their header buttons are `disabled` with a tooltip, deliberately
 not dead links.
 
-## 9. UI structure
+## 10. UI structure
 
-`src/app/programme/[id]/layout.tsx` renders the three-panel shell (`Sidebar`, `Header`,
-`RightPanel`) around every route under it. `Sidebar` is an **async server component** — it
-fetches artefact/gate status itself, which is why it can't be a client component (would pull
-Supabase access into the browser bundle). `RightPanel` is a client component fetching its own
-data via the API routes above (Artefacts tab live; Gate tab live; KPIs tab an honest empty
-state). Agent chat lives at `src/app/programme/[id]/agents/[agentName]/page.tsx` — one generic
-route for every agent, gated server-side by `canRunAgent` before rendering `ChatPanel`.
+`src/app/layout.tsx` is now **async** — it reads the current session (`getCurrentUserEmail`) to
+show the logged-in user's email and a sign-out form in the top nav, rendering neither on the
+public `/login`/`/signup` pages (no session exists there). `src/app/programme/[id]/layout.tsx`
+renders the three-panel shell (`Sidebar`, `Header`, `RightPanel`) around every route under it.
+`Sidebar` is an **async server component** — it fetches artefact/gate status itself, which is
+why it can't be a client component (would pull Supabase access into the browser bundle).
+`RightPanel` is a client component fetching its own data via the API routes above (Artefacts tab
+live, including `ArtefactModal` — a full-content viewer with an Approve action, added after the
+auth build surfaced that there was previously no way to actually read an artefact before
+approving it; Gate tab live; KPIs tab an honest empty state). Agent chat lives at
+`src/app/programme/[id]/agents/[agentName]/page.tsx` — one generic route for every agent, gated
+server-side by `canRunAgent` before rendering `ChatPanel`.
 
-## 10. Testing
+## 11. Testing
 
 `npm test` runs Vitest over `tests/unit/**/*.test.ts` only — no live Supabase or Claude calls.
 Currently covers: `registry.ts` lookups, `gating.ts`'s dependency/gate logic (injected fake data),
 `cost.ts`'s decimal arithmetic, `agentEngine.ts`'s `buildSystemPrompt`. Full conversational flows,
-real Supabase round-trips, and visual/colour-coding checks are verified manually against the live
-dev server and real Supabase project — not automated. `npm run lint` and `npm run build` are run
-after every change as a correctness gate (the build step has caught real server/client boundary
-mistakes during this project).
+real Supabase round-trips, auth flows, and visual/colour-coding checks are verified manually
+against the live dev server and real Supabase project — not automated. `npm run lint` and `npm
+run build` are run after every change as a correctness gate (the build step has caught real
+server/client boundary mistakes during this project).
 
 There's no Playwright/E2E suite set up in this repo yet (`tests/e2e/` doesn't exist), but a
 one-off Playwright script (`npm install --no-save playwright`, then a small `.mjs` driving
@@ -181,22 +252,35 @@ UI branch that `curl` can't see (`RightPanel.tsx`'s Gate tab fetches its data af
 server-rendered HTML never contains it). Worth reaching for again whenever a change touches
 client-only rendering logic that the Sidebar/server-component pattern doesn't cover.
 
-## 11. Environment variables (`.env.local`, never committed)
+The auth build's live verification (signup → email confirmation → login → real chat/approve →
+RLS check via direct anon-key query → sign-out) was entirely manual, run by the user in a real
+browser plus a few one-off scripts checking Supabase state directly — there is no automated
+coverage of the auth flow itself, by the same "no E2E suite yet" limitation above.
+
+## 12. Environment variables (`.env.local`, never committed)
 
 ```
 ANTHROPIC_API_KEY=
-SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-No `NEXT_PUBLIC_*` Supabase variables exist or should be added until real auth requires
-browser-side Supabase access — currently all DB access is server-only via the service-role key.
+`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` are safe to expose to the browser —
+that's their purpose, and what makes client-side Supabase Auth calls possible. They replace the
+old server-only `SUPABASE_URL` (same value, renamed — the URL itself was never sensitive, so one
+name instead of two avoids drift). `SUPABASE_SERVICE_ROLE_KEY` remains server-only and must never
+be exposed.
 
-## 12. Known technical debt
+## 13. Known technical debt
 
-- No auth — `DEFAULT_OWNER` constant (`src/lib/constants.ts`) stands in for a real user.
-  Migrating to real auth means swapping this constant for `session.user.id` and re-enabling RLS.
-- Cost pricing constants are placeholders (§7).
-- `dependsOnAgents` for the Foundation and Forge phases is a simplifying linear-chain
+- Cost pricing constants are placeholders (§8).
+- `dependsOnAgents` for the Foundation, Forge, and Amplify phases is a simplifying linear-chain
   assumption (each agent depends only on the one immediately before it), not derived from any
   explicit cross-agent dependency analysis in the original product brief.
+- `approved_by`/artefact `owner` store the user's **email**, not their Supabase Auth UUID
+  (§5.3) — simple and human-readable, but won't follow a user if they change their Auth email
+  later. Accepted tradeoff, not a bug.
+- RLS policies are a rubber stamp ("authenticated = full access"), not real per-user
+  authorization — intentional for the shared-workspace model (§5.2), but anyone building
+  per-user permissions later must not assume RLS is already doing any of that work.

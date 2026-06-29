@@ -60,3 +60,9 @@ Programme managers running structured delivery (especially legacy modernisation)
 similarly regulated organisation, who want AI assistance producing governance artefacts without
 losing control over what gets finalised, and who are comfortable reviewing AI-generated content
 before it's used.
+
+## Accounts
+
+Real accounts now exist (email + password, with email confirmation) — this is a **shared
+workspace**: every signed-in user sees and can act on every programme, with no per-person
+silos. Sign-up is open.

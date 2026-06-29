@@ -114,13 +114,40 @@ presence yet. **None have backing logic.**
   approved), structured content, approval timestamp and approver.
 - **Chat history**: full conversation per (programme, agent) pair, replayed on every turn.
 - **Cost records**: token usage and decimal-calculated USD cost per Claude call (pricing figures
-  are approximate placeholders — see Technical Documentation §7).
+  are approximate placeholders — see Technical Documentation §8).
 - **KPI snapshots**: table exists, nothing writes to it yet (no KPI Monitor agent).
 
-## 6. Known product gaps (intentional, not bugs)
+## 6. Authentication and multi-user (BUILT)
 
-- No login. Single-user. Every artefact is "approved by" a fixed placeholder owner.
-- No real audit trail across users — by design, until auth exists.
+Real Supabase Auth (email + password, with required email confirmation) replaces the old
+single-user placeholder. **Shared team workspace model, confirmed**: every logged-in user sees
+and can act on every programme — there is no per-user data isolation, and that's an intentional
+product decision, not a gap. Sign-up is open (no invite-only restriction).
+
+`artefacts.approved_by` and the `owner` field in artefact content now record the real, logged-in
+user's email — verified live: a fresh sign-up, email confirmation, login, a real chat turn, and
+an approval all show the actual account email, not the old `"owner"` placeholder. Existing test
+data created before auth existed was intentionally not migrated (explicit decision — those old
+rows still show `"owner"` and will not be retrofitted).
+
+Row Level Security is now enabled on all 5 tables — necessary the moment a publishable/anon key
+was exposed to the browser for login. The policies are deliberately a rubber stamp ("any
+authenticated user, full access") matching the shared-workspace model — they are **not** an
+authorization mechanism for per-user permissions (there are none) and must not be assumed to be
+one if that's ever built. See Technical Documentation §5 for the access-control split.
+
+## 7. Reviewing artefacts before approving (BUILT)
+
+Originally a gap found during the auth verification pass: the Artefacts tab listed names and
+statuses with an Approve button, but no way to actually read an artefact's content first — there
+was no real "review" step despite that being a core business rule. Every artefact now has a
+**View** action opening its full structured content (all sections, version, recorder, approver,
+disclaimer) before approving.
+
+## 8. Known product gaps (intentional, not bugs)
+
 - Cost figures are directional, not accurate to current Anthropic pricing.
 - Governance/compliance review is **not actually performed** — regulatory frameworks are
   captured but nothing checks artefacts against them yet.
+- No per-user permissions or data isolation — by design (shared workspace), not a missing
+  feature.

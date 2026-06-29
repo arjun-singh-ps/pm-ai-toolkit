@@ -80,7 +80,8 @@ export interface AgentTurnResult {
 export async function runAgentTurn(
   programmeId: string,
   agentName: string,
-  userMessage: string
+  userMessage: string,
+  userEmail: string
 ): Promise<AgentTurnResult> {
   const agent = getAgent(agentName);
   if (!agent) {
@@ -172,7 +173,14 @@ export async function runAgentTurn(
           continue;
         }
 
-        await recordArtefactDraft(programmeId, programme.name, agent, input.artefactName!, input.content);
+        await recordArtefactDraft(
+          programmeId,
+          programme.name,
+          agent,
+          input.artefactName!,
+          input.content,
+          userEmail
+        );
         recordedArtefacts.push(input.artefactName!);
         toolResults.push({
           type: "tool_result",

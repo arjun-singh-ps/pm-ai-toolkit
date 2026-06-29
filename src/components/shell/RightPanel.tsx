@@ -10,6 +10,7 @@ import type { Artefact } from "@/types/artefact";
 import type { Persona } from "@/types/programme";
 import { listAgentsForPhase } from "@/agents/registry";
 import { NEXT_PHASE } from "@/lib/constants";
+import { ArtefactModal } from "@/components/ArtefactModal";
 
 type Tab = "artefacts" | "kpis" | "gate";
 
@@ -53,6 +54,7 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [advanceError, setAdvanceError] = useState<string | null>(null);
+  const [viewingArtefactId, setViewingArtefactId] = useState<string | null>(null);
 
   const nextPhase = NEXT_PHASE[phase];
   const nextPhaseAvailable = Boolean(nextPhase) && listAgentsForPhase(persona, nextPhase).length > 0;
@@ -85,6 +87,7 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
       if (response.ok) {
         await loadData();
         router.refresh();
+        setViewingArtefactId(null);
       }
     } finally {
       setApprovingId(null);
@@ -141,16 +144,25 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
                   <p className={`text-xs ${STATUS_COLOR[artefact.status]}`}>
                     {STATUS_LABEL[artefact.status]} · v{artefact.version}
                   </p>
-                  {artefact.status !== "approved" && (
+                  <div className="mt-2 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => handleApprove(artefact.id)}
-                      disabled={approvingId === artefact.id}
-                      className="mt-2 rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+                      onClick={() => setViewingArtefactId(artefact.id)}
+                      className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
                     >
-                      {approvingId === artefact.id ? "Approving..." : "Approve"}
+                      View
                     </button>
-                  )}
+                    {artefact.status !== "approved" && (
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(artefact.id)}
+                        disabled={approvingId === artefact.id}
+                        className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+                      >
+                        {approvingId === artefact.id ? "Approving..." : "Approve"}
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -214,6 +226,20 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
             </div>
           ))}
       </div>
+
+      {viewingArtefactId &&
+        (() => {
+          const viewingArtefact = artefacts.find((artefact) => artefact.id === viewingArtefactId);
+          if (!viewingArtefact) return null;
+          return (
+            <ArtefactModal
+              artefact={viewingArtefact}
+              onClose={() => setViewingArtefactId(null)}
+              onApprove={handleApprove}
+              isApproving={approvingId === viewingArtefact.id}
+            />
+          );
+        })()}
     </aside>
   );
 }

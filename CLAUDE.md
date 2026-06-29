@@ -317,6 +317,30 @@ Routes:
 - Do not use floating point for any financial calculations
 - Do not log PII under any circumstances
 
+---
+
+## Documentation maintenance
+
+Four living documents exist under `docs/`:
+
+- `docs/business-specification.md` — product/business view: personas, phases, agents,
+  artefacts, business rules, and which of these are actually built vs. still aspirational.
+- `docs/technical-documentation.md` — engineering view: architecture, data model, agent
+  pattern, API routes, testing strategy, known technical debt.
+- `docs/product-overview.md` — what the product is and why it exists, for someone unfamiliar
+  with it.
+- `docs/user-guide.md` — a practical, step-by-step walkthrough of using the product as it
+  actually exists right now.
+
+**Whenever a change adds, removes, or changes product behaviour — a new agent, a schema
+change, a new route, a renamed UI flow, a retired feature, a fixed bug worth recording —
+update every document above that's affected, in the same piece of work, not as an
+afterthought.** All four files are written to reflect what's actually built, marking
+aspirational/not-yet-built parts explicitly, never describing unbuilt features — or UI flows
+that don't exist — as if they were real.
+
+---
+
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.

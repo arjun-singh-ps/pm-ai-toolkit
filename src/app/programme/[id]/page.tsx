@@ -1,11 +1,22 @@
-// Default centre-panel content for a programme: prompts the user to select
-// an agent from the sidebar once agent chat exists.
+// Default centre-panel content for a programme: edit programme notes and
+// prompts the user to select an agent.
 
-/** Placeholder centre panel shown until an agent is selected. */
-export default function ProgrammePage() {
-  return (
-    <div className="flex h-full items-center justify-center p-8 text-center text-zinc-500 dark:text-zinc-400">
-      Select an agent from the sidebar to begin.
-    </div>
-  );
+import { notFound } from "next/navigation";
+import { getProgramme } from "@/lib/programmes";
+import { ProgrammeNotesForm } from "@/components/ProgrammeNotesForm";
+
+interface ProgrammePageProps {
+  params: Promise<{ id: string }>;
+}
+
+/** Default programme view: notes editor + a hint to pick an agent. */
+export default async function ProgrammePage({ params }: ProgrammePageProps) {
+  const { id } = await params;
+  const programme = await getProgramme(id);
+
+  if (!programme) {
+    notFound();
+  }
+
+  return <ProgrammeNotesForm programmeId={programme.id} initialNotes={programme.notes} />;
 }

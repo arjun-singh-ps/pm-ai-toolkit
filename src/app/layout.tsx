@@ -44,7 +44,7 @@ export default function RootLayout({
               href="/settings"
               className="text-sm font-medium text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
             >
-              Project Context
+              Settings
             </Link>
           </div>
         </nav>

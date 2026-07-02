@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import type { DisplayMessage } from "@/lib/chatSessions";
 import { ARTEFACT_RECORDED_EVENT } from "@/lib/clientEvents";
+import { WELCOME_INIT_MARKER } from "@/lib/constants";
 
 interface ChatPanelProps {
   programmeId: string;
@@ -32,13 +33,34 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPane
       try {
         const response = await fetch(`/api/agents/${agentName}/session?programmeId=${programmeId}`);
         const data = await response.json();
-        if (!cancelled) {
-          setMessages(data.messages ?? []);
-        }
-      } finally {
-        if (!cancelled) {
+        const loaded: DisplayMessage[] = data.messages ?? [];
+
+        if (cancelled) return;
+
+        if (loaded.length === 0) {
+          // New session — auto-generate the opening briefing.
+          setIsLoadingHistory(false);
+          setIsSending(true);
+          const chatResponse = await fetch(`/api/agents/${agentName}/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ programmeId, message: WELCOME_INIT_MARKER }),
+          });
+          const chatData = await chatResponse.json();
+          if (!cancelled && chatResponse.ok) {
+            // Show the welcome but hide the synthetic init trigger.
+            setMessages([
+              { role: "user", text: WELCOME_INIT_MARKER },
+              { role: "assistant", text: chatData.reply ?? "" },
+            ]);
+          }
+          if (!cancelled) setIsSending(false);
+        } else {
+          setMessages(loaded);
           setIsLoadingHistory(false);
         }
+      } catch {
+        if (!cancelled) setIsLoadingHistory(false);
       }
     }
 
@@ -110,12 +132,16 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPane
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
         {isLoadingHistory ? (
           <p className="text-sm text-zinc-400">Loading conversation…</p>
-        ) : messages.length === 0 ? (
-          <p className="text-sm text-zinc-400">Start the conversation with {agentDisplayName} below.</p>
         ) : (
-          messages.map((message, index) => <MessageBubble key={index} message={message} />)
+          messages
+            .filter((m) => m.text !== WELCOME_INIT_MARKER)
+            .map((message, index) => <MessageBubble key={index} message={message} />)
         )}
-        {isSending && <p className="text-sm text-zinc-400">{agentDisplayName} is thinking…</p>}
+        {isSending && (
+          <p className="text-sm text-zinc-400">
+            {messages.length === 0 ? `${agentDisplayName} is preparing your briefing…` : `${agentDisplayName} is thinking…`}
+          </p>
+        )}
         <div ref={bottomRef} />
       </div>
 

@@ -25,3 +25,11 @@ export const NEXT_PHASE: Record<string, string> = {
   foundation: "forge",
   forge: "amplify",
 };
+
+/**
+ * Synthetic first message sent by ChatPanel when a session is brand new.
+ * The agent engine detects this and generates a contextual opening briefing
+ * instead of treating it as a normal user turn. Stored in the session but
+ * filtered from the chat display — the user never sees or types this string.
+ */
+export const WELCOME_INIT_MARKER = "__PM_TOOLKIT_WELCOME_INIT__";

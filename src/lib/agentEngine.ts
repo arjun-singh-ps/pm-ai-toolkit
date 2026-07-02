@@ -13,6 +13,9 @@ import { recordArtefactDraft } from "@/lib/artefacts";
 import { recordCost } from "@/lib/costRecords";
 import { getExtraContext } from "@/lib/crossCuttingContext";
 import { getActiveIntegrations } from "@/lib/integrations";
+import { listArtefactsForProgramme } from "@/lib/artefacts";
+import { formatArtefactSummary } from "@/agents/cross-cutting/artefactSummary";
+import { WELCOME_INIT_MARKER } from "@/lib/constants";
 import type { AgentConfig } from "@/agents/types";
 import type { Programme } from "@/types/programme";
 
@@ -104,7 +107,26 @@ export async function runAgentTurn(
   const messages: ChatMessage[] = [...session.messages, { role: "user", content: userMessage }];
   const baseSystemPrompt = buildSystemPrompt(agent, programme);
   const extraContext = await getExtraContext(agentName, programmeId);
-  const systemPrompt = extraContext ? `${baseSystemPrompt}\n\n${extraContext}` : baseSystemPrompt;
+  let systemPrompt = extraContext ? `${baseSystemPrompt}\n\n${extraContext}` : baseSystemPrompt;
+
+  const isWelcomeInit = userMessage === WELCOME_INIT_MARKER;
+
+  // For the welcome briefing, inject all existing artefacts so the agent can
+  // say what it already knows about the programme before asking questions.
+  if (isWelcomeInit) {
+    const existingArtefacts = await listArtefactsForProgramme(programmeId);
+    const artefactContext = formatArtefactSummary(existingArtefacts);
+    if (artefactContext) {
+      systemPrompt += `\n\n${artefactContext}`;
+    }
+    systemPrompt +=
+      "\n\nThis is the very start of the conversation. The programme manager has just opened this chat for the first time. " +
+      "Generate a welcoming opening briefing that does three things:\n" +
+      "1. Briefly introduce yourself — who you are and which artefacts you will produce in this session.\n" +
+      "2. Summarise what you already know about this programme from the context above — be specific about what's been done so far (name artefacts, decisions, or data points where they exist). If nothing exists yet, say so clearly.\n" +
+      "3. Ask the programme manager to confirm this is accurate and share any additional context, constraints, or priorities before you begin.\n" +
+      "Write in flowing, professional prose. Do not use markdown headers. Do not record any artefacts yet.";
+  }
 
   const activeIntegrations = await getActiveIntegrations();
   const mcpServers = activeIntegrations.map((integration) => ({

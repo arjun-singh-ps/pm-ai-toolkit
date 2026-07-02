@@ -12,6 +12,7 @@ import { loadOrCreateSession, saveSessionMessages, type ChatMessage } from "@/li
 import { recordArtefactDraft } from "@/lib/artefacts";
 import { recordCost } from "@/lib/costRecords";
 import { getExtraContext } from "@/lib/crossCuttingContext";
+import { getActiveIntegrations } from "@/lib/integrations";
 import type { AgentConfig } from "@/agents/types";
 import type { Programme } from "@/types/programme";
 
@@ -105,30 +106,51 @@ export async function runAgentTurn(
   const extraContext = await getExtraContext(agentName, programmeId);
   const systemPrompt = extraContext ? `${baseSystemPrompt}\n\n${extraContext}` : baseSystemPrompt;
 
+  const activeIntegrations = await getActiveIntegrations();
+  const mcpServers = activeIntegrations.map((integration) => ({
+    type: "url" as const,
+    url: integration.server_url,
+    name: integration.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+    ...(integration.auth_token ? { authorization_token: integration.auth_token } : {}),
+  }));
+
   const recordedArtefacts: string[] = [];
   let totalTokensIn = 0;
   let totalTokensOut = 0;
   let finalAssistantText = "";
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
-    const response = await getClient().messages.create({
+    const baseParams = {
       model: CLAUDE_MODEL,
       max_tokens: MAX_OUTPUT_TOKENS,
       system: systemPrompt,
       messages,
       tools: [RECORD_ARTEFACT_TOOL],
-    });
+    };
+
+    // Use the beta MCP client when integrations are configured; standard API otherwise.
+    const response =
+      mcpServers.length > 0
+        ? await getClient().beta.messages.create({
+            ...baseParams,
+            mcp_servers: mcpServers,
+            betas: ["mcp-client-2025-04-04"],
+          })
+        : await getClient().messages.create(baseParams);
 
     totalTokensIn += response.usage.input_tokens;
     totalTokensOut += response.usage.output_tokens;
-    messages.push({ role: "assistant", content: response.content });
+    // Cast is safe: BetaContentBlock is a superset of ContentBlock at runtime;
+    // we're just storing content for replay in subsequent turns.
+    const responseContent = response.content as Anthropic.Messages.ContentBlock[];
+    messages.push({ role: "assistant", content: responseContent });
 
-    const textBlocks = response.content.filter(
+    const textBlocks = responseContent.filter(
       (block): block is Anthropic.Messages.TextBlock => block.type === "text"
     );
     finalAssistantText = textBlocks.map((block) => block.text).join("\n").trim();
 
-    const toolUseBlocks = response.content.filter(
+    const toolUseBlocks = responseContent.filter(
       (block): block is Anthropic.Messages.ToolUseBlock => block.type === "tool_use"
     );
 

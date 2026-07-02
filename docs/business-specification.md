@@ -160,7 +160,26 @@ agent): recording an artefact via chat never told the Artefacts/Gate tabs to ref
 recorded artefact was invisible until the page was manually reloaded. Fixed — the Artefacts tab
 now updates immediately after any agent's conversation records something.
 
-## 9. Known product gaps (intentional, not bugs)
+## 9. MCP integrations (BUILT)
+
+A workspace-wide integration layer that connects external tools to every agent. Configured
+in Settings; stored in a new `mcp_integrations` table (shared workspace — one set of
+integrations available to all programmes and users).
+
+Supported types: **Jira**, **Confluence**, **SharePoint**, **Custom MCP**. Each integration
+stores a server URL and an optional auth token. Enabled integrations are injected into every
+Claude API call via the Anthropic SDK's `beta.messages.create` with `mcp_servers` — Claude
+can use MCP tools (e.g. search Jira, read Confluence) alongside the standard
+`record_artefact` tool during any agent conversation.
+
+**Constraint**: MCP server URLs must be publicly accessible. Internal instances behind
+corporate VPN/firewall need a hosted proxy.
+
+**Security note**: auth tokens are stored as plain text in Supabase for the MVP — RLS protects
+them from unauthenticated access, but at-rest encryption should be added before production use
+with real API keys.
+
+## 10. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing.
 - Governance/compliance review is **not actually performed** — regulatory frameworks are

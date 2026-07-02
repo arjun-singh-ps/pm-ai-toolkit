@@ -38,12 +38,19 @@ exception, built specifically to be client-safe (§5.1).
 
 ## 3. Data model
 
-5 tables, defined in `supabase/migrations/0001_init.sql`. **RLS is enabled on all of them**
-(`supabase/migrations/0002_enable_rls.sql`), with a single `to authenticated using (true) with
-check (true)` policy per table — any logged-in user, full access, matching the shared-workspace
-model. This is a backstop against the now-public anon/publishable key being used to call
-Supabase's REST API directly; it is **not** this app's own access-control mechanism (see §5.2).
+6 tables across two migration files. **RLS is enabled on all of them**, with a single `to
+authenticated using (true) with check (true)` policy per table — any logged-in user, full
+access, matching the shared-workspace model. This is a backstop against the now-public
+anon/publishable key being used to call Supabase's REST API directly; it is **not** this
+app's own access-control mechanism (see §5.2).
 
+Migrations:
+- `supabase/migrations/0001_init.sql` — original 5 tables + disabled RLS.
+- `supabase/migrations/0002_enable_rls.sql` — enables RLS on all 5.
+- `supabase/migrations/0003_mcp_integrations.sql` — adds the 6th table (below) with RLS
+  already enabled inline.
+
+Tables:
 - **`programmes`**: `id, name, client, persona, active_phase, regulatory_frameworks[], notes,
   created_at`
 - **`artefacts`**: `id, programme_id, artefact_name, phase, activity, agent_name, version,
@@ -58,6 +65,10 @@ Supabase's REST API directly; it is **not** this app's own access-control mechan
   recorded_at` — schema exists, nothing writes to it yet.
 - **`cost_records`**: `id, programme_id, agent_name, tokens_in, tokens_out, cost_usd
   (numeric(10,6)), artefact_id, created_at`.
+- **`mcp_integrations`**: `id, name, type (jira|confluence|sharepoint|custom), server_url,
+  auth_token (nullable, plain text for MVP), enabled, created_at` — workspace-scoped, not
+  programme-scoped. Auth tokens are protected by RLS (requires authenticated session) but are
+  not encrypted at rest — encrypt before production use with real API keys.
 
 ## 4. Agent architecture pattern
 
@@ -205,7 +216,12 @@ logout. Calls `supabase.auth.signOut()` via the server client so the cookie is a
    name/persona/phase/client/regulatory frameworks/notes, then the agent's own brief. Appends
    `getExtraContext(agentName, programmeId)` (§4.2) if non-null — this is the only place
    cross-cutting agents' portfolio-wide context enters the conversation.
-5. Calls Claude with a shared `record_artefact` tool, looping up to `MAX_TOOL_ITERATIONS` (5)
+5. Fetches enabled MCP integrations (`getActiveIntegrations`). If any exist, uses
+   `client.beta.messages.create` with `mcp_servers` (Anthropic beta feature, betas header
+   `"mcp-client-2025-04-04"`); otherwise falls back to `client.messages.create`. The beta
+   response's `BetaContentBlock[]` is cast to `ContentBlock[]` for message history replay —
+   safe at runtime since `BetaContentBlock` is a superset.
+6. Calls Claude with a shared `record_artefact` tool, looping up to `MAX_TOOL_ITERATIONS` (5)
    times while Claude keeps calling the tool.
 6. **Every `tool_use` block gets a paired `tool_result`, unconditionally**, regardless of why
    the response stopped. This is a deliberate fix for a real bug found during testing: a

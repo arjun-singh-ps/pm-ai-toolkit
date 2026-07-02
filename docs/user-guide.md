@@ -150,10 +150,35 @@ repeat the same background information to each one.
 
 ## 9. Settings
 
-The top-nav **Settings** link currently shows only the list of available regulatory frameworks
-for reference. Account/API-key management isn't there — your account itself is managed via
-sign-in/sign-out in the top nav (§1); there's no profile/password-change page yet, and no fake
-functionality standing in for it.
+The top-nav **Settings** link has two sections:
+
+### MCP integrations
+
+Connect external tools — Jira, Confluence, SharePoint, or any MCP-compatible server — so that
+every agent can pull live data when generating artefacts. For example, if Jira is connected,
+an agent drafting a Delivery Backlog can fetch real open tickets rather than relying solely
+on what you type.
+
+To add an integration:
+
+1. Click **+ Add integration**.
+2. Give it a name (e.g. "Our Jira"), choose its type, paste the MCP server URL, and optionally
+   add an auth token (Bearer token or API key).
+3. Click **Add integration**. It appears in the list immediately and is enabled by default.
+
+Use **Disable** / **Enable** to temporarily exclude an integration without deleting it.
+Use **Delete** to remove it permanently.
+
+**One important constraint**: the MCP server URL must be publicly reachable — Anthropic's
+servers connect to it, not your browser. Jira Cloud, Confluence Cloud, and SharePoint Online
+work directly. An internal instance behind a corporate VPN or firewall requires a hosted proxy
+or tunnel first.
+
+### Regulatory frameworks
+
+Lists the available compliance frameworks a programme can select at setup (PRA, FCA, DORA,
+etc.). These are reference only here — they're selected per programme at creation time, and
+the Governance Guardian agent uses them to review artefacts.
 
 ## Troubleshooting
 

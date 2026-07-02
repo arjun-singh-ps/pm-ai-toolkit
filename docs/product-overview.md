@@ -59,6 +59,11 @@ programme (PRA, FCA, DORA, etc.) are no longer just stored and forgotten; this a
 your programme's actual artefacts against them and produces a Compliance Charter, Governance
 Pulse, and Regulatory Gap Matrix, grounded in your real content rather than generic boilerplate.
 
+**MCP integrations** are live — connect Jira, Confluence, SharePoint, or any MCP-compatible
+server in Settings, and every agent automatically has access to those tools when generating
+artefacts. Claude can fetch real Jira tickets or read Confluence pages mid-conversation without
+you copying and pasting anything.
+
 Everything else described in the product vision (the Agentic Delivery persona, and the other 3
 cross-cutting agents — Cost Compass, Roadmap Architect, Comms Architect) is either a
 visible-but-disabled placeholder or not present yet. See `docs/business-specification.md` for

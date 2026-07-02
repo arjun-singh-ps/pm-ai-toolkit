@@ -1,0 +1,13 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - --tag
+      - "gcr.io/$PROJECT_ID/pm-ai-toolkit"
+      - --build-arg
+      - "NEXT_PUBLIC_SUPABASE_URL=https://dpruizflifxbprdcmhgi.supabase.co"
+      - --build-arg
+      - "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_tt9_OD8RuZ16SqviEvGEcg_O_6JcDeq"
+      - .
+images:
+  - "gcr.io/$PROJECT_ID/pm-ai-toolkit"

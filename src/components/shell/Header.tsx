@@ -1,7 +1,5 @@
 // Centre panel header: breadcrumb, History/KPIs links, and the 4
-// cross-cutting agent buttons. Governance Guardian is live; the other 3
-// (Cost Compass, Roadmap Architect, Comms Architect) remain disabled —
-// their backing agent logic hasn't been built yet.
+// cross-cutting agent buttons. All four are now live.
 
 import Link from "next/link";
 import type { Programme } from "@/types/programme";
@@ -10,7 +8,12 @@ interface HeaderProps {
   programme: Programme;
 }
 
-const DISABLED_CROSS_CUTTING_BUTTONS = ["Cost Compass", "Roadmap Architect", "Comms Architect"];
+const CROSS_CUTTING_LINKS: { label: string; agentName: string }[] = [
+  { label: "Governance Guardian", agentName: "governance-guardian" },
+  { label: "Cost Compass", agentName: "cost-compass" },
+  { label: "Roadmap Architect", agentName: "roadmap-architect" },
+  { label: "Comms Architect", agentName: "comms-architect" },
+];
 
 /** Renders the breadcrumb, History/KPIs links, and the cross-cutting agent buttons. */
 export function Header({ programme }: HeaderProps) {
@@ -34,22 +37,14 @@ export function Header({ programme }: HeaderProps) {
         </Link>
       </div>
       <div className="flex gap-2">
-        <Link
-          href={`/programme/${programme.id}/agents/governance-guardian`}
-          className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
-        >
-          Governance Guardian
-        </Link>
-        {DISABLED_CROSS_CUTTING_BUTTONS.map((label) => (
-          <button
-            key={label}
-            type="button"
-            disabled
-            title="Coming in a later milestone"
-            className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-zinc-400 opacity-50 dark:border-white/10 dark:text-zinc-600"
+        {CROSS_CUTTING_LINKS.map(({ label, agentName }) => (
+          <Link
+            key={agentName}
+            href={`/programme/${programme.id}/agents/${agentName}`}
+            className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
           >
             {label}
-          </button>
+          </Link>
         ))}
       </div>
     </header>

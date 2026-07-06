@@ -6,9 +6,15 @@
 // both the shared engine and the client-reachable registry.
 
 import { buildGovernanceGuardianContext } from "@/lib/governanceGuardianContext";
+import { buildCostCompassContext } from "@/lib/costCompassContext";
+import { buildRoadmapArchitectContext } from "@/lib/roadmapArchitectContext";
+import { buildCommsArchitectContext } from "@/lib/commsArchitectContext";
 
 const CONTEXT_BUILDERS: Record<string, (programmeId: string) => Promise<string | null>> = {
   "governance-guardian": buildGovernanceGuardianContext,
+  "cost-compass": buildCostCompassContext,
+  "roadmap-architect": buildRoadmapArchitectContext,
+  "comms-architect": buildCommsArchitectContext,
 };
 
 /** Returns extra system-prompt context for agents that need it, or null for agents that don't. */

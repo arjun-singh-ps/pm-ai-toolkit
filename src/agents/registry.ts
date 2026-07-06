@@ -21,6 +21,9 @@ import { launchRunwayAgent } from "@/agents/modernisation/amplify/launchRunway";
 import { deliveryHeartbeatAgent } from "@/agents/modernisation/amplify/deliveryHeartbeat";
 import { evolutionEngineAgent } from "@/agents/modernisation/amplify/evolutionEngine";
 import { governanceGuardianAgent } from "@/agents/cross-cutting/governanceGuardian";
+import { costCompassAgent } from "@/agents/cross-cutting/costCompass";
+import { roadmapArchitectAgent } from "@/agents/cross-cutting/roadmapArchitect";
+import { commsArchitectAgent } from "@/agents/cross-cutting/commsArchitect";
 
 /**
  * Foundation-phase agents in their required completion order. This list is
@@ -58,7 +61,12 @@ export const AMPLIFY_AGENTS: AgentConfig[] = [
  * any future "list a programme's available agents" code must filter
  * `phase === "cross-cutting"` directly, not reuse listAgentsForPhase.
  */
-export const CROSS_CUTTING_AGENTS: AgentConfig[] = [governanceGuardianAgent];
+export const CROSS_CUTTING_AGENTS: AgentConfig[] = [
+  governanceGuardianAgent,
+  costCompassAgent,
+  roadmapArchitectAgent,
+  commsArchitectAgent,
+];
 
 const ALL_AGENTS: AgentConfig[] = [
   ...FOUNDATION_AGENTS,

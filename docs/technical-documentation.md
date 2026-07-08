@@ -62,7 +62,10 @@ Tables:
   created_at` — one row per (programme, agent) pair currently. `messages` stores the exact
   Anthropic `MessageParam[]` shape, replayed straight back into the next API call.
 - **`kpi_snapshots`**: `id, programme_id, persona, lever_or_dimension, metric_name, value,
-  recorded_at` — schema exists, nothing writes to it yet.
+  recorded_at` — written via `writeKpiSnapshot` in `src/lib/kpiSnapshots.ts`, called by
+  `agentEngine.ts` when it handles a `record_kpi` tool call. Three agents have `kpiLevers`
+  set in their config and therefore receive the `record_kpi` tool: Delivery Intelligence,
+  Signal Watch, Delivery Heartbeat (see §4 and §6).
 - **`cost_records`**: `id, programme_id, agent_name, tokens_in, tokens_out, cost_usd
   (numeric(10,6)), artefact_id, created_at`.
 - **`mcp_integrations`**: `id, name, type (jira|confluence|sharepoint|custom), server_url,
@@ -223,8 +226,8 @@ logout. Calls `supabase.auth.signOut()` via the server client so the cookie is a
    `"mcp-client-2025-04-04"`); otherwise falls back to `client.messages.create`. The beta
    response's `BetaContentBlock[]` is cast to `ContentBlock[]` for message history replay —
    safe at runtime since `BetaContentBlock` is a superset.
-6. Calls Claude with a shared `record_artefact` tool, looping up to `MAX_TOOL_ITERATIONS` (5)
-   times while Claude keeps calling the tool.
+6. Calls Claude with `record_artefact` and (if `agent.kpiLevers` is non-empty) `record_kpi`
+   tools, looping up to `MAX_TOOL_ITERATIONS` (5) times while Claude keeps calling tools.
 6. **Every `tool_use` block gets a paired `tool_result`, unconditionally**, regardless of why
    the response stopped. This is a deliberate fix for a real bug found during testing: a
    truncated response (`stop_reason: "max_tokens"`) could leave a `tool_use` block unpaired,
@@ -288,6 +291,7 @@ figures are used for real spend reporting.
 | `/api/artefacts/[id]` | GET | Fetch one artefact's full content |
 | `/api/artefacts/[id]/approve` | POST | Explicit human approval action; 401s without a session (§5.3) |
 | `/api/gate/[phase]` | GET | Phase-gate checklist (every agent's artefacts + approved flag) |
+| `/api/kpis` | GET | KPI snapshots for a programme (`?programmeId=`), most recent first |
 | `/auth/callback` | GET | Exchanges an email-confirmation code for a session (§5.4) |
 
 All four cross-cutting agents needed **no new routes** — `/api/agents/[agentName]/chat` and

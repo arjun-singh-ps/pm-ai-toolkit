@@ -135,14 +135,18 @@ never counted toward any phase's gate checklist.
 ## 5. Data captured today
 
 - **Programmes**: name, client (optional), persona, active phase, regulatory frameworks
-  (multi-select: PRA, FCA, ECB/SSM, SR 11-7, EBA Guidelines, DORA, ISO 42001, Client Custom),
-  and free-text notes (shared with every agent's context).
+  (multi-select: PRA, FCA, ECB/SSM, SR 11-7, EBA Guidelines, DORA, ISO 42001, Client Custom —
+  editable post-creation from the programme screen), and free-text notes (shared with every
+  agent's context).
 - **Artefacts**: name, phase, activity, producing agent, version, status (draft / in_progress /
   approved), structured content, approval timestamp and approver.
 - **Chat history**: full conversation per (programme, agent) pair, replayed on every turn.
 - **Cost records**: token usage and decimal-calculated USD cost per Claude call (pricing figures
   are approximate placeholders — see Technical Documentation §8).
-- **KPI snapshots**: table exists, nothing writes to it yet (no KPI Monitor agent).
+- **KPI snapshots**: written by three agents during their conversations — Delivery Intelligence
+  (Foundation, Quality of Modernisation + AI Tool Upskill levers), Signal Watch (Forge, Pace of
+  Modernisation lever), and Delivery Heartbeat (Amplify, all three levers as current actuals).
+  Displayed in the KPIs tab of the right panel, grouped by lever, most recent value per metric.
 
 ## 6. Authentication and multi-user (BUILT)
 
@@ -199,9 +203,8 @@ with real API keys.
 
 ## 10. Known product gaps (intentional, not bugs)
 
-- Cost figures are directional, not accurate to current Anthropic pricing.
-- Cost figures in the Cost Compass are directional only — the per-million-token prices in
-  `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current pricing
-  page before treating them as accurate spend data.
+- Cost figures are directional, not accurate to current Anthropic pricing — the per-million-token
+  prices in `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current
+  pricing page before treating them as accurate spend data.
 - No per-user permissions or data isolation — by design (shared workspace), not a missing
   feature.

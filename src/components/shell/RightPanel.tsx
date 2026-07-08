@@ -1,12 +1,12 @@
 // Right panel of the three-panel shell: Artefacts / KPIs / Gate tabs.
-// Artefacts and Gate are wired to real data; KPIs remains an honest
-// empty-state placeholder until a KPI-writing agent exists.
+// All three tabs are wired to real data.
 
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Artefact } from "@/types/artefact";
+import type { KpiSnapshot } from "@/lib/kpiSnapshots";
 import type { Persona } from "@/types/programme";
 import { listAgentsForPhase } from "@/agents/registry";
 import { NEXT_PHASE } from "@/lib/constants";
@@ -45,11 +45,50 @@ interface RightPanelProps {
   persona: Persona;
 }
 
-/** Tabbed right panel: Artefacts (approve drafts) and Gate (phase checklist) are wired to real data. */
+/**
+ * Groups KPI snapshots by lever, de-duplicates to the most recent value per metric,
+ * and renders each lever as a labelled section.
+ */
+function KpiDisplay({ snapshots }: { snapshots: KpiSnapshot[] }) {
+  // snapshots are ordered most-recent-first; first occurrence of each metric is current value
+  const byLever = new Map<string, { metric: string; value: number; date: string }[]>();
+  const seen = new Set<string>();
+
+  for (const s of snapshots) {
+    const key = `${s.lever_or_dimension}::${s.metric_name}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const existing = byLever.get(s.lever_or_dimension) ?? [];
+    existing.push({ metric: s.metric_name, value: s.value, date: s.recorded_at.slice(0, 10) });
+    byLever.set(s.lever_or_dimension, existing);
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {[...byLever.entries()].map(([lever, metrics]) => (
+        <div key={lever}>
+          <p className="mb-1 text-xs font-semibold text-black dark:text-zinc-50">{lever}</p>
+          <ul className="flex flex-col gap-1">
+            {metrics.map(({ metric, value, date }) => (
+              <li key={metric} className="text-xs">
+                <span className="text-zinc-700 dark:text-zinc-300">{metric}:</span>{" "}
+                <span className="font-medium text-black dark:text-zinc-50">{value}</span>
+                <span className="ml-1 text-zinc-400 dark:text-zinc-500">({date})</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Tabbed right panel: Artefacts (approve drafts), KPIs (live metrics), and Gate (phase checklist). */
 export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("artefacts");
   const [artefacts, setArtefacts] = useState<Artefact[]>([]);
+  const [kpiSnapshots, setKpiSnapshots] = useState<KpiSnapshot[]>([]);
   const [gate, setGate] = useState<{ clear: boolean; agents: GateAgentChecklist[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -62,14 +101,17 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
 
   async function loadData() {
     try {
-      const [artefactsResponse, gateResponse] = await Promise.all([
+      const [artefactsResponse, gateResponse, kpisResponse] = await Promise.all([
         fetch(`/api/artefacts?programmeId=${programmeId}`),
         fetch(`/api/gate/${phase}?programmeId=${programmeId}`),
+        fetch(`/api/kpis?programmeId=${programmeId}`),
       ]);
       const artefactsData = await artefactsResponse.json();
       const gateData = await gateResponse.json();
+      const kpisData = await kpisResponse.json();
       setArtefacts(artefactsData.artefacts ?? []);
       setGate(gateData);
+      setKpiSnapshots(kpisData.snapshots ?? []);
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +220,17 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
             </ul>
           ))}
 
-        {activeTab === "kpis" && "No KPI data recorded for this programme yet."}
+        {activeTab === "kpis" &&
+          (isLoading ? (
+            "Loading KPIs..."
+          ) : kpiSnapshots.length === 0 ? (
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              No KPI data yet. KPIs are captured during conversations with Delivery Intelligence
+              (Foundation), Signal Watch (Forge), and Delivery Heartbeat (Amplify).
+            </p>
+          ) : (
+            <KpiDisplay snapshots={kpiSnapshots} />
+          ))}
 
         {activeTab === "gate" &&
           (isLoading || !gate ? (

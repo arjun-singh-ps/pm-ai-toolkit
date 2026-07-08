@@ -22,4 +22,10 @@ export interface AgentConfig {
   produces: ArtefactSpec[];
   /** Agent names whose artefacts must ALL be 'approved' before this agent can run. */
   dependsOnAgents: string[];
+  /**
+   * KPI levers this agent is responsible for capturing (e.g. "Quality of Modernisation").
+   * When set, the record_kpi tool is injected alongside record_artefact and the agent
+   * is expected to ask about and record specific metric values from the conversation.
+   */
+  kpiLevers?: string[];
 }

@@ -11,6 +11,7 @@ import { getProgramme } from "@/lib/programmes";
 import { loadOrCreateSession, saveSessionMessages, type ChatMessage } from "@/lib/chatSessions";
 import { recordArtefactDraft } from "@/lib/artefacts";
 import { recordCost } from "@/lib/costRecords";
+import { writeKpiSnapshot } from "@/lib/kpiSnapshots";
 import { getExtraContext } from "@/lib/crossCuttingContext";
 import { getActiveIntegrations } from "@/lib/integrations";
 import { listArtefactsForProgramme } from "@/lib/artefacts";
@@ -21,6 +22,33 @@ import type { Programme } from "@/types/programme";
 
 const MAX_OUTPUT_TOKENS = 4096;
 const MAX_TOOL_ITERATIONS = 5;
+
+const RECORD_KPI_TOOL: Anthropic.Messages.Tool = {
+  name: "record_kpi",
+  description:
+    "Records one confirmed KPI metric value for this programme. Only call this when the " +
+    "programme manager has explicitly confirmed a specific numeric value — never invent figures. " +
+    "You may call this multiple times in one turn to record several metrics at once.",
+  input_schema: {
+    type: "object",
+    properties: {
+      lever_or_dimension: {
+        type: "string",
+        description:
+          "The KPI lever name exactly as defined for this agent, e.g. 'Quality of Modernisation'.",
+      },
+      metric_name: {
+        type: "string",
+        description: "The specific metric name, e.g. 'Code Coverage (%)'.",
+      },
+      value: {
+        type: "number",
+        description: "The confirmed numeric value for this metric.",
+      },
+    },
+    required: ["lever_or_dimension", "metric_name", "value"],
+  },
+};
 
 const RECORD_ARTEFACT_TOOL: Anthropic.Messages.Tool = {
   name: "record_artefact",
@@ -136,6 +164,11 @@ export async function runAgentTurn(
     ...(integration.auth_token ? { authorization_token: integration.auth_token } : {}),
   }));
 
+  const tools: Anthropic.Messages.Tool[] = [RECORD_ARTEFACT_TOOL];
+  if (agent.kpiLevers && agent.kpiLevers.length > 0) {
+    tools.push(RECORD_KPI_TOOL);
+  }
+
   const recordedArtefacts: string[] = [];
   let totalTokensIn = 0;
   let totalTokensOut = 0;
@@ -147,7 +180,7 @@ export async function runAgentTurn(
       max_tokens: MAX_OUTPUT_TOKENS,
       system: systemPrompt,
       messages,
-      tools: [RECORD_ARTEFACT_TOOL],
+      tools,
     };
 
     // Use the beta MCP client when integrations are configured; standard API otherwise.
@@ -192,6 +225,40 @@ export async function runAgentTurn(
             tool_use_id: toolUse.id,
             content: "Response was cut off before this tool call finished. Please ask the agent to try again, perhaps with a shorter artefact.",
             is_error: true,
+          });
+          continue;
+        }
+
+        if (toolUse.name === "record_kpi") {
+          const kpiInput = toolUse.input as {
+            lever_or_dimension?: string;
+            metric_name?: string;
+            value?: number;
+          };
+          if (
+            !kpiInput.lever_or_dimension ||
+            !kpiInput.metric_name ||
+            typeof kpiInput.value !== "number"
+          ) {
+            toolResults.push({
+              type: "tool_result",
+              tool_use_id: toolUse.id,
+              content: "record_kpi requires lever_or_dimension, metric_name, and a numeric value.",
+              is_error: true,
+            });
+            continue;
+          }
+          await writeKpiSnapshot(
+            programmeId,
+            programme.persona,
+            kpiInput.lever_or_dimension,
+            kpiInput.metric_name,
+            kpiInput.value
+          );
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: toolUse.id,
+            content: `Recorded KPI: ${kpiInput.metric_name} = ${kpiInput.value} (${kpiInput.lever_or_dimension}).`,
           });
           continue;
         }

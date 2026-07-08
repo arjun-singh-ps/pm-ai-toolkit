@@ -54,7 +54,10 @@ Once inside a programme, you'll see three panels:
 - **Right panel**: three tabs —
   - **Artefacts** — every artefact produced so far, with **View** (read the full content) and
     **Approve** buttons.
-  - **KPIs** — currently always empty; no agent writes KPI data yet.
+  - **KPIs** — KPI metrics recorded during agent conversations, grouped by lever (Quality of
+    Modernisation, Pace of Modernisation, AI Tool Upskill). Empty until you've had a
+    conversation with Delivery Intelligence, Signal Watch, or Delivery Heartbeat and confirmed
+    specific metric values with them.
   - **Gate** — a checklist of every artefact required to clear the current phase, and an
     **Advance to [next phase]** button.
 
@@ -175,13 +178,20 @@ persona — the Gate tab shows "🏁 This is the final phase of this persona." i
 Advance button. There's nowhere further to go within this persona; this is the intended end
 state, not a stuck gate.
 
-## 7. Setting programme notes
+## 7. Programme settings (Notes and Regulatory Frameworks)
 
-Click the programme name area or navigate to the programme's default screen (centre panel, no
-agent selected) to find **Programme Notes** — free text describing things like delivery
-methodology, regulatory environment, or current phase context. Anything you save here is
-automatically shared with every agent's conversation for this programme, so you don't need to
-repeat the same background information to each one.
+Navigate to the programme's default screen (centre panel, no agent selected) to find two
+editable sections:
+
+**Programme Notes** — free text describing things like delivery methodology, regulatory
+environment, or current phase context. Saved here once and automatically shared with every
+agent's conversation for this programme — no need to repeat it in every chat.
+
+**Regulatory Frameworks** — checkboxes to add or remove the compliance frameworks in scope
+(PRA, FCA, ECB/SSM, SR 11-7, EBA Guidelines, DORA, ISO 42001, Client Custom). These are also
+selectable at programme creation, but this is where you update them if scope changes later.
+Changes take effect on the next conversation turn — Governance Guardian will use the updated
+selection immediately.
 
 ## 8. Tracking progress
 

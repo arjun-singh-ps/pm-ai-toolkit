@@ -12,6 +12,7 @@ import { loadOrCreateSession, saveSessionMessages, type ChatMessage } from "@/li
 import { recordArtefactDraft } from "@/lib/artefacts";
 import { recordCost } from "@/lib/costRecords";
 import { writeKpiSnapshot } from "@/lib/kpiSnapshots";
+import { createAgentAlert, getAgentAlert, formatAlertForSystemPrompt } from "@/lib/agentAlerts";
 import { getExtraContext } from "@/lib/crossCuttingContext";
 import { getActiveIntegrations } from "@/lib/integrations";
 import { listArtefactsForProgramme } from "@/lib/artefacts";
@@ -22,6 +23,39 @@ import type { Programme } from "@/types/programme";
 
 const MAX_OUTPUT_TOKENS = 4096;
 const MAX_TOOL_ITERATIONS = 5;
+
+const RECORD_ALERT_TOOL: Anthropic.Messages.Tool = {
+  name: "record_alert",
+  description:
+    "Records a proactive insight card shown on the programme home screen. Call this ONLY " +
+    "when you have identified a specific, quantified condition requiring the PM's attention: " +
+    "a threshold breach, a metric trending the wrong way, a decision that is overdue. " +
+    "The card must stand alone — the PM will read it without seeing this conversation. " +
+    "Never call this for vague concerns or when the PM has not confirmed actual data.",
+  input_schema: {
+    type: "object",
+    properties: {
+      what: {
+        type: "string",
+        description:
+          "One line: what changed or what threshold was crossed. Specific and quantified. " +
+          "Example: 'Sprint velocity dropped to 71% — below the 80% Quality Covenant threshold'.",
+      },
+      why_matters: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "2-3 bullets explaining consequences. Each bullet is one sentence, concrete and specific.",
+      },
+      suggested_action: {
+        type: "string",
+        description:
+          "One concrete action the PM should take. Specific enough to act on without further review.",
+      },
+    },
+    required: ["what", "why_matters", "suggested_action"],
+  },
+};
 
 const RECORD_KPI_TOOL: Anthropic.Messages.Tool = {
   name: "record_kpi",
@@ -107,6 +141,7 @@ export interface AgentTurnResult {
   reason?: string;
   reply?: string;
   recordedArtefacts?: string[];
+  recordedAlerts?: number;
 }
 
 /** Runs one user turn of a conversation with an agent: may loop internally while Claude calls tools. */
@@ -114,7 +149,8 @@ export async function runAgentTurn(
   programmeId: string,
   agentName: string,
   userMessage: string,
-  userEmail: string
+  userEmail: string,
+  alertId?: string
 ): Promise<AgentTurnResult> {
   const agent = getAgent(agentName);
   if (!agent) {
@@ -147,6 +183,16 @@ export async function runAgentTurn(
     if (artefactContext) {
       systemPrompt += `\n\n${artefactContext}`;
     }
+
+    // When opened from an alert card, inject the alert so the agent leads with
+    // the specific issue rather than a generic welcome briefing.
+    if (alertId) {
+      const alert = await getAgentAlert(alertId);
+      if (alert) {
+        systemPrompt += `\n\n${formatAlertForSystemPrompt(alert)}`;
+      }
+    }
+
     systemPrompt +=
       "\n\nThis is the very start of the conversation. The programme manager has just opened this chat for the first time. " +
       "Generate a welcoming opening briefing that does three things:\n" +
@@ -168,8 +214,12 @@ export async function runAgentTurn(
   if (agent.kpiLevers && agent.kpiLevers.length > 0) {
     tools.push(RECORD_KPI_TOOL);
   }
+  if (agent.canRecordAlerts) {
+    tools.push(RECORD_ALERT_TOOL);
+  }
 
   const recordedArtefacts: string[] = [];
+  let recordedAlerts = 0;
   let totalTokensIn = 0;
   let totalTokensOut = 0;
   let finalAssistantText = "";
@@ -225,6 +275,42 @@ export async function runAgentTurn(
             tool_use_id: toolUse.id,
             content: "Response was cut off before this tool call finished. Please ask the agent to try again, perhaps with a shorter artefact.",
             is_error: true,
+          });
+          continue;
+        }
+
+        if (toolUse.name === "record_alert") {
+          const alertInput = toolUse.input as {
+            what?: string;
+            why_matters?: string[];
+            suggested_action?: string;
+          };
+          if (
+            !alertInput.what?.trim() ||
+            !Array.isArray(alertInput.why_matters) ||
+            alertInput.why_matters.length === 0 ||
+            !alertInput.suggested_action?.trim()
+          ) {
+            toolResults.push({
+              type: "tool_result",
+              tool_use_id: toolUse.id,
+              content: "record_alert requires non-empty 'what', at least one 'why_matters' bullet, and 'suggested_action'.",
+              is_error: true,
+            });
+            continue;
+          }
+          await createAgentAlert(
+            programmeId,
+            agentName,
+            alertInput.what,
+            alertInput.why_matters,
+            alertInput.suggested_action
+          );
+          recordedAlerts++;
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: toolUse.id,
+            content: `Alert recorded: "${alertInput.what}". It will appear on the programme home screen.`,
           });
           continue;
         }
@@ -314,5 +400,5 @@ export async function runAgentTurn(
   await saveSessionMessages(session.id, messages);
   await recordCost(programmeId, agentName, totalTokensIn, totalTokensOut);
 
-  return { blocked: false, reply: finalAssistantText, recordedArtefacts };
+  return { blocked: false, reply: finalAssistantText, recordedArtefacts, recordedAlerts };
 }

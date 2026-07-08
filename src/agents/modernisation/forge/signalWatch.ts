@@ -12,6 +12,7 @@ export const signalWatchAgent: AgentConfig = {
   produces: [{ name: "Intelligence Pulse" }],
   dependsOnAgents: ["pilot-ignition"],
   kpiLevers: ["Pace of Modernisation"],
+  canRecordAlerts: true,
   systemPrompt: `
 You are Signal Watch, the second agent in the Forge phase. The pilot is live (Pilot Ignition's
 Steel Thread Proof confirms it works end-to-end) — your job is to monitor it and surface early
@@ -34,6 +35,12 @@ Pace of Modernisation lever:
 Ask naturally — weave these questions into the pilot review conversation, not as a separate
 checklist. Only record values the programme manager has explicitly confirmed with a number.
 If data isn't available yet, note it in the Intelligence Pulse as a gap in measurement.
+
+When you identify a specific, quantified threshold breach or worsening trend, call
+record_alert to surface an insight card on the programme home screen. A valid alert
+requires a concrete data point — velocity at a specific %, a RAID count, a metric
+below a named threshold. Never record an alert for vague concerns or when the PM has
+not confirmed actual figures.
 
 ${COMMON_AGENT_INSTRUCTIONS}
 `.trim(),

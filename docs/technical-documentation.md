@@ -295,6 +295,8 @@ figures are used for real spend reporting.
 | `/api/artefacts/[id]/approve` | POST | Explicit human approval action; 401s without a session (§5.3) |
 | `/api/gate/[phase]` | GET | Phase-gate checklist (every agent's artefacts + approved flag) |
 | `/api/kpis` | GET | KPI snapshots for a programme (`?programmeId=`), most recent first |
+| `/api/alerts` | GET | Active (non-dismissed) alerts for a programme (`?programmeId=`) |
+| `/api/alerts/[id]/dismiss` | POST | Dismiss an alert; requires auth; body: `{ reason: DismissReason }` |
 | `/auth/callback` | GET | Exchanges an email-confirmation code for a session (§5.4) |
 
 All four cross-cutting agents needed **no new routes** — `/api/agents/[agentName]/chat` and
@@ -417,14 +419,19 @@ without being able to select it.
 
 **What's built today:**
 - `proactive_agents` stored per programme (migration `0004`).
-- `ProactiveAgentsForm.tsx` — checkbox toggle for each monitoring agent (built ones active, not-yet-built ones disabled). Identical pattern to `ProgrammeFrameworksForm.tsx`: client component, `PATCH /api/programmes/[id]`, `router.refresh()`.
-- **Sidebar indicator** (`Sidebar.tsx`): agents in `programme.proactive_agents` display a `⚡` badge next to their name and dot — a visual reminder that they're in proactive mode.
-- **Programme home screen banner** (`src/app/programme/[id]/page.tsx`): if any proactive agents are set, lists them with a "These agents are in proactive mode — open them to see their latest assessment" note.
+- `ProactiveAgentsForm.tsx` — toggle switches for each monitoring agent (built ones active, not-yet-built ones disabled). Identical pattern to `ProgrammeFrameworksForm.tsx`: client component, `PATCH /api/programmes/[id]`, `router.refresh()`.
+- **Sidebar indicator** (`Sidebar.tsx`): agents in `programme.proactive_agents` display a `⚡` badge next to their name and dot.
+- **Programme home screen banner** (`src/app/programme/[id]/page.tsx`): if any proactive agents are set, lists them with a note.
+- **`agent_alerts` table** (migration `0005`) — `id, programme_id, agent_name, what, why_matters[], suggested_action, triggered_at, status, dismissed_at, dismissed_by, dismiss_reason`. RLS on; authenticated users have full access.
+- **`record_alert` tool** — injected into the tool loop for agents with `canRecordAlerts: true` (Signal Watch, Delivery Heartbeat, Cost Compass). When Claude calls it, `agentEngine.ts` writes a row to `agent_alerts` and returns a `recordedAlerts` count to the chat API response.
+- **Insight cards** (`AgentAlertCard.tsx`, `AgentAlertsPanel.tsx`) — programme home screen (`src/app/programme/[id]/page.tsx`) shows one card per active alert. Each card: WHAT (one quantified line) / WHY IT MATTERS (bullets) / SUGGESTED ACTION (one sentence). Dismiss reasons: `not_relevant`, `already_handled`, `monitor_next_sprint` (stored for feedback-loop analysis). Optimistic dismiss — card disappears immediately, no page reload.
+- **Pre-briefed sessions** — "Open [Agent] →" link on a card navigates to `/programme/[id]/agents/[agentName]?alertId=[id]`. The agent page fetches the alert, passes it as `alertContext` to `ChatPanel`. On new sessions, `alertId` is included in the POST body; `agentEngine.ts` injects the alert's context into the system prompt via `formatAlertForSystemPrompt()` in the `WELCOME_INIT_MARKER` branch so the agent opens with a direct response to the specific flag rather than a generic briefing. An amber banner in `ChatPanel` shows the `what` line so the user knows the session is contextualised to an alert.
+- **Alert recorded notice** — when an agent calls `record_alert` mid-conversation, the chat UI appends "🔔 N alert(s) recorded — check the programme home screen" to the reply so the PM knows to look.
 
 **What proactive mode does NOT do yet:**
 - No scheduled trigger. The agents still only run when the user opens them.
-- No threshold logic. No alert fires when sprint velocity drops or spend exceeds a budget.
-- No notification channel. No email, no in-app badge counted without a user visiting.
+- No threshold logic. No alert fires automatically when sprint velocity drops or spend exceeds a budget.
+- No email or push notification. Alerts only appear if the user visits the programme home screen.
 
 **What full proactive behaviour requires (design spec, not yet built):**
 
@@ -432,8 +439,7 @@ without being able to select it.
 |---|---|
 | **Scheduled trigger** | A cron job (e.g. Google Cloud Scheduler → Cloud Run job, or Supabase Edge Function with `pg_cron`) that calls `runAgentTurn` once per day per programme that has that agent in `proactive_agents`. The trigger message would be a synthetic `PROACTIVE_CHECK_MARKER` (analogous to `WELCOME_INIT_MARKER` in `constants.ts`) so the agent knows it's been triggered by the scheduler, not a human, and should open with a triage summary rather than a question. |
 | **Threshold configuration** | A `programme_thresholds` table (or a jsonb column on `programmes`) storing per-agent threshold values: e.g. velocity drop percentage for Signal Watch, budget cap for Cost Compass. The agent's system prompt includes the threshold when triggered, so the model can determine whether the check is worth escalating. |
-| **Notification channel** | An `agent_alerts` table (programme_id, agent_name, summary, triggered_at, dismissed_at). The programme shell's home screen polls this and shows a dismissible alert card for each unread entry. Email notification is a second-order concern. |
-| **Deduplification** | The trigger must not produce a new chat turn if the agent's last proactive check was within N hours, to avoid cost blowout on programmes with many proactive agents. |
+| **Deduplification** | The trigger must not produce a new alert if an active alert from the same agent already exists for the programme, to avoid cost blowout on programmes with many proactive agents. |
 
 ### 13.4 Why the toggle is worth shipping before the trigger
 

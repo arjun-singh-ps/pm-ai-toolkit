@@ -9,10 +9,10 @@ interface RouteParams {
   params: Promise<{ agentName: string }>;
 }
 
-/** Handles POST /api/agents/[agentName]/chat. Expects { programmeId, message }. */
+/** Handles POST /api/agents/[agentName]/chat. Expects { programmeId, message, alertId? }. */
 export async function POST(request: Request, { params }: RouteParams) {
   const { agentName } = await params;
-  const body = (await request.json()) as { programmeId?: string; message?: string };
+  const body = (await request.json()) as { programmeId?: string; message?: string; alertId?: string };
 
   if (!body.programmeId || !body.message) {
     return NextResponse.json({ error: "'programmeId' and 'message' are required." }, { status: 400 });
@@ -24,13 +24,23 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   try {
-    const result = await runAgentTurn(body.programmeId, agentName, body.message, userEmail);
+    const result = await runAgentTurn(
+      body.programmeId,
+      agentName,
+      body.message,
+      userEmail,
+      body.alertId
+    );
 
     if (result.blocked) {
       return NextResponse.json({ error: result.reason ?? "This agent is not available." }, { status: 403 });
     }
 
-    return NextResponse.json({ reply: result.reply, recordedArtefacts: result.recordedArtefacts });
+    return NextResponse.json({
+      reply: result.reply,
+      recordedArtefacts: result.recordedArtefacts,
+      recordedAlerts: result.recordedAlerts ?? 0,
+    });
   } catch (error) {
     console.error(`Agent chat failed for "${agentName}":`, error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Failed to get a response. Please try again." }, { status: 502 });

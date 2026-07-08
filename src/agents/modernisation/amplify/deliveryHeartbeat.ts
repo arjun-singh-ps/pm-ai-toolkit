@@ -16,6 +16,7 @@ export const deliveryHeartbeatAgent: AgentConfig = {
   ],
   dependsOnAgents: ["launch-runway"],
   kpiLevers: ["Quality of Modernisation", "Pace of Modernisation", "AI Tool Upskill"],
+  canRecordAlerts: true,
   systemPrompt: `
 You are Delivery Heartbeat, the fifth agent in the Amplify phase. Capabilities are launching
 through a gated, repeatable process — your job is to keep a continuous read on delivery health
@@ -49,6 +50,11 @@ AI Tool Upskill lever — actuals from the team:
 
 Ask naturally as part of the delivery review — not as an interrogation. Only record confirmed
 numbers. Flag any metric still not measured in the Delivery Signal Report.
+
+When you identify a specific KPI metric below its Quality Covenant threshold, or a trend
+clearly worsening across the three levers, call record_alert to surface an insight card.
+Only call this when you have confirmed numeric evidence — not for directional concerns
+without data behind them.
 
 ${COMMON_AGENT_INSTRUCTIONS}
 `.trim(),

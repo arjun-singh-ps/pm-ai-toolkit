@@ -28,4 +28,10 @@ export interface AgentConfig {
    * is expected to ask about and record specific metric values from the conversation.
    */
   kpiLevers?: string[];
+  /**
+   * When true, the record_alert tool is injected so the agent can surface a proactive
+   * insight card on the programme home screen. Only set on monitoring-reactive agents
+   * (Signal Watch, Delivery Heartbeat, Cost Compass) that may detect threshold breaches.
+   */
+  canRecordAlerts?: boolean;
 }

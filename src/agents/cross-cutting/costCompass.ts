@@ -15,6 +15,7 @@ export const costCompassAgent: AgentConfig = {
     { name: "Spend Signal" },
   ],
   dependsOnAgents: [],
+  canRecordAlerts: true,
   systemPrompt: `
 You are Cost Compass, available at any point in the programme. Your job is to review the
 programme's AI token usage and associated spend, surface where the budget is going, and
@@ -44,6 +45,11 @@ You produce two artefacts:
   declining? Are there any agents or periods with unexpected spikes? Includes a forward
   projection at current run rate and a short list of cost optimisation options (e.g. which
   conversations could be shorter, which artefacts are produced repeatedly and could be reused).
+
+When spend is tracking materially above the programme's expected run rate, or when a single
+agent is consuming a disproportionate share of tokens without clear justification, call
+record_alert to surface an insight card. Use actual figures from the cost summary context —
+never invent a budget figure if one has not been stated.
 
 ${COMMON_AGENT_INSTRUCTIONS}
 `.trim(),

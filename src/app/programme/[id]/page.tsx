@@ -1,6 +1,5 @@
-// Default centre-panel content for a programme: edit programme notes,
-// regulatory frameworks, and agent modes. Also shows a proactive-agent
-// reminder banner when any monitoring agents are in proactive mode.
+// Default centre-panel content for a programme: proactive alerts, notes,
+// regulatory frameworks, and agent mode settings.
 
 import { notFound } from "next/navigation";
 import { getProgramme } from "@/lib/programmes";
@@ -8,12 +7,13 @@ import { MONITORING_AGENTS } from "@/lib/constants";
 import { ProgrammeNotesForm } from "@/components/ProgrammeNotesForm";
 import { ProgrammeFrameworksForm } from "@/components/ProgrammeFrameworksForm";
 import { ProactiveAgentsForm } from "@/components/ProactiveAgentsForm";
+import { AgentAlertsPanel } from "@/components/AgentAlertsPanel";
 
 interface ProgrammePageProps {
   params: Promise<{ id: string }>;
 }
 
-/** Default programme view: notes, regulatory frameworks, agent mode settings, and proactive banner. */
+/** Default programme view: alerts, notes, regulatory frameworks, agent mode settings. */
 export default async function ProgrammePage({ params }: ProgrammePageProps) {
   const { id } = await params;
   const programme = await getProgramme(id);
@@ -29,6 +29,10 @@ export default async function ProgrammePage({ params }: ProgrammePageProps) {
 
   return (
     <div>
+      {/* Proactive alerts — fetches its own data; renders nothing when empty */}
+      <AgentAlertsPanel programmeId={programme.id} />
+
+      {/* Proactive-mode reminder banner — shows which agents are configured as proactive */}
       {activeProactiveAgents.length > 0 && (
         <div className="mx-8 mt-8 rounded-lg border border-black/10 bg-zinc-50 p-4 dark:border-white/10 dark:bg-zinc-900">
           <p className="text-sm font-medium text-black dark:text-zinc-50">

@@ -9,15 +9,18 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 import type { DisplayMessage } from "@/lib/chatSessions";
 import { ARTEFACT_RECORDED_EVENT } from "@/lib/clientEvents";
 import { WELCOME_INIT_MARKER } from "@/lib/constants";
+import type { AgentAlert } from "@/types/agentAlert";
 
 interface ChatPanelProps {
   programmeId: string;
   agentName: string;
   agentDisplayName: string;
+  /** When set, shows a pre-brief banner and injects alert context into the opening briefing. */
+  alertContext?: AgentAlert | null;
 }
 
 /** Chat UI for one agent: history, message input, and inline artefact-recorded notices. */
-export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPanelProps) {
+export function ChatPanel({ programmeId, agentName, agentDisplayName, alertContext }: ChatPanelProps) {
   const router = useRouter();
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState("");
@@ -44,7 +47,11 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPane
           const chatResponse = await fetch(`/api/agents/${agentName}/chat`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ programmeId, message: WELCOME_INIT_MARKER }),
+            body: JSON.stringify({
+              programmeId,
+              message: WELCOME_INIT_MARKER,
+              ...(alertContext ? { alertId: alertContext.id } : {}),
+            }),
           });
           const chatData = await chatResponse.json();
           if (!cancelled && chatResponse.ok) {
@@ -91,7 +98,11 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPane
       const response = await fetch(`/api/agents/${agentName}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ programmeId, message: userText }),
+        body: JSON.stringify({
+          programmeId,
+          message: userText,
+          ...(alertContext ? { alertId: alertContext.id } : {}),
+        }),
       });
       const data = await response.json();
 
@@ -101,8 +112,13 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPane
       }
 
       const recordedArtefacts: string[] = data.recordedArtefacts ?? [];
+      const recordedAlerts: number = data.recordedAlerts ?? 0;
       const artefactLines = recordedArtefacts.map((name) => `📄 Recorded artefact: ${name}`);
-      const replyText = [data.reply, ...artefactLines].filter(Boolean).join("\n\n");
+      const alertLine =
+        recordedAlerts > 0
+          ? `🔔 ${recordedAlerts} alert${recordedAlerts > 1 ? "s" : ""} recorded — check the programme home screen`
+          : null;
+      const replyText = [data.reply, ...artefactLines, alertLine].filter(Boolean).join("\n\n");
       setMessages((current) => [...current, { role: "assistant", text: replyText }]);
 
       if (recordedArtefacts.length > 0) {
@@ -129,6 +145,15 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName }: ChatPane
 
   return (
     <div className="flex h-full flex-col">
+      {alertContext && (
+        <div className="mx-4 mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-950">
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+            ⚡ Opened from a {agentDisplayName} alert
+          </p>
+          <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300">{alertContext.what}</p>
+        </div>
+      )}
+
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
         {isLoadingHistory ? (
           <p className="text-sm text-zinc-400">Loading conversation…</p>

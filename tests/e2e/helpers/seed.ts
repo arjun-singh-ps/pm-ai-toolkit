@@ -103,10 +103,46 @@ export async function seedFoundationArtefactsApproved(
   if (error) throw new Error(`seed: seedFoundationArtefactsApproved failed: ${error.message}`);
 }
 
+export interface TestAlert {
+  id: string;
+  agent_name: string;
+  what: string;
+}
+
+/**
+ * Seeds one active alert for a programme, bypassing the agent engine.
+ * Returns the alert id so specs can look it up.
+ */
+export async function seedAlert(
+  programmeId: string,
+  agentName: string,
+  what: string,
+  whyMatters: string[],
+  suggestedAction: string
+): Promise<TestAlert> {
+  const db = getServiceClient();
+
+  const { data, error } = await db
+    .from("agent_alerts")
+    .insert({
+      programme_id: programmeId,
+      agent_name: agentName,
+      what,
+      why_matters: whyMatters,
+      suggested_action: suggestedAction,
+      status: "active",
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`seed: seedAlert failed: ${error.message}`);
+  return { id: data.id as string, agent_name: data.agent_name as string, what: data.what as string };
+}
+
 /**
  * Deletes every programme whose name starts with the E2E prefix, including
- * their artefacts and chat sessions. Call in beforeAll and afterAll to keep
- * the shared database tidy across runs.
+ * their artefacts, chat sessions, and alerts. Call in beforeAll and afterAll
+ * to keep the shared database tidy across runs.
  */
 export async function deleteTestProgrammes(): Promise<void> {
   const db = getServiceClient();
@@ -121,6 +157,7 @@ export async function deleteTestProgrammes(): Promise<void> {
 
   const ids = data.map((p: { id: string }) => p.id);
 
+  await db.from("agent_alerts").delete().in("programme_id", ids);
   await db.from("artefacts").delete().in("programme_id", ids);
   await db.from("chat_sessions").delete().in("programme_id", ids);
   await db.from("programmes").delete().in("id", ids);

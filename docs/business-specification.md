@@ -312,16 +312,27 @@ Within reactive, three sub-types describe the design intent of each agent:
 Four agents have monitoring in their design brief and are the natural first candidates once
 threshold logic and cross-session memory are built:
 
-| Agent | What proactive would look like |
-|---|---|
-| **Signal Watch** | Detects pilot velocity drop > threshold, cross-references against open RAID items, drafts an Intelligence Pulse with the right escalation flag — before the PM notices the trend |
-| **Delivery Heartbeat** | Monitors all three KPI levers; surfaces a Delivery Signal Report automatically when any metric crosses its warning threshold |
-| **Cost Compass** | Monitors spend rate; alerts when the projected monthly cost exceeds a defined programme budget before the sprint ends |
-| **Performance Pulse** | Watches live agent accuracy and latency across the Agentic Delivery KPI dimensions; drafts a Full Spectrum KPI Report when a dimension dips below its agreed threshold |
+| Agent | Built | What proactive would look like |
+|---|---|---|
+| **Signal Watch** | ✅ | Detects pilot velocity drop > threshold, cross-references against open RAID items, drafts an Intelligence Pulse with the right escalation flag — before the PM notices the trend |
+| **Delivery Heartbeat** | ✅ | Monitors all three KPI levers; surfaces a Delivery Signal Report automatically when any metric crosses its warning threshold |
+| **Cost Compass** | ✅ | Monitors spend rate; alerts when the projected monthly cost exceeds a defined programme budget before the sprint ends |
+| **Performance Pulse** | 🔲 | Watches live agent accuracy and latency across the Agentic Delivery KPI dimensions; drafts a Full Spectrum KPI Report when a dimension dips below its agreed threshold |
 
-Building proactive behaviour requires: a scheduled evaluation mechanism (e.g. a cron job
-calling the agent engine against each programme), threshold configuration per programme,
-and a notification channel (email or in-app). None of these exist today.
+**Agent mode toggle (BUILT)** — users can now set each monitoring agent to **Proactive** or
+**Reactive** per programme from the programme settings screen (the same screen as Notes and
+Regulatory Frameworks). The preference is stored in `programmes.proactive_agents[]` and
+displayed as a ⚡ badge in the sidebar for proactive agents. A banner on the programme home
+screen lists active proactive agents and prompts the user to open them for their latest
+assessment.
+
+Performance Pulse is shown in the toggle UI but disabled (marked "coming soon") — it is not
+yet implemented.
+
+**What the toggle does NOT do yet** — the scheduled trigger infrastructure (cron job, threshold
+configuration per programme, in-app alert table) does not yet exist. Proactive mode stores and
+displays the user's intent; the agents still only run when opened. See Technical Documentation
+§13 for the full architecture of what full proactive behaviour requires.
 
 ## 11. Known product gaps (intentional, not bugs)
 

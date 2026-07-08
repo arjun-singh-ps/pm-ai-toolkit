@@ -10,7 +10,7 @@
 - **Auth**: Supabase Auth (email + password, email confirmation required), via `@supabase/ssr`
 - **AI**: Anthropic Claude API (`claude-sonnet-4-6`), `@anthropic-ai/sdk`
 - **Styling**: Tailwind CSS
-- **Testing**: Vitest (unit only — no Playwright/E2E suite yet)
+- **Testing**: Vitest (unit), Playwright (E2E — see §11)
 - **Decimal arithmetic**: `decimal.js` (for cost calculations — see §8)
 
 ## 2. Architecture overview
@@ -49,10 +49,13 @@ Migrations:
 - `supabase/migrations/0002_enable_rls.sql` — enables RLS on all 5.
 - `supabase/migrations/0003_mcp_integrations.sql` — adds the 6th table (below) with RLS
   already enabled inline.
+- `supabase/migrations/0004_proactive_agents.sql` — adds `proactive_agents text[] NOT NULL
+  DEFAULT '{}'` to `programmes`.
 
 Tables:
 - **`programmes`**: `id, name, client, persona, active_phase, regulatory_frameworks[], notes,
-  created_at`
+  proactive_agents[], created_at` — `proactive_agents` stores the agent names the user has
+  opted into proactive mode for this programme (see §14)
 - **`artefacts`**: `id, programme_id, artefact_name, phase, activity, agent_name, version,
   status (draft/in_progress/approved), content (jsonb), created_at, approved_at, approved_by`
   - `content` is structured JSON (`{ title, sections: [{heading, body}] }` plus universal fields
@@ -283,7 +286,7 @@ figures are used for real spend reporting.
 | Route | Method | Purpose |
 |---|---|---|
 | `/api/programmes` | GET, POST | List / create programmes |
-| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, regulatory_frameworks (PATCH should not be used to change active_phase — see §7.1) |
+| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, regulatory_frameworks, proactive_agents (PATCH should not be used to change active_phase — see §7.1) |
 | `/api/programmes/[id]/advance-phase` | POST | Gate-enforced phase transition — the only path allowed to change active_phase |
 | `/api/agents/[agentName]/chat` | POST | Run one chat turn (the only path to `agentEngine.ts`); 401s without a session (§5.3) |
 | `/api/agents/[agentName]/session` | GET | Fetch display-ready chat history for hydrating the UI |
@@ -326,28 +329,37 @@ server-rendered lock/status dots update too); `RightPanel` listens for it and ca
 
 ## 11. Testing
 
-`npm test` runs Vitest over `tests/unit/**/*.test.ts` only — no live Supabase or Claude calls.
-Currently covers: `registry.ts` lookups (including that cross-cutting agents never leak into
-`listAgentsForPhase` for any real phase/persona combination), `gating.ts`'s dependency/gate logic
-(injected fake data), `cost.ts`'s decimal arithmetic, `agentEngine.ts`'s `buildSystemPrompt`,
-and `artefactSummary.ts`'s `formatArtefactSummary` (truncation, status-ordering, empty-state).
-Full conversational flows,
-real Supabase round-trips, auth flows, and visual/colour-coding checks are verified manually
-against the live dev server and real Supabase project — not automated. `npm run lint` and `npm
-run build` are run after every change as a correctness gate (the build step has caught real
-server/client boundary mistakes during this project).
+### Unit tests (`npm test`)
 
-There's no Playwright/E2E suite set up in this repo yet (`tests/e2e/` doesn't exist), but a
-one-off Playwright script (`npm install --no-save playwright`, then a small `.mjs` driving
-`chromium.launch()`) was used during the Amplify build to actually screenshot a client-rendered
-UI branch that `curl` can't see (`RightPanel.tsx`'s Gate tab fetches its data after mount, so
-server-rendered HTML never contains it). Worth reaching for again whenever a change touches
-client-only rendering logic that the Sidebar/server-component pattern doesn't cover.
+Runs Vitest over `tests/unit/**/*.test.ts` — no live Supabase or Claude calls. Covers:
+`registry.ts` lookups (including that cross-cutting agents never leak into `listAgentsForPhase`
+for any real phase/persona combination), `gating.ts`'s dependency/gate logic (injected fake
+data), `cost.ts`'s decimal arithmetic, `agentEngine.ts`'s `buildSystemPrompt`, and
+`artefactSummary.ts`'s `formatArtefactSummary` (truncation, status-ordering, empty-state).
 
-The auth build's live verification (signup → email confirmation → login → real chat/approve →
-RLS check via direct anon-key query → sign-out) was entirely manual, run by the user in a real
-browser plus a few one-off scripts checking Supabase state directly — there is no automated
-coverage of the auth flow itself, by the same "no E2E suite yet" limitation above.
+### E2E tests (`npm run test:e2e`)
+
+Playwright suite in `tests/e2e/`. Requires `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` in
+`.env.local` (a real Supabase user in the project).
+
+- `tests/e2e/global.setup.ts` — runs once before all specs: logs in via the real login form,
+  saves the authenticated session to `tests/e2e/.auth/session.json`. All subsequent specs reuse
+  that session via `storageState`.
+- `tests/e2e/helpers/seed.ts` — creates and deletes test programmes and artefacts directly via
+  the Supabase service client (no Claude, no Next.js API). Test programmes are named
+  `[E2E] ...` so they can be bulk-deleted without touching real data. Never imports from `@/`
+  — it runs in the Playwright process, not in Next.js.
+- `tests/e2e/auth.spec.ts` — authenticated home page, Settings nav, sign out → `/login`.
+- `tests/e2e/legacy-journey.spec.ts` — seeds all 14 Foundation artefacts as approved, then
+  exercises: sidebar renders Foundation phase, all 4 cross-cutting header links present, Gate
+  tab shows clear, Advance to Forge button works, programme advances to forge phase, Artefacts
+  tab lists seeded items.
+
+**Key design constraint**: Claude API calls happen server-side inside Next.js; `page.route()`
+cannot intercept them. The E2E suite bypasses Claude entirely by seeding artefacts directly
+via the service client — it exercises the real gate/phase-advance logic without touching the
+AI layer. `npm run lint` and `npm run build` run after every change as a correctness gate (the
+build step has caught real server/client boundary mistakes during this project).
 
 ## 12. Environment variables (`.env.local`, never committed)
 
@@ -364,7 +376,75 @@ old server-only `SUPABASE_URL` (same value, renamed — the URL itself was never
 name instead of two avoids drift). `SUPABASE_SERVICE_ROLE_KEY` remains server-only and must never
 be exposed.
 
-## 13. Known technical debt
+## 13. Proactive agent architecture
+
+### 13.1 What the feature is
+
+Four agents in the system have a design brief that implies monitoring rather than pure
+conversation: **Signal Watch** (Forge), **Delivery Heartbeat** (Amplify), **Cost Compass**
+(cross-cutting), and **Performance Pulse** (Agentic Delivery/Prove — not yet built). Per the
+product's reactive/proactive categorisation (see Business Specification §10), they are currently
+*monitoring-reactive* — designed to watch for signals, but only running when the user opens them.
+
+The proactive agent feature lets users set each of these agents to **proactive mode** per
+programme. The preference is persisted and displayed — the trigger infrastructure (see §13.3)
+is a separate future build.
+
+### 13.2 Data model
+
+`programmes.proactive_agents text[] NOT NULL DEFAULT '{}'`
+
+Stores the `agentConfig.name` values (e.g. `["signal-watch", "cost-compass"]`) for agents the
+user has opted into proactive mode for this specific programme. Added in migration
+`0004_proactive_agents.sql`. Editable via the existing `PATCH /api/programmes/[id]` route — the
+same pattern as `regulatory_frameworks`.
+
+`MONITORING_AGENTS` in `src/lib/constants.ts` defines the authoritative list:
+
+```typescript
+export const MONITORING_AGENTS: { name: string; displayName: string; built: boolean }[] = [
+  { name: "signal-watch",       displayName: "Signal Watch",       built: true  },
+  { name: "delivery-heartbeat", displayName: "Delivery Heartbeat", built: true  },
+  { name: "cost-compass",       displayName: "Cost Compass",       built: true  },
+  { name: "performance-pulse",  displayName: "Performance Pulse",  built: false },
+];
+```
+
+`built: false` entries are shown in the toggle UI but disabled — the user can see what's coming
+without being able to select it.
+
+### 13.3 Current implementation vs full proactive behaviour
+
+**What's built today:**
+- `proactive_agents` stored per programme (migration `0004`).
+- `ProactiveAgentsForm.tsx` — checkbox toggle for each monitoring agent (built ones active, not-yet-built ones disabled). Identical pattern to `ProgrammeFrameworksForm.tsx`: client component, `PATCH /api/programmes/[id]`, `router.refresh()`.
+- **Sidebar indicator** (`Sidebar.tsx`): agents in `programme.proactive_agents` display a `⚡` badge next to their name and dot — a visual reminder that they're in proactive mode.
+- **Programme home screen banner** (`src/app/programme/[id]/page.tsx`): if any proactive agents are set, lists them with a "These agents are in proactive mode — open them to see their latest assessment" note.
+
+**What proactive mode does NOT do yet:**
+- No scheduled trigger. The agents still only run when the user opens them.
+- No threshold logic. No alert fires when sprint velocity drops or spend exceeds a budget.
+- No notification channel. No email, no in-app badge counted without a user visiting.
+
+**What full proactive behaviour requires (design spec, not yet built):**
+
+| Requirement | Design |
+|---|---|
+| **Scheduled trigger** | A cron job (e.g. Google Cloud Scheduler → Cloud Run job, or Supabase Edge Function with `pg_cron`) that calls `runAgentTurn` once per day per programme that has that agent in `proactive_agents`. The trigger message would be a synthetic `PROACTIVE_CHECK_MARKER` (analogous to `WELCOME_INIT_MARKER` in `constants.ts`) so the agent knows it's been triggered by the scheduler, not a human, and should open with a triage summary rather than a question. |
+| **Threshold configuration** | A `programme_thresholds` table (or a jsonb column on `programmes`) storing per-agent threshold values: e.g. velocity drop percentage for Signal Watch, budget cap for Cost Compass. The agent's system prompt includes the threshold when triggered, so the model can determine whether the check is worth escalating. |
+| **Notification channel** | An `agent_alerts` table (programme_id, agent_name, summary, triggered_at, dismissed_at). The programme shell's home screen polls this and shows a dismissible alert card for each unread entry. Email notification is a second-order concern. |
+| **Deduplification** | The trigger must not produce a new chat turn if the agent's last proactive check was within N hours, to avoid cost blowout on programmes with many proactive agents. |
+
+### 13.4 Why the toggle is worth shipping before the trigger
+
+From a programme management perspective: knowing which agents you *want* to watch for you is a
+decision worth recording now. When the trigger infrastructure is built, no user action is
+needed — the scheduler reads `proactive_agents` and starts running. The toggle is the user's
+configuration surface; the cron is the execution engine. Building the toggle first also makes
+the intent visible in the UI, which gives users and stakeholders a concrete picture of what
+"proactive" will mean for their programme.
+
+## 14. Known technical debt
 
 - Cost pricing constants are placeholders (§8).
 - `dependsOnAgents` for the Foundation, Forge, and Amplify phases is a simplifying linear-chain

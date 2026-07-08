@@ -10,6 +10,7 @@ export interface Programme {
   persona: Persona;
   active_phase: string;
   regulatory_frameworks: string[];
+  proactive_agents: string[];
   notes: string;
   created_at: string;
 }

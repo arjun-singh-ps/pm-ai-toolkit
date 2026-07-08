@@ -55,10 +55,10 @@ export async function createProgramme(input: CreateProgrammeInput): Promise<Prog
   return data as Programme;
 }
 
-/** Updates editable fields on a programme (e.g. notes, active_phase). */
+/** Updates editable fields on a programme (e.g. notes, active_phase, regulatory_frameworks, proactive_agents). */
 export async function updateProgramme(
   id: string,
-  patch: Partial<Pick<Programme, "notes" | "active_phase" | "regulatory_frameworks">>
+  patch: Partial<Pick<Programme, "notes" | "active_phase" | "regulatory_frameworks" | "proactive_agents">>
 ): Promise<Programme> {
   const { data, error } = await getSupabaseServiceClient()
     .from("programmes")

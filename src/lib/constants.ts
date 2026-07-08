@@ -27,6 +27,18 @@ export const NEXT_PHASE: Record<string, string> = {
 };
 
 /**
+ * The four monitoring-reactive agents that can be set to proactive mode per programme.
+ * `built: false` means the agent exists in the product brief but isn't implemented yet —
+ * show it in the toggle UI as disabled so users can see what's coming.
+ */
+export const MONITORING_AGENTS: { name: string; displayName: string; built: boolean }[] = [
+  { name: "signal-watch",       displayName: "Signal Watch",       built: true  },
+  { name: "delivery-heartbeat", displayName: "Delivery Heartbeat", built: true  },
+  { name: "cost-compass",       displayName: "Cost Compass",       built: true  },
+  { name: "performance-pulse",  displayName: "Performance Pulse",  built: false },
+];
+
+/**
  * Synthetic first message sent by ChatPanel when a session is brand new.
  * The agent engine detects this and generates a contextual opening briefing
  * instead of treating it as a normal user turn. Stored in the session but

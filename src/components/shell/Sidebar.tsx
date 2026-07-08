@@ -61,7 +61,8 @@ export async function Sidebar({ programme }: SidebarProps) {
         <p className="mb-2 text-xs uppercase tracking-wide text-zinc-400">{programme.active_phase}</p>
         <ul className="flex flex-col gap-1">
           {agentRows.map(({ agent, status, locked, reason }) => {
-            const dot = <span className={`h-2 w-2 rounded-full ${DOT_COLOR[status]}`} />;
+            const dot = <span className={`h-2 w-2 flex-shrink-0 rounded-full ${DOT_COLOR[status]}`} />;
+            const isProactive = (programme.proactive_agents ?? []).includes(agent.name);
 
             if (locked) {
               return (
@@ -71,7 +72,10 @@ export async function Sidebar({ programme }: SidebarProps) {
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-zinc-400 dark:text-zinc-600"
                 >
                   {dot}
-                  {agent.displayName}
+                  <span>{agent.displayName}</span>
+                  {isProactive && (
+                    <span title="Proactive mode" className="ml-auto text-xs">⚡</span>
+                  )}
                 </li>
               );
             }
@@ -83,7 +87,10 @@ export async function Sidebar({ programme }: SidebarProps) {
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-zinc-700 transition-colors hover:bg-black/5 dark:text-zinc-300 dark:hover:bg-white/5"
                 >
                   {dot}
-                  {agent.displayName}
+                  <span>{agent.displayName}</span>
+                  {isProactive && (
+                    <span title="Proactive mode" className="ml-auto text-xs">⚡</span>
+                  )}
                 </Link>
               </li>
             );

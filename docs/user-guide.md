@@ -178,9 +178,9 @@ persona — the Gate tab shows "🏁 This is the final phase of this persona." i
 Advance button. There's nowhere further to go within this persona; this is the intended end
 state, not a stuck gate.
 
-## 7. Programme settings (Notes and Regulatory Frameworks)
+## 7. Programme settings (Notes, Regulatory Frameworks, and Agent Mode)
 
-Navigate to the programme's default screen (centre panel, no agent selected) to find two
+Navigate to the programme's default screen (centre panel, no agent selected) to find three
 editable sections:
 
 **Programme Notes** — free text describing things like delivery methodology, regulatory
@@ -192,6 +192,27 @@ agent's conversation for this programme — no need to repeat it in every chat.
 selectable at programme creation, but this is where you update them if scope changes later.
 Changes take effect on the next conversation turn — Governance Guardian will use the updated
 selection immediately.
+
+**Agent Mode** — toggle switches for each monitoring agent between **Reactive** (default) and
+**Proactive** (⚡). The four monitoring agents are:
+
+| Agent | Available |
+|---|---|
+| Signal Watch | ✅ |
+| Delivery Heartbeat | ✅ |
+| Cost Compass | ✅ |
+| Performance Pulse | Coming soon |
+
+- **Reactive** (default): the agent runs when you open it. Nothing happens automatically.
+- **Proactive** (⚡): the agent gets a ⚡ badge in the sidebar and appears in a banner on
+  this settings screen, reminding you to open it for its latest programme assessment. This is
+  a reminder mode — the agent still only runs when you open it. A future update will add the
+  scheduled trigger where the agent checks your programme automatically in the background.
+
+A proactive agent with a ⚡ badge is prompting you: "Open me — there may be something worth
+looking at." Think of it as a standing agenda item rather than an automated alarm.
+
+Click **Save agent mode** after making changes.
 
 ## 8. Tracking progress
 

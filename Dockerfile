@@ -10,9 +10,11 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Build args become NEXT_PUBLIC_ env vars at build time (baked into the JS bundle)
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+# NEXT_PUBLIC_* vars are baked into the JS bundle at build time.
+# These are publishable (non-secret) values — the NEXT_PUBLIC_ prefix means
+# they're intentionally embedded in the browser bundle served to every user.
+ARG NEXT_PUBLIC_SUPABASE_URL=https://dpruizflifxbprdcmhgi.supabase.co
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_tt9_OD8RuZ16SqviEvGEcg_O_6JcDeq
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 RUN npm run build

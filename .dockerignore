@@ -4,3 +4,7 @@ node_modules
 .next
 .git
 README.md
+tests
+*.spec.ts
+*.test.ts
+vercel.json

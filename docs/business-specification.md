@@ -35,10 +35,10 @@ Seven agents, run in strict linear order — each requires the previous agent's 
 | 3 | Infrastructure Blueprint | Platform Readiness Report |
 | 4 | Knowledge Forge | Intelligence Fabric |
 | 5 | Backlog Architecture | Delivery Backlog |
-| 6 | Delivery Intelligence | Command Centre, Signal Engine, Quality Covenant |
+| 6 | Delivery Intelligence | Command Centre, Signal Engine, Quality Covenant, **RAID Register** |
 | 7 | Launch Readiness | Forge Charter, Crew Blueprint, Forge Compass |
 
-The phase gate (all 14 artefacts above approved) is checked, visible in the UI, and **advancing
+The phase gate (all **15** artefacts above approved) is checked, visible in the UI, and **advancing
 to Forge actually works** — re-checked server-side, never just a disabled button — via
 `POST /api/programmes/[id]/advance-phase`.
 
@@ -346,7 +346,50 @@ checks). Proactive mode stores intent and surfaces cards when the user manually 
 agent; the agents still only run on demand. See Technical Documentation §13 for the full
 architecture of what automatic triggering requires.
 
-## 11. Known product gaps (intentional, not bugs)
+## 11. RAID Register — Delivery Intelligence (BUILT)
+
+The RAID Register is the fourth artefact produced by the Delivery Intelligence agent in the
+Foundation phase. It covers Risks, Assumptions, Issues, and Dependencies for the programme, structured
+with per-entry fields: probability/impact (Risks), validation status (Assumptions), priority and
+resolution (Issues), and dependency type and status (Dependencies).
+
+**Sources the agent draws from, in priority order:**
+1. Uploaded programme documents (Excel, PDF, Word) — parsed server-side and injected into the
+   agent's system prompt as source material. See §12 (Programme Documents).
+2. Connected MCP tools (Jira, Confluence, SharePoint) — the agent can query issue boards and
+   existing RAID documentation via the same MCP connection layer used by all agents.
+3. Direct conversation — the PM walks through each quadrant if no other sources exist.
+
+**Proactive monitoring** — Delivery Intelligence is now a monitoring agent. After producing the
+RAID Register, it will call `record_alert` for any Critical Issues or High/High Risks it identifies,
+surfacing them as insight cards on the programme home screen. The PM can configure it to proactive
+mode in the Agent Mode settings.
+
+## 12. Programme Documents (BUILT)
+
+Programme managers can upload Excel, PDF, and Word documents (existing RAID logs, risk registers,
+project documentation) from the programme settings page. Files are parsed server-side and only the
+extracted text is stored — the raw binary is not retained.
+
+Extracted text is injected into the Delivery Intelligence agent's system prompt as source material
+when it runs. This lets the agent read an existing Excel RAID log row-by-row and incorporate it
+into the new structured RAID Register rather than starting from scratch.
+
+The documents section lives on the programme settings page alongside Notes, Regulatory Frameworks,
+and Agent Mode.
+
+## 13. Archive Programmes (BUILT)
+
+Programmes can be archived from the programme settings page. Archiving is a soft-removal:
+
+- All artefacts, chat sessions, alerts, and documents are preserved.
+- Archived programmes are hidden from the active programme list on the landing page.
+- A "View N archived programmes" link on the landing page expands a separate archived section
+  (dimmed, with an "Archived" badge).
+- The programme page remains fully accessible — the PM can review history, read artefacts,
+  and unarchive at any time.
+
+## 14. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing — the per-million-token
   prices in `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current

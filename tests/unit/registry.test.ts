@@ -91,6 +91,16 @@ describe("agent registry", () => {
     ]);
   });
 
+  it("Delivery Intelligence produces 4 artefacts including RAID Register", () => {
+    const di = getAgent("delivery-intelligence");
+    const names = di?.produces.map((spec) => spec.name) ?? [];
+    expect(names).toContain("Command Centre");
+    expect(names).toContain("Signal Engine");
+    expect(names).toContain("Quality Covenant");
+    expect(names).toContain("RAID Register");
+    expect(names).toHaveLength(4);
+  });
+
   it("Governance Guardian has no dependencies and produces its 3 artefacts", () => {
     const guardian = getAgent("governance-guardian");
     expect(guardian?.dependsOnAgents).toEqual([]);

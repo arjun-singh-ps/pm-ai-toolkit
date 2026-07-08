@@ -9,12 +9,14 @@ import { buildGovernanceGuardianContext } from "@/lib/governanceGuardianContext"
 import { buildCostCompassContext } from "@/lib/costCompassContext";
 import { buildRoadmapArchitectContext } from "@/lib/roadmapArchitectContext";
 import { buildCommsArchitectContext } from "@/lib/commsArchitectContext";
+import { buildDeliveryIntelligenceContext } from "@/lib/deliveryIntelligenceContext";
 
 const CONTEXT_BUILDERS: Record<string, (programmeId: string) => Promise<string | null>> = {
   "governance-guardian": buildGovernanceGuardianContext,
   "cost-compass": buildCostCompassContext,
   "roadmap-architect": buildRoadmapArchitectContext,
   "comms-architect": buildCommsArchitectContext,
+  "delivery-intelligence": buildDeliveryIntelligenceContext,
 };
 
 /** Returns extra system-prompt context for agents that need it, or null for agents that don't. */

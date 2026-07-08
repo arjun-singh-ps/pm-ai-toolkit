@@ -65,6 +65,7 @@ describe("isPhaseGateClear", () => {
       "Command Centre",
       "Signal Engine",
       "Quality Covenant",
+      "RAID Register",
       "Forge Charter",
       "Crew Blueprint",
       "Forge Compass",

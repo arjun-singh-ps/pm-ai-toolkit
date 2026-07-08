@@ -1,5 +1,5 @@
 // Default centre-panel content for a programme: proactive alerts, notes,
-// regulatory frameworks, and agent mode settings.
+// regulatory frameworks, agent mode settings, document uploads, and archive.
 
 import { notFound } from "next/navigation";
 import { getProgramme } from "@/lib/programmes";
@@ -8,6 +8,8 @@ import { ProgrammeNotesForm } from "@/components/ProgrammeNotesForm";
 import { ProgrammeFrameworksForm } from "@/components/ProgrammeFrameworksForm";
 import { ProactiveAgentsForm } from "@/components/ProactiveAgentsForm";
 import { AgentAlertsPanel } from "@/components/AgentAlertsPanel";
+import { ProgrammeDocumentsForm } from "@/components/ProgrammeDocumentsForm";
+import { ArchiveProgrammeButton } from "@/components/ArchiveProgrammeButton";
 
 interface ProgrammePageProps {
   params: Promise<{ id: string }>;
@@ -56,6 +58,11 @@ export default async function ProgrammePage({ params }: ProgrammePageProps) {
         programmeId={programme.id}
         initialProactiveAgents={proactiveAgentNames}
       />
+      <ProgrammeDocumentsForm programmeId={programme.id} />
+      <ArchiveProgrammeButton programmeId={programme.id} archived={programme.archived ?? false} />
+
+      {/* Bottom padding so the last section isn't flush against the panel edge */}
+      <div className="h-12" />
     </div>
   );
 }

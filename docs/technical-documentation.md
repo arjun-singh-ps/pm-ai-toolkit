@@ -12,6 +12,7 @@
 - **Styling**: Tailwind CSS
 - **Testing**: Vitest (unit), Playwright (E2E — see §11)
 - **Decimal arithmetic**: `decimal.js` (for cost calculations — see §8)
+- **Document parsing**: `pdf-parse` (PDF text extraction), `xlsx` (Excel CSV extraction), `mammoth` (DOCX raw text); all marked `serverExternalPackages` in `next.config.ts` — never bundled by webpack, Node.js only
 
 ## 2. Architecture overview
 
@@ -297,6 +298,8 @@ figures are used for real spend reporting.
 | `/api/kpis` | GET | KPI snapshots for a programme (`?programmeId=`), most recent first |
 | `/api/alerts` | GET | Active (non-dismissed) alerts for a programme (`?programmeId=`) |
 | `/api/alerts/[id]/dismiss` | POST | Dismiss an alert; requires auth; body: `{ reason: DismissReason }` |
+| `/api/documents` | GET, POST | List documents (`?programmeId=`) / upload a file (multipart/form-data: `file`, `programmeId`); POST requires auth |
+| `/api/documents/[id]` | DELETE | Remove a document; requires auth |
 | `/auth/callback` | GET | Exchanges an email-confirmation code for a session (§5.4) |
 
 All four cross-cutting agents needed **no new routes** — `/api/agents/[agentName]/chat` and

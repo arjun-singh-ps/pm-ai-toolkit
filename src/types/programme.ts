@@ -12,6 +12,7 @@ export interface Programme {
   regulatory_frameworks: string[];
   proactive_agents: string[];
   notes: string;
+  archived: boolean;
   created_at: string;
 }
 

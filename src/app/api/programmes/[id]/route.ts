@@ -26,11 +26,11 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 }
 
-/** Handles PATCH /api/programmes/[id] — updates notes, active_phase, regulatory_frameworks, or proactive_agents. */
+/** Handles PATCH /api/programmes/[id] — updates notes, active_phase, regulatory_frameworks, proactive_agents, or archived. */
 export async function PATCH(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const body = (await request.json()) as Partial<
-    Pick<Programme, "notes" | "active_phase" | "regulatory_frameworks" | "proactive_agents">
+    Pick<Programme, "notes" | "active_phase" | "regulatory_frameworks" | "proactive_agents" | "archived">
   >;
 
   try {

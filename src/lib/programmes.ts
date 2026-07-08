@@ -5,15 +5,31 @@ import { getSupabaseServiceClient } from "@/lib/supabase";
 import { INITIAL_PHASE_BY_PERSONA } from "@/lib/constants";
 import type { CreateProgrammeInput, Programme } from "@/types/programme";
 
-/** Returns every programme, most recently created first. */
+/** Returns every active (non-archived) programme, most recently created first. */
 export async function listProgrammes(): Promise<Programme[]> {
   const { data, error } = await getSupabaseServiceClient()
     .from("programmes")
     .select("*")
+    .eq("archived", false)
     .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to list programmes: ${error.message}`);
+  }
+
+  return data as Programme[];
+}
+
+/** Returns every archived programme, most recently archived first. */
+export async function listArchivedProgrammes(): Promise<Programme[]> {
+  const { data, error } = await getSupabaseServiceClient()
+    .from("programmes")
+    .select("*")
+    .eq("archived", true)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to list archived programmes: ${error.message}`);
   }
 
   return data as Programme[];
@@ -55,10 +71,10 @@ export async function createProgramme(input: CreateProgrammeInput): Promise<Prog
   return data as Programme;
 }
 
-/** Updates editable fields on a programme (e.g. notes, active_phase, regulatory_frameworks, proactive_agents). */
+/** Updates editable fields on a programme. */
 export async function updateProgramme(
   id: string,
-  patch: Partial<Pick<Programme, "notes" | "active_phase" | "regulatory_frameworks" | "proactive_agents">>
+  patch: Partial<Pick<Programme, "notes" | "active_phase" | "regulatory_frameworks" | "proactive_agents" | "archived">>
 ): Promise<Programme> {
   const { data, error } = await getSupabaseServiceClient()
     .from("programmes")

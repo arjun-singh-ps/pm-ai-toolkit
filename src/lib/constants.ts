@@ -32,10 +32,11 @@ export const NEXT_PHASE: Record<string, string> = {
  * show it in the toggle UI as disabled so users can see what's coming.
  */
 export const MONITORING_AGENTS: { name: string; displayName: string; built: boolean }[] = [
-  { name: "signal-watch",       displayName: "Signal Watch",       built: true  },
-  { name: "delivery-heartbeat", displayName: "Delivery Heartbeat", built: true  },
-  { name: "cost-compass",       displayName: "Cost Compass",       built: true  },
-  { name: "performance-pulse",  displayName: "Performance Pulse",  built: false },
+  { name: "delivery-intelligence", displayName: "Delivery Intelligence", built: true  },
+  { name: "signal-watch",          displayName: "Signal Watch",          built: true  },
+  { name: "delivery-heartbeat",    displayName: "Delivery Heartbeat",    built: true  },
+  { name: "cost-compass",          displayName: "Cost Compass",          built: true  },
+  { name: "performance-pulse",     displayName: "Performance Pulse",     built: false },
 ];
 
 /**

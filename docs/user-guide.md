@@ -5,8 +5,8 @@
 > in `CLAUDE.md`.
 
 This guide covers what's actually usable today: the Modernising Legacy Journey persona (all
-three phases, 16 agents) plus accounts. For what's still aspirational, see
-`docs/business-specification.md`.
+three phases, 16 agents), all four cross-cutting header agents, and accounts. For what's still
+aspirational, see `docs/business-specification.md`.
 
 ## 1. Sign up and sign in
 
@@ -32,9 +32,9 @@ From the homepage (`/`):
 3. Choose a **Persona**. Only **Modernising Legacy Journey** is selectable — **Agentic
    Delivery** is shown but disabled, since it isn't built yet.
 4. Optionally tick any **Regulatory frameworks** that apply (PRA, FCA, ECB/SSM, SR 11-7, EBA
-   Guidelines, DORA, ISO 42001, Client Custom). These are stored against the programme but
-   nothing checks artefacts against them yet (the Governance Guardian agent that would do this
-   isn't built).
+   Guidelines, DORA, ISO 42001, Client Custom). These are used by the Governance Guardian agent
+   to review your artefacts — select the ones that actually apply to this programme, since
+   Governance Guardian will refuse to produce generic output without at least one selected.
 5. Click **Create programme**. You'll land inside the new programme automatically.
 
 Existing programmes are listed above the form — click one to re-enter it at any time.
@@ -58,9 +58,9 @@ Once inside a programme, you'll see three panels:
   - **Gate** — a checklist of every artefact required to clear the current phase, and an
     **Advance to [next phase]** button.
 
-At the top, **History** and **KPIs** links open full-page views of the same data. Of the 4
-cross-cutting buttons, **Governance Guardian** is clickable — see §4.1 below; **Cost Compass**,
-**Roadmap Architect**, and **Comms Architect** remain disabled ("coming in a later milestone").
+At the top, **History** and **KPIs** links open full-page views of the same data. All four
+cross-cutting buttons (**Governance Guardian**, **Cost Compass**, **Roadmap Architect**,
+**Comms Architect**) are live — see §4.1–4.4 below.
 
 ## 4. Talking to an agent
 
@@ -76,21 +76,63 @@ cross-cutting buttons, **Governance Guardian** is clickable — see §4.1 below;
 5. You can keep chatting in the same conversation — history persists, so leaving and coming
    back later picks up exactly where you left off.
 
-### 4.1 Governance Guardian — available any time, not just at the start
+### 4.1–4.4 Cross-cutting agents — available any time, from the header
 
-Unlike the phase agents in the sidebar, **Governance Guardian** (the header button) is available
-the moment you create a programme — it isn't locked behind any phase progression. Click it to
-chat directly; it reviews your programme's existing artefacts (if any) against the regulatory
-frameworks you selected when creating the programme, and can produce a **Compliance Charter**,
-**Governance Pulse**, and **Regulatory Gap Matrix**.
+All four header buttons open an agent chat that isn't locked behind any phase progression. Their
+artefacts appear in the **Artefacts** tab and **History** like any phase agent's, but never in
+the **Gate** tab — they don't block or contribute to phase progression. Each one automatically
+reads the programme's existing artefacts (and, in some cases, KPI or cost data) before
+responding, so you don't need to brief it on what's already been done.
 
-- If you haven't selected any regulatory frameworks for this programme, it'll tell you to add
-  some (via the programme creation form's checkboxes — there's no way to edit them after
-  creation yet) rather than producing a generic compliance document.
-- If nothing's been built yet, it'll say so and ask you to come back once some artefacts exist.
-- Its artefacts show up in the **Artefacts** tab and **History** like any other, but — unlike
-  phase agents' artefacts — they never appear in the **Gate** tab checklist and never block
-  phase progression. Governance review runs alongside delivery, not as a gate on it.
+#### 4.1 Governance Guardian
+
+Reviews your programme's existing artefacts against the regulatory frameworks you selected when
+creating the programme, and produces a **Compliance Charter**, **Governance Pulse**, and
+**Regulatory Gap Matrix**.
+
+- If you haven't selected any regulatory frameworks, it'll ask you to add some first (via the
+  programme creation form — there's no way to edit them after creation yet).
+- If nothing's been built yet, it'll say so and ask you to return once some artefacts exist.
+
+#### 4.2 Cost Compass
+
+Reviews your programme's actual AI token spend and surfaces where the budget is going. Produces
+a **Cost Blueprint** (total spend by agent, plain-language interpretation, what's driving cost)
+and a **Spend Signal** (spend velocity, forward projection, cost optimisation options).
+
+- On a brand-new programme with no conversations yet, it'll tell you there's no data yet and
+  explain what it will track once conversations start.
+- For Legacy programmes it frames cost per agent and artefact; for Agentic Delivery it will
+  frame chassis vs pillar costs and cost per user (once that persona is built).
+
+#### 4.3 Roadmap Architect
+
+Turns your programme's current phase state and artefacts into planning outputs for three
+different audiences:
+
+- **Horizon Map** — a phase-and-milestone timeline for the delivery team. Phase-specific: shows
+  Foundation/Forge/Amplify gates and key artefacts for a Legacy programme.
+- **Sprint Canvas** — a sprint-by-sprint plan derived from your active backlog artefact. If
+  asked, it'll request sprint length and team capacity before drafting.
+- **Stakeholder Roadmap** — a one-page executive summary: where the programme stands, what
+  value has been delivered, what's coming next quarter, and what decisions are needed. No
+  programme management jargon.
+
+#### 4.4 Comms Architect
+
+Produces stakeholder communications grounded in your actual artefact content and KPI data. It
+will ask you for the current RAG status, any open decisions, and the intended distribution date
+before drafting. Produces:
+
+- **SteerCo Pack** — weekly or fortnightly. RAG status, progress, decisions needed, risks and
+  issues with owners, actions from last meeting. Two to three pages maximum.
+- **Board Signal** — monthly, one page. Business outcomes, value delivered, next major
+  milestone, one or two key risks in business-impact terms, any board-level decisions needed.
+- **Escalation Notice** — triggered by a specific condition (scope change, budget overrun,
+  regulatory finding, blocked dependency). It will ask what triggered the escalation before
+  drafting. Crisp and factual — not a narrative.
+- **Stakeholder Bulletin** — broader team update. Non-technical, inclusive tone. What's been
+  achieved, what's coming, any changes that affect the team. Suitable for email or intranet.
 
 ## 5. Reviewing and approving artefacts
 

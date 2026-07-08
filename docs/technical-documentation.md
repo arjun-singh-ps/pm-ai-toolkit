@@ -98,8 +98,8 @@ separate type — no code path needed to change. Two sentinel-like choices make 
 - `dependsOnAgents: []` — no gating, available the instant a programme exists. The existing
   generic chat route (`src/app/programme/[id]/agents/[agentName]/page.tsx`) needed **zero
   changes** — `canRunAgent` already returns `{allowed: true}` unconditionally for an empty
-  dependency list. Entry point is `src/components/shell/Header.tsx`'s Governance Guardian
-  button (a `Link`, not the disabled placeholder the other 3 cross-cutting buttons still are).
+  dependency list. All four cross-cutting agents are linked from `src/components/shell/Header.tsx`
+  as `Link` components (Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect).
 
 ### 4.2 Portfolio-wide context — and the client-bundle trap it almost reintroduced
 
@@ -130,9 +130,11 @@ graph — caught before shipping, not after, this time.
   `formatArtefactSummary`.
 - `src/lib/crossCuttingContext.ts` (server-only) — a small `agentName → builder` map, imported
   only by `src/lib/agentEngine.ts`. `runAgentTurn` calls `getExtraContext(agentName, programmeId)`
-  generically and appends a non-null result to the system prompt; adding the next cross-cutting
-  agent (e.g. a future Cost Compass needing `cost_records` instead of artefacts) means adding one
-  entry to this map and one new server-only context file — `agentEngine.ts` itself doesn't change.
+  generically and appends a non-null result to the system prompt. Currently maps all four
+  cross-cutting agents: Governance Guardian → artefacts, Cost Compass → `cost_records` aggregated
+  by agent using Decimal arithmetic, Roadmap Architect → artefacts, Comms Architect → artefacts
+  plus KPI snapshots (fetched in parallel). Adding another cross-cutting agent means one new entry
+  here and one new server-only context file — `agentEngine.ts` itself doesn't change.
 
 ### Adding a new agent
 1. Create `src/agents/<persona>/<phase>/<agentName>.ts` exporting one `AgentConfig`.
@@ -288,10 +290,9 @@ figures are used for real spend reporting.
 | `/api/gate/[phase]` | GET | Phase-gate checklist (every agent's artefacts + approved flag) |
 | `/auth/callback` | GET | Exchanges an email-confirmation code for a session (§5.4) |
 
-Governance Guardian needed **no new routes** — `/api/agents/[agentName]/chat` and
-`/api/agents/[agentName]/session` are already generic by agent name (§4.1). No routes exist for
-the remaining 3 cross-cutting agents (Cost Compass, Roadmap Architect, Comms Architect) — their
-header buttons stay `disabled` with a tooltip, deliberately not dead links.
+All four cross-cutting agents needed **no new routes** — `/api/agents/[agentName]/chat` and
+`/api/agents/[agentName]/session` are already generic by agent name (§4.1). The header buttons
+are all live `Link` components pointing to the standard agent route.
 
 ## 10. UI structure
 

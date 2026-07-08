@@ -86,18 +86,36 @@ deliverable generators.
 Nine named in the original vision: Orchestrator, Persona Selector, Artefact State, KPI Monitor,
 Responsible AI, Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect.
 
-**Governance Guardian (BUILT)** — the first cross-cutting agent. Available immediately on any
-programme, regardless of phase, via a header button (not the phase-scoped sidebar). Reviews the
-programme's existing artefacts (any status — approved and draft, status-labeled) against its
-selected regulatory frameworks and produces: Compliance Charter, Governance Pulse, Regulatory
-Gap Matrix. If no frameworks are selected or no artefacts exist yet, it says so plainly rather
-than producing generic output — directly satisfying rule #10 below. Its artefacts are tagged
-`phase: "cross-cutting"`, so they show up in the Artefacts tab and History but never count
-toward any phase's gate checklist — cross-cutting work doesn't block phase progression.
+All four header-button agents are **now built and live**. Orchestrator, Persona Selector,
+Artefact State, KPI Monitor, and Responsible AI have no UI presence yet and no backing logic.
 
-Cost Compass, Roadmap Architect, and Comms Architect remain visible, disabled header buttons —
-placeholders for later. Orchestrator, Persona Selector, Artefact State, KPI Monitor, and
-Responsible AI have no UI presence yet and no backing logic.
+**Governance Guardian (BUILT)** — reviews the programme's existing artefacts (any status —
+approved and draft, status-labeled) against its selected regulatory frameworks and produces:
+Compliance Charter, Governance Pulse, Regulatory Gap Matrix. If no frameworks are selected or no
+artefacts exist yet, it says so plainly rather than producing generic output — directly
+satisfying rule #10 below.
+
+**Cost Compass (BUILT)** — reviews token spend from the programme's `cost_records`, aggregates
+by agent using Decimal arithmetic, and produces: Cost Blueprint (total spend broken down by
+agent/phase, plain-language interpretation) and Spend Signal (spend velocity, forward projection
+at current run rate, optimisation options). Tracks differently per persona: Legacy = cost per
+agent/artefact/sprint vs hours saved; Agentic = chassis vs pillar costs, cost per user, cost per
+1,000 prompts.
+
+**Roadmap Architect (BUILT)** — injects the programme's existing artefact summary and produces:
+Horizon Map (phase-and-milestone timeline for the delivery team, persona-specific), Sprint Canvas
+(sprint-by-sprint plan derived from the active backlog artefact), and Stakeholder Roadmap (one-page
+executive summary, business outcomes only, no programme jargon).
+
+**Comms Architect (BUILT)** — injects artefacts and KPI snapshots and produces: SteerCo Pack
+(weekly/fortnightly, RAG status, decisions, risks), Board Signal (monthly, one page, board-level
+language), Escalation Notice (condition-triggered, crisp factual format), and Stakeholder Bulletin
+(broader team update, non-technical).
+
+All four follow the same architecture: `AgentConfig` in `src/agents/cross-cutting/`, server-only
+context builder in `src/lib/*Context.ts`, wired via `src/lib/crossCuttingContext.ts`. Their
+artefacts are tagged `phase: "cross-cutting"` — visible in the Artefacts tab and History but
+never counted toward any phase's gate checklist.
 
 ## 4. Business rules (status per rule)
 
@@ -182,7 +200,8 @@ with real API keys.
 ## 10. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing.
-- Governance/compliance review is **not actually performed** — regulatory frameworks are
-  captured but nothing checks artefacts against them yet.
+- Cost figures in the Cost Compass are directional only — the per-million-token prices in
+  `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current pricing
+  page before treating them as accurate spend data.
 - No per-user permissions or data isolation — by design (shared workspace), not a missing
   feature.

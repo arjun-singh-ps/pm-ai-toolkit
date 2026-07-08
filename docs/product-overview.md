@@ -44,8 +44,8 @@ produced → approve it → the next step unlocks.**
 - **Phase gate** — the checklist of every artefact required to complete a phase. Once every
   artefact in the current phase is approved, the gate is "clear" and the next phase can unlock.
 - **Cross-cutting agent** — unlike phase agents, available immediately on any programme via a
-  header button rather than the sidebar, and not gated behind phase progression. Governance
-  Guardian (below) is the first one built.
+  header button rather than the sidebar, and not gated behind phase progression. Four are built:
+  Governance Guardian, Cost Compass, Roadmap Architect, and Comms Architect.
 
 ## What exists today
 
@@ -54,20 +54,31 @@ The **Modernising Legacy Journey** persona is **fully built and complete**: all 
 conversation, with approval and phase-gating enforced end to end — including the phase
 transitions themselves, not just checklists.
 
-**Governance Guardian** is live — the regulatory frameworks you select when creating a
-programme (PRA, FCA, DORA, etc.) are no longer just stored and forgotten; this agent reviews
-your programme's actual artefacts against them and produces a Compliance Charter, Governance
-Pulse, and Regulatory Gap Matrix, grounded in your real content rather than generic boilerplate.
+**All four cross-cutting header agents are live** — available immediately on any programme, not
+gated behind phase progression:
+
+- **Governance Guardian** — reviews your programme's actual artefacts against the regulatory
+  frameworks you selected (PRA, FCA, DORA, etc.) and produces a Compliance Charter, Governance
+  Pulse, and Regulatory Gap Matrix. Grounded in your real content, not generic boilerplate.
+- **Cost Compass** — surfaces where your AI token budget is going: spend by agent, spend
+  velocity, a forward projection at current run rate, and specific optimisation suggestions.
+  Produces a Cost Blueprint and a Spend Signal.
+- **Roadmap Architect** — turns the programme's current artefacts and phase state into three
+  audience-specific planning outputs: a Horizon Map (delivery team timeline), Sprint Canvas
+  (sprint-by-sprint plan), and Stakeholder Roadmap (one-page executive summary, business
+  outcomes only).
+- **Comms Architect** — produces stakeholder communications grounded in actual artefact content
+  and KPI data: SteerCo Pack, Board Signal, Escalation Notice, and Stakeholder Bulletin — each
+  for a distinct audience and cadence.
 
 **MCP integrations** are live — connect Jira, Confluence, SharePoint, or any MCP-compatible
 server in Settings, and every agent automatically has access to those tools when generating
 artefacts. Claude can fetch real Jira tickets or read Confluence pages mid-conversation without
 you copying and pasting anything.
 
-Everything else described in the product vision (the Agentic Delivery persona, and the other 3
-cross-cutting agents — Cost Compass, Roadmap Architect, Comms Architect) is either a
-visible-but-disabled placeholder or not present yet. See `docs/business-specification.md` for
-the exact build status of every piece.
+The **Agentic Delivery persona** is the main remaining gap — visible but not yet selectable when
+creating a programme. See `docs/business-specification.md` for the exact build status of every
+piece.
 
 ## Who it's for
 

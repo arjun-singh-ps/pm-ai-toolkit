@@ -82,8 +82,16 @@ describe("agent registry", () => {
     expect(listAgentsForPhase("legacy", "amplify")).toHaveLength(6);
   });
 
-  it("contains Governance Guardian with no dependencies and its 3 artefacts", () => {
-    expect(CROSS_CUTTING_AGENTS.map((agent) => agent.name)).toEqual(["governance-guardian"]);
+  it("contains all 4 cross-cutting agents", () => {
+    expect(CROSS_CUTTING_AGENTS.map((agent) => agent.name)).toEqual([
+      "governance-guardian",
+      "cost-compass",
+      "roadmap-architect",
+      "comms-architect",
+    ]);
+  });
+
+  it("Governance Guardian has no dependencies and produces its 3 artefacts", () => {
     const guardian = getAgent("governance-guardian");
     expect(guardian?.dependsOnAgents).toEqual([]);
     expect(guardian?.produces.map((spec) => spec.name)).toEqual([
@@ -93,15 +101,24 @@ describe("agent registry", () => {
     ]);
   });
 
+  it("Cost Compass, Roadmap Architect, and Comms Architect have no dependencies", () => {
+    for (const name of ["cost-compass", "roadmap-architect", "comms-architect"]) {
+      expect(getAgent(name)?.dependsOnAgents).toEqual([]);
+    }
+  });
+
   it("never returns cross-cutting agents from listAgentsForPhase for any real phase", () => {
     const realPhases = ["foundation", "forge", "amplify", "envision", "shape", "incubate", "prove", "scale"];
+    const crossCuttingNames = CROSS_CUTTING_AGENTS.map((a) => a.name);
     for (const phase of realPhases) {
-      expect(listAgentsForPhase("legacy", phase)).not.toContainEqual(
-        expect.objectContaining({ name: "governance-guardian" })
-      );
-      expect(listAgentsForPhase("agentic", phase)).not.toContainEqual(
-        expect.objectContaining({ name: "governance-guardian" })
-      );
+      for (const name of crossCuttingNames) {
+        expect(listAgentsForPhase("legacy", phase)).not.toContainEqual(
+          expect.objectContaining({ name })
+        );
+        expect(listAgentsForPhase("agentic", phase)).not.toContainEqual(
+          expect.objectContaining({ name })
+        );
+      }
     }
   });
 });

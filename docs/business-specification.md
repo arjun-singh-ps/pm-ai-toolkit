@@ -201,7 +201,129 @@ corporate VPN/firewall need a hosted proxy.
 them from unauthenticated access, but at-rest encryption should be added before production use
 with real API keys.
 
-## 10. Known product gaps (intentional, not bugs)
+## 10. Agent interaction model — reactive vs proactive
+
+### 10.1 The distinction
+
+A **reactive agent** responds when you open it and ask. It may have rich context about the
+programme, but it does nothing until you initiate.
+
+A **proactive agent** knows what the programme needs and surfaces it before you ask. Per the
+framing that shaped this product's design direction, proactive behaviour requires three things
+a reactive agent doesn't have:
+
+1. **Programme state** — continuous awareness of where the programme is in its lifecycle.
+2. **Threshold logic** — an embedded definition of what "bad" looks like, so the agent can
+   detect a problem before you tell it one exists.
+3. **Memory across sessions** — the ability to spot a trend (velocity this week vs last week)
+   rather than only react to the current state in isolation.
+
+### 10.2 Current state — all agents are reactive
+
+Every agent in the product today is **reactive**. They all receive programme state as injected
+context (criterion 1 is met structurally), but none have threshold logic or self-trigger across
+sessions (criteria 2 and 3 are absent). An agent only runs when a user opens it.
+
+Within reactive, three sub-types describe the design intent of each agent:
+
+- **Conversational reactive** — gathers information from the PM through dialogue before
+  generating. The agent interviews first; the artefact comes from the conversation.
+- **Monitoring reactive** — designed to watch for signals (velocity, spend, quality trends)
+  but currently only runs when opened. These are the natural candidates for proactive
+  evolution once threshold logic is built.
+- **Synthesis reactive** — reads what has already been produced (artefacts, KPIs, cost
+  records) and turns it into analysis or communication outputs without needing to gather
+  new information first.
+
+### 10.3 Categorisation — all 33 agents
+
+#### Modernising Legacy — Foundation phase
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Scope Sprint | Conversational reactive | Interviews the PM to define programme scope, pilots, value case |
+| Estate Mapping | Conversational reactive | Interviews the PM to map the current technical estate |
+| Infrastructure Blueprint | Conversational reactive | Interviews the PM to assess platform readiness |
+| Knowledge Forge | Conversational reactive | Captures institutional knowledge the agents will use throughout |
+| Backlog Architecture | Conversational reactive | Sequences the modernisation work into a delivery backlog |
+| Delivery Intelligence | Synthesis reactive | Sets up reporting cadence and records the first KPI baselines from conversation |
+| Launch Readiness | Conversational reactive | Confirms the programme is ready to move from planning to pilot |
+
+#### Modernising Legacy — Forge phase
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Pilot Ignition | Conversational reactive | Runs the first end-to-end pilot build through conversation |
+| Signal Watch | **Monitoring reactive** | Designed to watch the live pilot for early warning signs — runs only when opened |
+| Scale Blueprint | Conversational reactive | Defines how to scale what's been proven |
+
+#### Modernising Legacy — Amplify phase
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Backlog Pulse | Synthesis reactive | Re-prioritises the backlog based on what the pilot taught |
+| Context Flywheel | Conversational reactive | Keeps the Intelligence Fabric current as delivery evolves |
+| Factory Build | Conversational reactive | Designs the scaled delivery factory and service catalogue |
+| Launch Runway | Synthesis reactive | Confirms quality gates are met before each capability launch |
+| Delivery Heartbeat | **Monitoring reactive** | Designed for continuous monitoring across all three KPI levers — runs only when opened |
+| Evolution Engine | Synthesis reactive | Charts the programme's next horizon |
+
+#### Cross-cutting agents
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Governance Guardian | Synthesis reactive | Reads all artefacts, checks against selected regulatory frameworks |
+| Cost Compass | **Monitoring reactive** | Designed to surface spend trends and forward projections — runs only when opened |
+| Roadmap Architect | Synthesis reactive | Synthesises artefact state into delivery team, sprint, and executive planning outputs |
+| Comms Architect | Synthesis reactive | Synthesises artefacts and KPIs into stakeholder communications |
+
+#### Agentic Delivery — Envision and Shape (not yet built)
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Vision Ignition | Conversational reactive | Defines the agentic north star through dialogue |
+| MVP Covenant | Conversational reactive | Shapes the solution proposal and engagement charter |
+| Use Case Discovery | Conversational reactive | Discovers and prioritises use cases through structured interviews |
+| Agentic Blueprint | Conversational reactive | Designs the agent architecture through dialogue |
+| Team Launch | Conversational reactive | Establishes the team covenant and delivery flight plan |
+
+#### Agentic Delivery — Incubate and Prove (not yet built)
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Environment Ignition | Conversational reactive | Sets up the compliant agent environment through guided steps |
+| Agent Foundations | Conversational reactive | Builds the prompt fabric and evaluation covenant through dialogue |
+| Proving Ground | Synthesis reactive | Synthesises the proving charter and pioneer agent release |
+| Value Delivery Sprint | Synthesis reactive | Synthesises sprint outcomes into refined releases |
+| Performance Pulse | **Monitoring reactive** | Designed to watch live agent signals across KPI dimensions — runs only when opened |
+| Scale Readiness | Conversational reactive | Prepares the prompt catalogue and organisation rollout plan |
+
+#### Agentic Delivery — Scale (not yet built, strategic adviser mode)
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Platform Expansion | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
+| Governance Engine | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
+| Value Sequencer | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
+| Transformation Blueprint | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
+
+### 10.4 Agents most suited to become proactive
+
+Four agents have monitoring in their design brief and are the natural first candidates once
+threshold logic and cross-session memory are built:
+
+| Agent | What proactive would look like |
+|---|---|
+| **Signal Watch** | Detects pilot velocity drop > threshold, cross-references against open RAID items, drafts an Intelligence Pulse with the right escalation flag — before the PM notices the trend |
+| **Delivery Heartbeat** | Monitors all three KPI levers; surfaces a Delivery Signal Report automatically when any metric crosses its warning threshold |
+| **Cost Compass** | Monitors spend rate; alerts when the projected monthly cost exceeds a defined programme budget before the sprint ends |
+| **Performance Pulse** | Watches live agent accuracy and latency across the Agentic Delivery KPI dimensions; drafts a Full Spectrum KPI Report when a dimension dips below its agreed threshold |
+
+Building proactive behaviour requires: a scheduled evaluation mechanism (e.g. a cron job
+calling the agent engine against each programme), threshold configuration per programme,
+and a notification channel (email or in-app). None of these exist today.
+
+## 11. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing — the per-million-token
   prices in `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current

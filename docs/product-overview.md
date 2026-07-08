@@ -46,6 +46,18 @@ produced → approve it → the next step unlocks.**
 - **Cross-cutting agent** — unlike phase agents, available immediately on any programme via a
   header button rather than the sidebar, and not gated behind phase progression. Four are built:
   Governance Guardian, Cost Compass, Roadmap Architect, and Comms Architect.
+- **Reactive agent** — an agent that responds when you open it and start a conversation. All
+  33 agents in the product today are reactive: they receive full programme context automatically,
+  but they wait for you to initiate. Most fall into one of three patterns: *conversational
+  reactive* (interview-then-generate, gathering new information from the PM), *synthesis reactive*
+  (reading existing artefacts and KPIs to produce analysis or communications), or *monitoring
+  reactive* (designed to watch for signals, but currently only running when you open them).
+- **Proactive agent** — an agent that surfaces what the programme needs before you ask,
+  triggered by programme state crossing a threshold. None of the current agents are proactive
+  yet. The four monitoring-reactive agents (Signal Watch, Delivery Heartbeat, Cost Compass,
+  Performance Pulse) are the natural candidates: they already have the right design brief;
+  what they're missing is threshold logic and a scheduled trigger. See the Business Specification
+  §10 for the full categorisation and what proactive would look like for each one.
 
 ## What exists today
 

@@ -40,8 +40,11 @@ export function AgentAlertsPanel({ programmeId }: AgentAlertsPanelProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3 p-8 pb-0">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+    <div className="flex flex-col gap-3 p-6 pb-0">
+      <h2
+        className="text-[10px] font-semibold uppercase tracking-wider"
+        style={{ color: "var(--text-muted)" }}
+      >
         ⚡ Proactive alerts
       </h2>
       {alerts.map((alert) => (

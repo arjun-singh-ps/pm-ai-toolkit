@@ -1,5 +1,5 @@
 // Right panel of the three-panel shell: Artefacts / KPIs / Gate tabs.
-// All three tabs are wired to real data.
+// Monzo-style: coral active tab indicator, rounded cards, clean status badges.
 
 "use client";
 
@@ -27,10 +27,10 @@ const STATUS_LABEL: Record<Artefact["status"], string> = {
   approved: "Approved",
 };
 
-const STATUS_COLOR: Record<Artefact["status"], string> = {
-  draft: "text-zinc-500 dark:text-zinc-400",
-  in_progress: "text-blue-600 dark:text-blue-400",
-  approved: "text-green-600 dark:text-green-400",
+const STATUS_DOT: Record<Artefact["status"], string> = {
+  draft: "var(--text-muted)",
+  in_progress: "var(--blue)",
+  approved: "var(--green)",
 };
 
 interface GateAgentChecklist {
@@ -50,7 +50,6 @@ interface RightPanelProps {
  * and renders each lever as a labelled section.
  */
 function KpiDisplay({ snapshots }: { snapshots: KpiSnapshot[] }) {
-  // snapshots are ordered most-recent-first; first occurrence of each metric is current value
   const byLever = new Map<string, { metric: string; value: number; date: string }[]>();
   const seen = new Set<string>();
 
@@ -67,13 +66,30 @@ function KpiDisplay({ snapshots }: { snapshots: KpiSnapshot[] }) {
     <div className="flex flex-col gap-4">
       {[...byLever.entries()].map(([lever, metrics]) => (
         <div key={lever}>
-          <p className="mb-1 text-xs font-semibold text-black dark:text-zinc-50">{lever}</p>
-          <ul className="flex flex-col gap-1">
+          <p
+            className="mb-2 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {lever}
+          </p>
+          <ul className="flex flex-col gap-2">
             {metrics.map(({ metric, value, date }) => (
-              <li key={metric} className="text-xs">
-                <span className="text-zinc-700 dark:text-zinc-300">{metric}:</span>{" "}
-                <span className="font-medium text-black dark:text-zinc-50">{value}</span>
-                <span className="ml-1 text-zinc-400 dark:text-zinc-500">({date})</span>
+              <li
+                key={metric}
+                className="rounded-xl px-3 py-2"
+                style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+              >
+                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  {metric}
+                </p>
+                <div className="mt-0.5 flex items-baseline justify-between">
+                  <p className="text-sm font-semibold" style={{ color: "var(--navy)" }}>
+                    {value}
+                  </p>
+                  <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                    {date}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>
@@ -83,7 +99,7 @@ function KpiDisplay({ snapshots }: { snapshots: KpiSnapshot[] }) {
   );
 }
 
-/** Tabbed right panel: Artefacts (approve drafts), KPIs (live metrics), and Gate (phase checklist). */
+/** Tabbed right panel: Artefacts (approve drafts), KPIs (live metrics), Gate (phase checklist). */
 export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("artefacts");
@@ -163,44 +179,84 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
     }
   }
 
+  const emptyClass = "flex-1 flex items-center justify-center text-xs";
+
   return (
-    <aside className="flex w-[240px] flex-shrink-0 flex-col border-l border-black/10 bg-white dark:border-white/10 dark:bg-zinc-950">
-      <div className="flex border-b border-black/10 dark:border-white/10">
+    <aside
+      className="flex w-[240px] flex-shrink-0 flex-col"
+      style={{
+        background: "var(--surface)",
+        borderLeft: "1px solid var(--border)",
+      }}
+    >
+      {/* Tab bar */}
+      <div
+        className="flex"
+        style={{ borderBottom: "1px solid var(--border)" }}
+      >
         {TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 px-2 py-2 text-xs font-medium ${
+            className="flex-1 py-3 text-xs font-semibold transition-colors"
+            style={
               activeTab === tab.id
-                ? "border-b-2 border-black text-black dark:border-white dark:text-zinc-50"
-                : "text-zinc-400"
-            }`}
+                ? {
+                    color: "var(--coral)",
+                    borderBottom: "2px solid var(--coral)",
+                    marginBottom: "-1px",
+                  }
+                : { color: "var(--text-muted)" }
+            }
           >
             {tab.label}
           </button>
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 text-sm text-zinc-500 dark:text-zinc-400">
+      <div className="flex-1 overflow-y-auto p-3">
+        {/* Artefacts tab */}
         {activeTab === "artefacts" &&
           (isLoading ? (
-            "Loading artefacts..."
+            <p className={emptyClass} style={{ color: "var(--text-muted)" }}>Loading...</p>
           ) : artefacts.length === 0 ? (
-            "No artefacts yet."
+            <p className={emptyClass} style={{ color: "var(--text-muted)" }}>No artefacts yet.</p>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-2">
               {artefacts.map((artefact) => (
-                <li key={artefact.id} className="rounded-md border border-black/10 p-2 dark:border-white/10">
-                  <p className="text-xs font-medium text-black dark:text-zinc-50">{artefact.artefact_name}</p>
-                  <p className={`text-xs ${STATUS_COLOR[artefact.status]}`}>
-                    {STATUS_LABEL[artefact.status]} · v{artefact.version}
-                  </p>
-                  <div className="mt-2 flex gap-2">
+                <li
+                  key={artefact.id}
+                  className="rounded-xl p-3"
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <div className="flex items-start gap-2">
+                    <span
+                      className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                      style={{ background: STATUS_DOT[artefact.status] }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium leading-snug" style={{ color: "var(--navy)" }}>
+                        {artefact.artefact_name}
+                      </p>
+                      <p className="mt-0.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        {STATUS_LABEL[artefact.status]} · v{artefact.version}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-2.5 flex gap-2">
                     <button
                       type="button"
                       onClick={() => setViewingArtefactId(artefact.id)}
-                      className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+                      className="rounded-full px-3 py-1 text-[10px] font-medium transition-colors hover:opacity-80"
+                      style={{
+                        background: "var(--surface)",
+                        color: "var(--navy)",
+                        border: "1px solid var(--border)",
+                      }}
                     >
                       View
                     </button>
@@ -209,7 +265,11 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
                         type="button"
                         onClick={() => handleApprove(artefact.id)}
                         disabled={approvingId === artefact.id}
-                        className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+                        className="rounded-full px-3 py-1 text-[10px] font-medium transition-colors hover:opacity-80 disabled:opacity-40"
+                        style={{
+                          background: "var(--green)",
+                          color: "#fff",
+                        }}
                       >
                         {approvingId === artefact.id ? "Approving..." : "Approve"}
                       </button>
@@ -220,35 +280,60 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
             </ul>
           ))}
 
+        {/* KPIs tab */}
         {activeTab === "kpis" &&
           (isLoading ? (
-            "Loading KPIs..."
+            <p className={emptyClass} style={{ color: "var(--text-muted)" }}>Loading...</p>
           ) : kpiSnapshots.length === 0 ? (
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              No KPI data yet. KPIs are captured during conversations with Delivery Intelligence
-              (Foundation), Signal Watch (Forge), and Delivery Heartbeat (Amplify).
+            <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              No KPI data yet. KPIs are captured during conversations with Delivery Intelligence,
+              Signal Watch, and Delivery Heartbeat.
             </p>
           ) : (
             <KpiDisplay snapshots={kpiSnapshots} />
           ))}
 
+        {/* Gate tab */}
         {activeTab === "gate" &&
           (isLoading || !gate ? (
-            "Loading gate status..."
+            <p className={emptyClass} style={{ color: "var(--text-muted)" }}>Loading...</p>
           ) : (
             <div className="flex flex-col gap-3">
-              <p className={gate.clear ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}>
-                {gate.clear ? "✅ Phase gate clear" : "⏳ Phase gate not yet clear"}
-              </p>
+              {/* Gate status badge */}
+              <div
+                className="rounded-xl px-3 py-2.5"
+                style={{
+                  background: gate.clear ? "#ECFDF5" : "#FFFBEB",
+                  border: `1px solid ${gate.clear ? "#A7F3D0" : "#FDE68A"}`,
+                }}
+              >
+                <p
+                  className="text-xs font-semibold"
+                  style={{ color: gate.clear ? "var(--green)" : "#D97706" }}
+                >
+                  {gate.clear ? "Gate clear" : "Gate not yet clear"}
+                </p>
+              </div>
 
-              <ul className="flex flex-col gap-2">
+              {/* Agent checklists */}
+              <ul className="flex flex-col gap-3">
                 {gate.agents.map((agent) => (
                   <li key={agent.name}>
-                    <p className="text-xs font-medium text-black dark:text-zinc-50">{agent.displayName}</p>
-                    <ul className="ml-3 mt-1 flex flex-col gap-0.5">
+                    <p
+                      className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {agent.displayName}
+                    </p>
+                    <ul className="flex flex-col gap-1">
                       {agent.artefacts.map((artefact) => (
-                        <li key={artefact.name} className="text-xs">
-                          {artefact.approved ? "✅" : "⬜"} {artefact.name}
+                        <li key={artefact.name} className="flex items-center gap-2 text-xs">
+                          <span style={{ color: artefact.approved ? "var(--green)" : "var(--border)" }}>
+                            {artefact.approved ? "●" : "○"}
+                          </span>
+                          <span style={{ color: artefact.approved ? "var(--navy)" : "var(--text-muted)" }}>
+                            {artefact.name}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -257,8 +342,8 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
               </ul>
 
               {nextPhase === undefined ? (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  🏁 This is the final phase of this persona.
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Final phase of this persona.
                 </p>
               ) : (
                 <>
@@ -266,6 +351,12 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
                     type="button"
                     onClick={handleAdvance}
                     disabled={!gate.clear || !nextPhaseAvailable || isAdvancing}
+                    className="mt-1 w-full rounded-xl py-2.5 text-xs font-semibold transition-colors disabled:opacity-40"
+                    style={
+                      gate.clear && nextPhaseAvailable
+                        ? { background: "var(--coral)", color: "#fff" }
+                        : { background: "var(--bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }
+                    }
                     title={
                       !nextPhaseAvailable
                         ? `${nextPhase} phase agents are not yet available`
@@ -273,7 +364,6 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
                           ? "Approve every artefact above first"
                           : undefined
                     }
-                    className="mt-1 self-start rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-zinc-400 opacity-50 enabled:border-black/20 enabled:text-black enabled:opacity-100 enabled:hover:bg-black/5 dark:border-white/10 dark:enabled:text-zinc-50 dark:enabled:hover:bg-white/5"
                   >
                     {isAdvancing
                       ? "Advancing..."
@@ -281,7 +371,9 @@ export function RightPanel({ programmeId, phase, persona }: RightPanelProps) {
                   </button>
 
                   {advanceError && (
-                    <p className="text-xs text-red-600 dark:text-red-400">{advanceError}</p>
+                    <p className="text-xs" style={{ color: "#DC2626" }}>
+                      {advanceError}
+                    </p>
                   )}
                 </>
               )}

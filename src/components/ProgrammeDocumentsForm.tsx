@@ -57,7 +57,6 @@ export function ProgrammeDocumentsForm({ programmeId }: ProgrammeDocumentsFormPr
       setUploadError("Could not reach the server. Check your connection.");
     } finally {
       setIsUploading(false);
-      // Reset the input so the same file can be re-uploaded if needed.
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
@@ -70,16 +69,24 @@ export function ProgrammeDocumentsForm({ programmeId }: ProgrammeDocumentsFormPr
   }
 
   return (
-    <div className="mx-8 mt-8">
-      <h2 className="text-sm font-semibold text-black dark:text-zinc-50">Programme Documents</h2>
-      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-        Upload Excel, PDF, or Word files (existing RAID logs, risk registers, project docs).
-        Delivery Intelligence uses these when building the RAID Register. All agents can reference
-        them.
-      </p>
+    <div className="flex flex-col gap-3 p-6">
+      <div>
+        <h2 className="font-semibold" style={{ color: "var(--navy)" }}>
+          Programme documents
+        </h2>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+          Upload Excel, PDF, or Word files (existing RAID logs, risk registers, project docs). Delivery Intelligence uses these when building the RAID Register.
+        </p>
+      </div>
 
-      <div className="mt-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-black/10 px-4 py-1.5 text-sm font-medium text-black transition-colors hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5">
+      <div className="flex items-center gap-3">
+        <label
+          className="inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90"
+          style={{
+            background: isUploading ? "var(--border)" : "var(--coral)",
+            pointerEvents: isUploading ? "none" : "auto",
+          }}
+        >
           <input
             ref={fileInputRef}
             type="file"
@@ -90,34 +97,43 @@ export function ProgrammeDocumentsForm({ programmeId }: ProgrammeDocumentsFormPr
           />
           {isUploading ? "Uploading…" : "Upload file"}
         </label>
-        <span className="ml-3 text-xs text-zinc-400 dark:text-zinc-500">
-          PDF, Excel (.xlsx/.xls), Word (.docx/.doc)
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+          PDF, Excel, Word
         </span>
       </div>
 
       {uploadError && (
-        <p className="mt-2 text-xs text-red-600 dark:text-red-400">{uploadError}</p>
+        <p className="text-xs" style={{ color: "#B91C1C" }}>
+          {uploadError}
+        </p>
       )}
 
       {documents.length > 0 && (
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="flex flex-col gap-2">
           {documents.map((doc) => (
             <li
               key={doc.id}
-              className="flex items-center justify-between rounded-lg border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-zinc-900"
+              className="flex items-center justify-between rounded-xl px-3 py-2.5"
+              style={{
+                background: "var(--bg)",
+                border: "1px solid var(--border)",
+              }}
             >
-              <div>
-                <p className="text-sm font-medium text-black dark:text-zinc-50">{doc.filename}</p>
-                <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium" style={{ color: "var(--navy)" }}>
+                  {doc.filename}
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                   {doc.file_type.toUpperCase()} ·{" "}
-                  {Math.round(doc.content_text.length / 1000)}k chars extracted ·{" "}
+                  {Math.round(doc.content_text.length / 1000)}k chars ·{" "}
                   {new Date(doc.created_at).toLocaleDateString()}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => handleDelete(doc.id)}
-                className="ml-4 text-xs text-zinc-400 transition-colors hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
+                className="ml-4 flex-shrink-0 text-xs transition-colors hover:opacity-60"
+                style={{ color: "var(--text-muted)" }}
               >
                 Remove
               </button>

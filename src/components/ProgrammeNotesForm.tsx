@@ -39,28 +39,45 @@ export function ProgrammeNotesForm({ programmeId, initialNotes }: ProgrammeNotes
   }
 
   return (
-    <form onSubmit={handleSave} className="flex max-w-xl flex-col gap-3 p-8">
-      <h2 className="text-lg font-medium text-black dark:text-zinc-50">Programme Notes</h2>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        Background context (methodology, regulatory environment, delivery phase) shared with every
-        agent in this programme, so you don&apos;t need to repeat it in every conversation.
-      </p>
+    <form onSubmit={handleSave} className="flex flex-col gap-3 p-6">
+      <div>
+        <h2 className="font-semibold" style={{ color: "var(--navy)" }}>
+          Programme notes
+        </h2>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+          Background context shared with every agent — methodology, regulatory environment, delivery phase. You don&apos;t need to repeat this in every conversation.
+        </p>
+      </div>
       <textarea
-        rows={6}
+        rows={5}
         value={notes}
         onChange={(event) => setNotes(event.target.value)}
         placeholder="e.g. Agile delivery, regulated UK retail banking environment, mid-implementation phase."
-        className="rounded-md border border-black/10 bg-white p-3 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+        className="w-full resize-none rounded-xl border px-3 py-2.5 text-sm outline-none transition-shadow focus:ring-2"
+        style={{
+          background: "var(--bg)",
+          border: "1px solid var(--border)",
+          color: "var(--navy)",
+        }}
       />
-      <button
-        type="submit"
-        disabled={isSaving}
-        className="self-start rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
-      >
-        {isSaving ? "Saving..." : "Save notes"}
-      </button>
-      {savedAt && <p className="text-sm text-zinc-500">Saved at {savedAt}</p>}
-      <p className="mt-4 text-sm text-zinc-400">Select an agent from the sidebar to begin a conversation.</p>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
+          style={{ background: "var(--coral)" }}
+        >
+          {isSaving ? "Saving…" : "Save notes"}
+        </button>
+        {savedAt && (
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Saved at {savedAt}
+          </p>
+        )}
+      </div>
+      <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+        Select an agent from the sidebar to begin a conversation.
+      </p>
     </form>
   );
 }

@@ -1,10 +1,18 @@
-// Email/password sign-in form.
+// Email/password sign-in form — Monzo-style inputs and coral button.
 
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
+
+const inputClass =
+  "w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-shadow focus:ring-2";
+const inputStyle = {
+  background: "var(--bg)",
+  border: "1px solid var(--border)",
+  color: "var(--navy)",
+};
 
 /** Sign-in form: email + password, redirects to / on success. */
 export function LoginForm() {
@@ -34,8 +42,8 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-black dark:text-zinc-50">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
           Email
         </label>
         <input
@@ -44,12 +52,13 @@ export function LoginForm() {
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="rounded-md border border-black/10 bg-white p-2 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+          className={inputClass}
+          style={inputStyle}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium text-black dark:text-zinc-50">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
           Password
         </label>
         <input
@@ -58,12 +67,16 @@ export function LoginForm() {
           required
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="rounded-md border border-black/10 bg-white p-2 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+          className={inputClass}
+          style={inputStyle}
         />
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+        <div
+          className="rounded-xl p-3 text-sm"
+          style={{ background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C" }}
+        >
           {error}
         </div>
       )}
@@ -71,9 +84,10 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="self-start rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+        className="w-full rounded-xl py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
+        style={{ background: "var(--coral)" }}
       >
-        {isSubmitting ? "Signing in..." : "Sign in"}
+        {isSubmitting ? "Signing in…" : "Sign in"}
       </button>
     </form>
   );

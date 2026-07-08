@@ -36,10 +36,8 @@ export function ArchiveProgrammeButton({ programmeId, archived }: ArchiveProgram
       }
 
       if (!archived) {
-        // Archiving — leave this programme's page.
         router.push("/");
       } else {
-        // Unarchiving — refresh the current page.
         router.refresh();
       }
     } catch {
@@ -50,32 +48,49 @@ export function ArchiveProgrammeButton({ programmeId, archived }: ArchiveProgram
   }
 
   return (
-    <div className="mx-8 mt-8">
-      <h2 className="text-sm font-semibold text-black dark:text-zinc-50">
-        {archived ? "Archived programme" : "Archive programme"}
-      </h2>
-      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-        {archived
-          ? "This programme is archived. All artefacts and history are preserved. Unarchive to make it active again."
-          : "Move this programme to the archive. All artefacts, sessions, and alerts are preserved — nothing is deleted."}
-      </p>
-
-      {error && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
-
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={isPending}
-        className="mt-3 rounded-full border border-black/10 px-4 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:border-black/20 hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/20 dark:hover:bg-white/5"
+    <div className="p-6 pt-0">
+      <div
+        className="rounded-xl px-4 py-4"
+        style={{
+          background: "var(--bg)",
+          border: "1px solid var(--border)",
+        }}
       >
-        {isPending
-          ? archived
-            ? "Unarchiving…"
-            : "Archiving…"
-          : archived
-            ? "Unarchive programme"
-            : "Archive programme"}
-      </button>
+        <h2 className="text-sm font-semibold" style={{ color: "var(--navy)" }}>
+          {archived ? "Archived programme" : "Archive programme"}
+        </h2>
+        <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          {archived
+            ? "This programme is archived. All artefacts and history are preserved. Unarchive to make it active again."
+            : "Move this programme to the archive. All artefacts, sessions, and alerts are preserved — nothing is deleted."}
+        </p>
+
+        {error && (
+          <p className="mt-2 text-xs" style={{ color: "#B91C1C" }}>
+            {error}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={handleClick}
+          disabled={isPending}
+          className="mt-3 rounded-xl border px-4 py-2 text-sm font-medium transition-all hover:opacity-80 disabled:opacity-40"
+          style={{
+            border: "1px solid var(--border)",
+            color: "var(--text-secondary)",
+            background: "var(--surface)",
+          }}
+        >
+          {isPending
+            ? archived
+              ? "Unarchiving…"
+              : "Archiving…"
+            : archived
+              ? "Unarchive programme"
+              : "Archive programme"}
+        </button>
+      </div>
     </div>
   );
 }

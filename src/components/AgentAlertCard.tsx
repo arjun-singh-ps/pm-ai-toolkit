@@ -1,5 +1,5 @@
 // Insight card for one proactive agent alert. Renders the three-part structure
-// (what / why it matters / suggested action) with three dismiss reasons and a
+// (what / why it matters / suggested action) with dismiss reasons and a
 // direct link to the agent with alert context pre-loaded.
 //
 // Design rule: the card must answer "why should I act on this right now?" in
@@ -62,43 +62,69 @@ export function AgentAlertCard({ alert, programmeId, onDismissed }: AgentAlertCa
   }
 
   return (
-    <div className="rounded-lg border border-black/10 bg-white p-4 dark:border-white/10 dark:bg-zinc-900">
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+        <span
+          className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+          style={{ background: "var(--coral-light)", color: "var(--coral)" }}
+        >
           ⚡ {agentDisplayName(alert.agent_name)}
+        </span>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          {timeAgo(alert.triggered_at)}
         </p>
-        <p className="text-xs text-zinc-400 dark:text-zinc-500">{timeAgo(alert.triggered_at)}</p>
       </div>
 
       {/* What */}
-      <p className="mt-2 text-sm font-medium text-black dark:text-zinc-50">{alert.what}</p>
+      <p className="mt-2.5 text-sm font-semibold leading-snug" style={{ color: "var(--navy)" }}>
+        {alert.what}
+      </p>
 
       {/* Why it matters */}
       <ul className="mt-2 flex flex-col gap-1">
         {alert.why_matters.map((bullet, i) => (
-          <li key={i} className="flex gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-            <span className="mt-0.5 flex-shrink-0 text-zinc-400">·</span>
+          <li key={i} className="flex gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+            <span className="mt-0.5 flex-shrink-0" style={{ color: "var(--coral)" }}>·</span>
             {bullet}
           </li>
         ))}
       </ul>
 
       {/* Suggested action */}
-      <div className="mt-3 rounded-md bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
-        <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Suggested action</p>
-        <p className="mt-0.5 text-sm text-black dark:text-zinc-50">{alert.suggested_action}</p>
+      <div
+        className="mt-3 rounded-xl px-3 py-2.5"
+        style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          Suggested action
+        </p>
+        <p className="mt-1 text-sm" style={{ color: "var(--navy)" }}>
+          {alert.suggested_action}
+        </p>
       </div>
 
       {/* Controls */}
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         {DISMISS_REASONS.map((reason) => (
           <button
             key={reason}
             type="button"
             disabled={isDismissing}
             onClick={() => handleDismiss(reason)}
-            className="rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5"
+            className="rounded-full px-3 py-1 text-xs font-medium transition-all hover:opacity-80 disabled:opacity-40"
+            style={{
+              background: "var(--bg)",
+              color: "var(--text-secondary)",
+              border: "1px solid var(--border)",
+            }}
           >
             {DISMISS_REASON_LABELS[reason]}
           </button>
@@ -106,9 +132,10 @@ export function AgentAlertCard({ alert, programmeId, onDismissed }: AgentAlertCa
 
         <Link
           href={`/programme/${programmeId}/agents/${alert.agent_name}?alertId=${alert.id}`}
-          className="ml-auto rounded-full border border-black/20 px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-black/5 dark:border-white/20 dark:text-zinc-50 dark:hover:bg-white/5"
+          className="ml-auto rounded-full px-3 py-1 text-xs font-semibold transition-all hover:opacity-80"
+          style={{ background: "var(--coral)", color: "#fff" }}
         >
-          Open {agentDisplayName(alert.agent_name)} →
+          Open agent →
         </Link>
       </div>
     </div>

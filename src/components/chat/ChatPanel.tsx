@@ -144,26 +144,32 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col" style={{ background: "var(--bg)" }}>
       {alertContext && (
-        <div className="mx-4 mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-950">
-          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+        <div
+          className="mx-4 mt-3 rounded-xl px-3 py-2.5"
+          style={{
+            background: "#FFFBEB",
+            border: "1px solid #FDE68A",
+          }}
+        >
+          <p className="text-xs font-semibold" style={{ color: "#D97706" }}>
             ⚡ Opened from a {agentDisplayName} alert
           </p>
-          <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300">{alertContext.what}</p>
+          <p className="mt-0.5 text-xs" style={{ color: "#92400E" }}>{alertContext.what}</p>
         </div>
       )}
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
         {isLoadingHistory ? (
-          <p className="text-sm text-zinc-400">Loading conversation…</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading conversation…</p>
         ) : (
           messages
             .filter((m) => m.text !== WELCOME_INIT_MARKER)
             .map((message, index) => <MessageBubble key={index} message={message} />)
         )}
         {isSending && (
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             {messages.length === 0 ? `${agentDisplayName} is preparing your briefing…` : `${agentDisplayName} is thinking…`}
           </p>
         )}
@@ -171,24 +177,41 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
       </div>
 
       {error && (
-        <div className="mx-4 mb-2 rounded-lg border border-red-300 bg-red-50 p-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+        <div
+          className="mx-4 mb-2 rounded-xl p-3 text-sm"
+          style={{
+            background: "#FEF2F2",
+            border: "1px solid #FECACA",
+            color: "#B91C1C",
+          }}
+        >
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSend} className="flex gap-2 border-t border-black/10 p-3 dark:border-white/10">
+      <form
+        onSubmit={handleSend}
+        className="flex items-end gap-2 p-3"
+        style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}
+      >
         <textarea
           rows={2}
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={`Message ${agentDisplayName}...`}
-          className="flex-1 resize-none rounded-md border border-black/10 bg-white p-2 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+          placeholder={`Message ${agentDisplayName}…`}
+          className="flex-1 resize-none rounded-2xl px-4 py-2.5 text-sm outline-none transition-shadow focus:ring-2"
+          style={{
+            background: "var(--bg)",
+            border: "1px solid var(--border)",
+            color: "var(--navy)",
+          }}
         />
         <button
           type="submit"
           disabled={isSending || !input.trim()}
-          className="self-end rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="flex-shrink-0 self-end rounded-full px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
+          style={{ background: "var(--coral)" }}
         >
           Send
         </button>

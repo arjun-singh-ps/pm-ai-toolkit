@@ -1,4 +1,4 @@
-// Root layout: wraps every page with the shared top navigation.
+// Root layout: shared top navigation with Monzo-inspired coral branding.
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -7,59 +7,58 @@ import { getCurrentUserEmail } from "@/lib/auth";
 import { signOutAction } from "@/app/actions/auth";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PM AI Toolkit",
-  description: "AI-assisted delivery toolkit for banking programme managers",
+  title: "PM Copilot",
+  description: "AI-powered delivery copilot for banking programme managers",
 };
 
-/** Shared shell rendered around every route: fonts, global CSS, and the top nav. */
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const userEmail = await getCurrentUserEmail();
 
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <nav className="flex justify-center border-b border-black/10 bg-white dark:border-white/10 dark:bg-zinc-950">
-          <div className="flex w-full max-w-3xl items-center justify-between px-6 py-3">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
+      <body className="flex min-h-full flex-col" style={{ background: "var(--bg)" }}>
+        <nav style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+            {/* Brand */}
             <div className="flex items-center gap-6">
-              <Link
-                href="/"
-                className="text-sm font-medium text-black dark:text-zinc-50"
-              >
-                Programmes
+              <Link href="/" className="flex items-center gap-2">
+                <span
+                  className="flex h-7 w-7 items-center justify-center rounded-xl text-xs font-bold text-white"
+                  style={{ background: "var(--coral)" }}
+                >
+                  PM
+                </span>
+                <span className="hidden font-semibold sm:block" style={{ color: "var(--navy)" }}>
+                  PM Copilot
+                </span>
               </Link>
               <Link
                 href="/settings"
-                className="text-sm font-medium text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                className="text-sm transition-colors hover:opacity-100"
+                style={{ color: "var(--text-secondary)" }}
               >
                 Settings
               </Link>
             </div>
 
+            {/* User */}
             {userEmail && (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-zinc-500 dark:text-zinc-400">{userEmail}</span>
+                <span
+                  className="hidden truncate text-sm sm:block"
+                  style={{ color: "var(--text-muted)", maxWidth: "180px" }}
+                >
+                  {userEmail}
+                </span>
                 <form action={signOutAction}>
                   <button
                     type="submit"
-                    className="text-sm font-medium text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                    className="rounded-full px-3 py-1.5 text-sm font-medium transition-colors hover:opacity-80"
+                    style={{ color: "var(--coral)" }}
                   >
                     Sign out
                   </button>
@@ -68,7 +67,8 @@ export default async function RootLayout({
             )}
           </div>
         </nav>
-        {children}
+
+        <div className="flex flex-1 flex-col">{children}</div>
       </body>
     </html>
   );

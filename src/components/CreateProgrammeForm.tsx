@@ -1,4 +1,5 @@
 // Client form for creating a new programme from the landing page.
+// Monzo-style inputs, coral submit button, persona as styled radio cards.
 
 "use client";
 
@@ -6,6 +7,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { REGULATORY_FRAMEWORKS } from "@/lib/constants";
 import type { Persona } from "@/types/programme";
+
+const inputClass = "w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-shadow focus:ring-2";
+const inputStyle = {
+  background: "var(--bg)",
+  border: "1px solid var(--border)",
+  color: "var(--navy)",
+};
+const labelClass = "text-xs font-semibold uppercase tracking-wider";
 
 /** Lets the user create a programme (name, client, persona, regulatory frameworks) and navigates into it. */
 export function CreateProgrammeForm() {
@@ -55,9 +64,9 @@ export function CreateProgrammeForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name" className="text-sm font-medium text-black dark:text-zinc-50">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="name" className={labelClass} style={{ color: "var(--text-muted)" }}>
           Programme name
         </label>
         <input
@@ -65,55 +74,95 @@ export function CreateProgrammeForm() {
           required
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="rounded-md border border-black/10 bg-white p-2 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+          placeholder="e.g. Core Banking Modernisation"
+          className={inputClass}
+          style={inputStyle}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="client" className="text-sm font-medium text-black dark:text-zinc-50">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="client" className={labelClass} style={{ color: "var(--text-muted)" }}>
           Client (optional)
         </label>
         <input
           id="client"
           value={client}
           onChange={(event) => setClient(event.target.value)}
-          className="rounded-md border border-black/10 bg-white p-2 text-sm text-black dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-50"
+          placeholder="e.g. Barclays"
+          className={inputClass}
+          style={inputStyle}
         />
       </div>
 
+      {/* Persona selector */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-medium text-black dark:text-zinc-50">Persona</legend>
-        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-          <input
-            type="radio"
-            name="persona"
-            checked={persona === "legacy"}
-            onChange={() => setPersona("legacy")}
-          />
-          Modernising Legacy Journey
-        </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-          <input
-            type="radio"
-            name="persona"
-            checked={persona === "agentic"}
-            onChange={() => setPersona("agentic")}
-          />
-          Agentic Delivery (not yet available)
-        </label>
+        <legend className={labelClass} style={{ color: "var(--text-muted)" }}>
+          Persona
+        </legend>
+        <div className="flex flex-col gap-2">
+          {(
+            [
+              { value: "legacy", label: "Modernising Legacy Journey", available: true },
+              { value: "agentic", label: "Agentic Delivery", available: false },
+            ] as const
+          ).map(({ value, label, available }) => (
+            <label
+              key={value}
+              className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 transition-all"
+              style={{
+                background: persona === value ? "var(--coral-light)" : "var(--bg)",
+                border: `1px solid ${persona === value ? "var(--coral)" : "var(--border)"}`,
+                opacity: available ? 1 : 0.5,
+              }}
+            >
+              <input
+                type="radio"
+                name="persona"
+                checked={persona === value}
+                onChange={() => available && setPersona(value)}
+                disabled={!available}
+                className="accent-[var(--coral)]"
+              />
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--navy)" }}>
+                  {label}
+                </p>
+                {!available && (
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    Coming soon
+                  </p>
+                )}
+              </div>
+            </label>
+          ))}
+        </div>
       </fieldset>
 
+      {/* Regulatory frameworks */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-medium text-black dark:text-zinc-50">
+        <legend className={labelClass} style={{ color: "var(--text-muted)" }}>
           Regulatory frameworks (optional)
         </legend>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {REGULATORY_FRAMEWORKS.map((framework) => (
-            <label key={framework} className="flex items-center gap-1.5 text-sm text-zinc-700 dark:text-zinc-300">
+            <label
+              key={framework}
+              className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all"
+              style={
+                frameworks.includes(framework)
+                  ? { background: "var(--coral)", color: "#fff" }
+                  : {
+                      background: "var(--bg)",
+                      color: "var(--text-secondary)",
+                      border: "1px solid var(--border)",
+                    }
+              }
+            >
               <input
                 type="checkbox"
                 checked={frameworks.includes(framework)}
                 onChange={() => toggleFramework(framework)}
+                className="sr-only"
               />
               {framework}
             </label>
@@ -122,7 +171,10 @@ export function CreateProgrammeForm() {
       </fieldset>
 
       {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+        <div
+          className="rounded-xl p-3 text-sm"
+          style={{ background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C" }}
+        >
           {error}
         </div>
       )}
@@ -130,9 +182,10 @@ export function CreateProgrammeForm() {
       <button
         type="submit"
         disabled={isSubmitting || persona === "agentic"}
-        className="self-start rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+        className="w-full rounded-xl py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
+        style={{ background: "var(--coral)" }}
       >
-        {isSubmitting ? "Creating..." : "Create programme"}
+        {isSubmitting ? "Creating…" : "Create programme"}
       </button>
     </form>
   );

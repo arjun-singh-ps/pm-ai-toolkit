@@ -13,7 +13,7 @@ interface ProgrammeFrameworksFormProps {
   initialFrameworks: string[];
 }
 
-/** Checkbox editor for a programme's regulatory frameworks, persisted via PATCH. */
+/** Toggle pills for a programme's regulatory frameworks, persisted via PATCH. */
 export function ProgrammeFrameworksForm({ programmeId, initialFrameworks }: ProgrammeFrameworksFormProps) {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>(initialFrameworks);
@@ -48,33 +48,55 @@ export function ProgrammeFrameworksForm({ programmeId, initialFrameworks }: Prog
   }
 
   return (
-    <form onSubmit={handleSave} className="flex max-w-xl flex-col gap-3 p-8 pt-0">
-      <h2 className="text-lg font-medium text-black dark:text-zinc-50">Regulatory Frameworks</h2>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        Select the frameworks in scope for this programme. Governance Guardian uses these to
-        review your artefacts — changes take effect on the next conversation turn.
-      </p>
-      <div className="flex flex-wrap gap-x-6 gap-y-2">
+    <form onSubmit={handleSave} className="flex flex-col gap-3 p-6 pt-0">
+      <div>
+        <h2 className="font-semibold" style={{ color: "var(--navy)" }}>
+          Regulatory frameworks
+        </h2>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+          Governance Guardian reviews artefacts against these frameworks — changes take effect on the next conversation turn.
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
         {REGULATORY_FRAMEWORKS.map((framework) => (
-          <label key={framework} className="flex cursor-pointer items-center gap-2 text-sm text-black dark:text-zinc-50">
+          <label
+            key={framework}
+            className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all"
+            style={
+              selected.includes(framework)
+                ? { background: "var(--coral)", color: "#fff" }
+                : {
+                    background: "var(--bg)",
+                    color: "var(--text-secondary)",
+                    border: "1px solid var(--border)",
+                  }
+            }
+          >
             <input
               type="checkbox"
               checked={selected.includes(framework)}
               onChange={() => handleToggle(framework)}
-              className="rounded border-black/20 dark:border-white/20"
+              className="sr-only"
             />
             {framework}
           </label>
         ))}
       </div>
-      <button
-        type="submit"
-        disabled={isSaving}
-        className="self-start rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
-      >
-        {isSaving ? "Saving..." : "Save frameworks"}
-      </button>
-      {savedAt && <p className="text-sm text-zinc-500">Saved at {savedAt}</p>}
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
+          style={{ background: "var(--coral)" }}
+        >
+          {isSaving ? "Saving…" : "Save frameworks"}
+        </button>
+        {savedAt && (
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Saved at {savedAt}
+          </p>
+        )}
+      </div>
     </form>
   );
 }

@@ -323,16 +323,28 @@ threshold logic and cross-session memory are built:
 **Reactive** per programme from the programme settings screen (the same screen as Notes and
 Regulatory Frameworks). The preference is stored in `programmes.proactive_agents[]` and
 displayed as a ⚡ badge in the sidebar for proactive agents. A banner on the programme home
-screen lists active proactive agents and prompts the user to open them for their latest
-assessment.
+screen lists active proactive agents.
 
 Performance Pulse is shown in the toggle UI but disabled (marked "coming soon") — it is not
 yet implemented.
 
-**What the toggle does NOT do yet** — the scheduled trigger infrastructure (cron job, threshold
-configuration per programme, in-app alert table) does not yet exist. Proactive mode stores and
-displays the user's intent; the agents still only run when opened. See Technical Documentation
-§13 for the full architecture of what full proactive behaviour requires.
+**Proactive insight cards (BUILT)** — when a monitoring agent (Signal Watch, Delivery Heartbeat,
+Cost Compass) runs and detects something worth flagging, it calls a `record_alert` tool that
+writes a structured entry to the `agent_alerts` table. The programme home screen shows one
+dismissible card per active alert. Each card carries: a one-line WHAT, up to three WHY IT MATTERS
+bullets, and a SUGGESTED ACTION — enough context to decide whether to act without opening the
+agent. Three dismiss reasons are available (`Not relevant`, `Already handled`, `Monitor next
+sprint`), stored for feedback-loop analysis.
+
+**Pre-briefed sessions (BUILT)** — "Open [Agent] →" on an alert card navigates to the agent
+with `?alertId=` in the URL. On a new session, the alert's context is injected into the agent's
+opening briefing so it leads directly with the specific flag rather than a generic introduction.
+An amber banner in the chat confirms the session is contextualised to the alert.
+
+**What is NOT yet built** — the scheduled trigger infrastructure (cron job, automatic threshold
+checks). Proactive mode stores intent and surfaces cards when the user manually opens a monitoring
+agent; the agents still only run on demand. See Technical Documentation §13 for the full
+architecture of what automatic triggering requires.
 
 ## 11. Known product gaps (intentional, not bugs)
 

@@ -71,6 +71,16 @@ gated behind phase progression:
   and KPI data: SteerCo Pack, Board Signal, Escalation Notice, and Stakeholder Bulletin — each
   for a distinct audience and cadence.
 
+**KPI capture** is live — three delivery agents (Delivery Intelligence, Signal Watch, and
+Delivery Heartbeat) ask about and record specific numeric metrics during their conversations,
+covering all three KPI levers: Quality of Modernisation, Pace of Modernisation, and AI Tool
+Upskill. Recorded values appear in the KPIs tab of the right panel, grouped by lever, and are
+available to Cost Compass and Comms Architect as context for their outputs.
+
+**Regulatory frameworks are editable** — the compliance frameworks in scope (PRA, FCA, DORA,
+etc.) can now be added or removed from an existing programme at any time from the programme
+screen, not just at creation. Governance Guardian picks up the change on the next conversation.
+
 **MCP integrations** are live — connect Jira, Confluence, SharePoint, or any MCP-compatible
 server in Settings, and every agent automatically has access to those tools when generating
 artefacts. Claude can fetch real Jira tickets or read Confluence pages mid-conversation without

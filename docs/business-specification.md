@@ -113,39 +113,54 @@ toggleable to proactive mode in the Agent Mode settings.
 
 ## 3. Cross-cutting agents
 
-Nine named in the original vision: Orchestrator, Persona Selector, Artefact State, KPI Monitor,
-Responsible AI, Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect.
+All nine are **now built and live**. They share the same architecture: `AgentConfig` in
+`src/agents/cross-cutting/`, server-only context builder in `src/lib/*Context.ts`, wired via
+`src/lib/crossCuttingContext.ts`. Their artefacts are tagged `phase: "cross-cutting"` — visible in
+the Artefacts tab and History but never counted toward any phase's gate checklist.
 
-All four header-button agents are **now built and live**. Orchestrator, Persona Selector,
-Artefact State, KPI Monitor, and Responsible AI have no UI presence yet and no backing logic.
+The nine agents are split into two groups in the header: **Programme Intelligence** (advisory,
+contextual) and **Delivery Outputs** (produce governed artefacts).
 
-**Governance Guardian (BUILT)** — reviews the programme's existing artefacts (any status —
-approved and draft, status-labeled) against its selected regulatory frameworks and produces:
-Compliance Charter, Governance Pulse, Regulatory Gap Matrix. If no frameworks are selected or no
-artefacts exist yet, it says so plainly rather than producing generic output — directly
-satisfying rule #10 below.
+### Programme Intelligence group (header — group 1)
 
-**Cost Compass (BUILT)** — reviews token spend from the programme's `cost_records`, aggregates
-by agent using Decimal arithmetic, and produces: Cost Blueprint (total spend broken down by
-agent/phase, plain-language interpretation) and Spend Signal (spend velocity, forward projection
-at current run rate, optimisation options). Tracks differently per persona: Legacy = cost per
-agent/artefact/sprint vs hours saved; Agentic = chassis vs pillar costs, cost per user, cost per
-1,000 prompts.
+**Navigator / Orchestrator (BUILT)** — reads the programme's full progress map (artefacts by agent,
+completion status) and advises on what to work on next, what's blocking progress, and what the
+specific risks are of skipping any step. Advisory only — no fixed artefacts produced. Context:
+progress map from `orchestratorContext.ts`.
 
-**Roadmap Architect (BUILT)** — injects the programme's existing artefact summary and produces:
-Horizon Map (phase-and-milestone timeline for the delivery team, persona-specific), Sprint Canvas
-(sprint-by-sprint plan derived from the active backlog artefact), and Stakeholder Roadmap (one-page
-executive summary, business outcomes only, no programme jargon).
+**Persona Guide / Persona Selector (BUILT)** — advises the PM on which persona best fits their
+programme (Legacy vs Agentic), or reviews whether a mid-programme switch makes sense given work
+already done. Produces: Persona Recommendation. Context: current persona commitment + artefact
+summary from `personaSelectorContext.ts`.
 
-**Comms Architect (BUILT)** — injects artefacts and KPI snapshots and produces: SteerCo Pack
-(weekly/fortnightly, RAG status, decisions, risks), Board Signal (monthly, one page, board-level
-language), Escalation Notice (condition-triggered, crisp factual format), and Stakeholder Bulletin
-(broader team update, non-technical).
+**Artefact State (BUILT)** — produces a Programme Status Report: a comprehensive, decision-ready
+view of all artefacts grouped by agent in phase order, what's approved, what's awaiting PM review,
+and what hasn't been started yet. Context: detailed status map from `artefactStateContext.ts`.
 
-All four follow the same architecture: `AgentConfig` in `src/agents/cross-cutting/`, server-only
-context builder in `src/lib/*Context.ts`, wired via `src/lib/crossCuttingContext.ts`. Their
-artefacts are tagged `phase: "cross-cutting"` — visible in the Artefacts tab and History but
-never counted toward any phase's gate checklist.
+**KPI Monitor (BUILT)** — interprets the programme's KPI snapshot data, identifies metrics moving
+in the wrong direction, and recommends specific actions tied to specific agents. Produces: KPI
+Interpretation Report. Context: grouped snapshots with trend data + artefact summary from
+`kpiMonitorContext.ts`.
+
+**AI Safety Review / Responsible AI (BUILT)** — reviews any AI-generated artefact for safety,
+fairness, and regulatory compliance before it is approved. Produces: AI Safety Review (per
+artefact) and Guardrail Compliance Report (programme-wide). Must cite active regulatory frameworks
+by name. Context: artefact summary from `responsibleAiContext.ts`.
+
+### Delivery Outputs group (header — group 2)
+
+**Governance Guardian (BUILT)** — reviews the programme's existing artefacts against its selected
+regulatory frameworks and produces: Compliance Charter, Governance Pulse, Regulatory Gap Matrix.
+Directly enforces rule #10 — never produces generic governance output.
+
+**Cost Compass (BUILT)** — reviews token spend, aggregates by agent using Decimal arithmetic, and
+produces: Cost Blueprint and Spend Signal. Tracks differently per persona.
+
+**Roadmap Architect (BUILT)** — injects the programme's artefact summary and produces: Horizon Map,
+Sprint Canvas, and Stakeholder Roadmap.
+
+**Comms Architect (BUILT)** — injects artefacts and KPI snapshots and produces: SteerCo Pack,
+Board Signal, Escalation Notice, and Stakeholder Bulletin.
 
 ## 4. Business rules (status per rule)
 
@@ -158,7 +173,7 @@ never counted toward any phase's gate checklist.
 | 5 | Skipped input → warn of risk, proceed with a stated assumption, flag in the artefact | **Enforced via agent prompting** — agents are instructed to do this; not independently validated by code. |
 | 6 | Tone varies by audience (engineering / SteerCo / board) | **Not enforced** — no audience-selection mechanism exists yet. |
 | 7 | Scale-phase agents are strategic advisers only, no fixed artefacts | **Enforced structurally** — Scale agents have `produces: []`; the engine's `record_artefact` validation rejects any artefact name not in the produces list, and the Gate tab has nothing to check. |
-| 8 | Responsible AI guardrails surfaced proactively | **Partially enforced** — every artefact is labelled "AI-generated, review before use"; no dedicated guardrail agent exists. |
+| 8 | Responsible AI guardrails surfaced proactively | **Enforced** — every artefact is labelled "AI-generated, review before use"; the AI Safety Review agent (header group 1) is available at any time to formally review any artefact for safety, fairness, and regulatory alignment before it is approved. |
 | 9 | Never conflate "Prompt Catalogue" with "Agent Prompt Fabric" | **Enforced via agent prompting** — Agent Foundations (Incubate) explicitly distinguishes the two in its system prompt; Scale Readiness (Prove) explains Prompt Catalogue as the scaled, shareable version distinct from the operational Fabric. |
 | 10 | Governance Guardian must reference selected regulatory frameworks | **Enforced via agent prompting** — its system prompt requires referencing the programme's actual selected frameworks and existing artefact content, and explicitly refuses to produce generic output when frameworks or artefacts are missing; verified live, not just in the prompt text. |
 

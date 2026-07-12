@@ -44,10 +44,12 @@ produced → approve it → the next step unlocks.**
 - **Phase gate** — the checklist of every artefact required to complete a phase. Once every
   artefact in the current phase is approved, the gate is "clear" and the next phase can unlock.
 - **Cross-cutting agent** — unlike phase agents, available immediately on any programme via a
-  header button rather than the sidebar, and not gated behind phase progression. Four are built:
-  Governance Guardian, Cost Compass, Roadmap Architect, and Comms Architect.
+  header button rather than the sidebar, and not gated behind phase progression. All nine are
+  built, in two groups: Programme Intelligence (Navigator, Persona Guide, Artefact State, KPI
+  Monitor, AI Safety Review) and Delivery Outputs (Governance Guardian, Cost Compass, Roadmap
+  Architect, Comms Architect).
 - **Reactive agent** — an agent that responds when you open it and start a conversation. All
-  33 agents in the product today are reactive: they receive full programme context automatically,
+  40 agents in the product today are reactive: they receive full programme context automatically,
   but they wait for you to initiate. Most fall into one of three patterns: *conversational
   reactive* (interview-then-generate, gathering new information from the PM), *synthesis reactive*
   (reading existing artefacts and KPIs to produce analysis or communications), or *monitoring
@@ -66,9 +68,23 @@ The **Modernising Legacy Journey** persona is **fully built and complete**: all 
 conversation, with approval and phase-gating enforced end to end — including the phase
 transitions themselves, not just checklists.
 
-**All four cross-cutting header agents are live** — available immediately on any programme, not
-gated behind phase progression:
+**All nine cross-cutting header agents are live** — available immediately on any programme, not
+gated behind phase progression. They sit in two groups:
 
+**Programme Intelligence group** (grey pills, advisory):
+- **Navigator** — reads the programme's full progress map and gives specific, grounded navigation
+  advice: what to do next, what's blocked, what risks come with skipping a step. Advisory only.
+- **Persona Guide** — helps you choose or review your persona choice (Legacy vs Agentic);
+  produces a Persona Recommendation document.
+- **Artefact State** — produces a Programme Status Report: every artefact by agent in phase
+  order, what's approved, what's awaiting review, what's missing, what comes next.
+- **KPI Monitor** — interprets your KPI data, identifies metrics moving the wrong way, recommends
+  specific actions tied to specific agents. Produces a KPI Interpretation Report.
+- **AI Safety Review** — reviews any artefact for safety, fairness, and regulatory compliance
+  before approval. Produces an AI Safety Review (per artefact) and a Guardrail Compliance Report
+  (programme-wide audit trail).
+
+**Delivery Outputs group** (coral pills, produce governed artefacts):
 - **Governance Guardian** — reviews your programme's actual artefacts against the regulatory
   frameworks you selected (PRA, FCA, DORA, etc.) and produces a Compliance Charter, Governance
   Pulse, and Regulatory Gap Matrix. Grounded in your real content, not generic boilerplate.

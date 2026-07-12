@@ -24,6 +24,11 @@ import { governanceGuardianAgent } from "@/agents/cross-cutting/governanceGuardi
 import { costCompassAgent } from "@/agents/cross-cutting/costCompass";
 import { roadmapArchitectAgent } from "@/agents/cross-cutting/roadmapArchitect";
 import { commsArchitectAgent } from "@/agents/cross-cutting/commsArchitect";
+import { orchestratorAgent } from "@/agents/cross-cutting/orchestrator";
+import { personaSelectorAgent } from "@/agents/cross-cutting/personaSelector";
+import { artefactStateAgent } from "@/agents/cross-cutting/artefactState";
+import { kpiMonitorAgent } from "@/agents/cross-cutting/kpiMonitor";
+import { responsibleAiAgent } from "@/agents/cross-cutting/responsibleAi";
 import { visionIgnitionAgent } from "@/agents/agentic/envision/visionIgnition";
 import { mvpCovenantAgent } from "@/agents/agentic/envision/mvpCovenant";
 import { useCaseDiscoveryAgent } from "@/agents/agentic/shape/useCaseDiscovery";
@@ -104,6 +109,11 @@ export const CROSS_CUTTING_AGENTS: AgentConfig[] = [
   costCompassAgent,
   roadmapArchitectAgent,
   commsArchitectAgent,
+  orchestratorAgent,
+  personaSelectorAgent,
+  artefactStateAgent,
+  kpiMonitorAgent,
+  responsibleAiAgent,
 ];
 
 const ALL_AGENTS: AgentConfig[] = [

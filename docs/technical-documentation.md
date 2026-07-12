@@ -101,23 +101,31 @@ hardcoded elsewhere.
 
 ### 4.1 Cross-cutting agents — a phase-independent variant of the same config
 
-The first cross-cutting agent, Governance Guardian, reuses `AgentConfig` as-is rather than a
-separate type — no code path needed to change. Two sentinel-like choices make this work:
+All nine cross-cutting agents reuse `AgentConfig` as-is rather than a separate type — no code
+path needed to change. Two sentinel-like choices make this work:
 
 - `phase: "cross-cutting"` never matches a real `programme.active_phase`, so
   `listAgentsForPhase` (and therefore the Sidebar and `isPhaseGateClear`) never returns it —
   confirmed by a dedicated test (`tests/unit/registry.test.ts`) iterating every real phase
   across both personas. **Any future "list a programme's available agents" code must filter
   `phase === "cross-cutting"` directly — never reuse `listAgentsForPhase` for that.**
-- `persona: "legacy"` is a pragmatic stand-in — all four cross-cutting agents use it. Agentic
-  Delivery is now built, but these agents are genuinely persona-agnostic; the type doesn't
-  support that today. Any future "list all agents for a programme" code must filter
-  `phase === "cross-cutting"` directly, never via `listAgentsForPhase`.
+- `persona: "legacy"` is a pragmatic stand-in — all nine cross-cutting agents use it. They are
+  genuinely persona-agnostic; the type doesn't support that today. Any future "list all agents
+  for a programme" code must filter `phase === "cross-cutting"` directly, not via
+  `listAgentsForPhase`.
 - `dependsOnAgents: []` — no gating, available the instant a programme exists. The existing
   generic chat route (`src/app/programme/[id]/agents/[agentName]/page.tsx`) needed **zero
   changes** — `canRunAgent` already returns `{allowed: true}` unconditionally for an empty
-  dependency list. All four cross-cutting agents are linked from `src/components/shell/Header.tsx`
-  as `Link` components (Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect).
+  dependency list.
+
+All nine agents are linked from `src/components/shell/Header.tsx` in two visual groups:
+- **Programme Intelligence** (grey pills): Navigator, Persona Guide, Artefact State, KPI Monitor,
+  AI Safety Review
+- **Delivery Outputs** (coral pills): Governance Guardian, Cost Compass, Roadmap Architect,
+  Comms Architect
+
+The `orchestrator` agent uses `produces: []` like the Scale advisers — it is purely advisory.
+The guardrail test suite exempts it alongside Scale agents in the "produces artefacts" check.
 
 ### 4.2 Portfolio-wide context — and the client-bundle trap it almost reintroduced
 
@@ -148,11 +156,20 @@ graph — caught before shipping, not after, this time.
   `formatArtefactSummary`.
 - `src/lib/crossCuttingContext.ts` (server-only) — a small `agentName → builder` map, imported
   only by `src/lib/agentEngine.ts`. `runAgentTurn` calls `getExtraContext(agentName, programmeId)`
-  generically and appends a non-null result to the system prompt. Currently maps all four
-  cross-cutting agents: Governance Guardian → artefacts, Cost Compass → `cost_records` aggregated
-  by agent using Decimal arithmetic, Roadmap Architect → artefacts, Comms Architect → artefacts
-  plus KPI snapshots (fetched in parallel). Adding another cross-cutting agent means one new entry
-  here and one new server-only context file — `agentEngine.ts` itself doesn't change.
+  generically and appends a non-null result to the system prompt. Currently maps all nine
+  cross-cutting agents:
+  - Governance Guardian → artefacts
+  - Cost Compass → `cost_records` aggregated by agent using Decimal arithmetic
+  - Roadmap Architect → artefacts
+  - Comms Architect → artefacts plus KPI snapshots (fetched in parallel)
+  - Orchestrator → full programme progress map (agents × artefacts, completion state)
+  - Persona Selector → current persona commitment + artefact summary
+  - Artefact State → detailed agent-by-agent status map with awaiting-approval list
+  - KPI Monitor → grouped KPI snapshots with trend data (current + previous per metric) + artefact summary
+  - AI Safety Review → artefact summary (same pattern as Governance Guardian)
+
+  Adding another cross-cutting agent means one new entry here and one new server-only context
+  file — `agentEngine.ts` itself doesn't change.
 
 ### Adding a new agent
 1. Create `src/agents/<persona>/<phase>/<agentName>.ts` exporting one `AgentConfig`.
@@ -317,7 +334,7 @@ figures are used for real spend reporting.
 | `/api/documents/[id]` | DELETE | Remove a document; requires auth |
 | `/auth/callback` | GET | Exchanges an email-confirmation code for a session (§5.4) |
 
-All four cross-cutting agents needed **no new routes** — `/api/agents/[agentName]/chat` and
+All nine cross-cutting agents needed **no new routes** — `/api/agents/[agentName]/chat` and
 `/api/agents/[agentName]/session` are already generic by agent name (§4.1). The header buttons
 are all live `Link` components pointing to the standard agent route.
 
@@ -371,7 +388,7 @@ Playwright suite in `tests/e2e/`. Requires `TEST_USER_EMAIL` and `TEST_USER_PASS
   — it runs in the Playwright process, not in Next.js.
 - `tests/e2e/auth.spec.ts` — authenticated home page, Settings nav, sign out → `/login`.
 - `tests/e2e/legacy-journey.spec.ts` — seeds all 14 Foundation artefacts as approved, then
-  exercises: sidebar renders Foundation phase, all 4 cross-cutting header links present, Gate
+  exercises: sidebar renders Foundation phase, cross-cutting header links present, Gate
   tab shows clear, Advance to Forge button works, programme advances to forge phase, Artefacts
   tab lists seeded items.
 

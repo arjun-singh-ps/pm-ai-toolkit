@@ -10,6 +10,11 @@ import { buildCostCompassContext } from "@/lib/costCompassContext";
 import { buildRoadmapArchitectContext } from "@/lib/roadmapArchitectContext";
 import { buildCommsArchitectContext } from "@/lib/commsArchitectContext";
 import { buildDeliveryIntelligenceContext } from "@/lib/deliveryIntelligenceContext";
+import { buildOrchestratorContext } from "@/lib/orchestratorContext";
+import { buildPersonaSelectorContext } from "@/lib/personaSelectorContext";
+import { buildArtefactStateContext } from "@/lib/artefactStateContext";
+import { buildKpiMonitorContext } from "@/lib/kpiMonitorContext";
+import { buildResponsibleAiContext } from "@/lib/responsibleAiContext";
 
 const CONTEXT_BUILDERS: Record<string, (programmeId: string) => Promise<string | null>> = {
   "governance-guardian": buildGovernanceGuardianContext,
@@ -17,6 +22,11 @@ const CONTEXT_BUILDERS: Record<string, (programmeId: string) => Promise<string |
   "roadmap-architect": buildRoadmapArchitectContext,
   "comms-architect": buildCommsArchitectContext,
   "delivery-intelligence": buildDeliveryIntelligenceContext,
+  "orchestrator": buildOrchestratorContext,
+  "persona-selector": buildPersonaSelectorContext,
+  "artefact-state": buildArtefactStateContext,
+  "kpi-monitor": buildKpiMonitorContext,
+  "responsible-ai": buildResponsibleAiContext,
 };
 
 /** Returns extra system-prompt context for agents that need it, or null for agents that don't. */

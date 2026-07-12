@@ -8,7 +8,17 @@ interface HeaderProps {
   programme: Programme;
 }
 
-const CROSS_CUTTING_LINKS: { label: string; agentName: string }[] = [
+/** Programme intelligence agents — contextual advisers and monitors. */
+const INTELLIGENCE_LINKS: { label: string; agentName: string }[] = [
+  { label: "Navigator", agentName: "orchestrator" },
+  { label: "Persona Guide", agentName: "persona-selector" },
+  { label: "Artefact State", agentName: "artefact-state" },
+  { label: "KPI Monitor", agentName: "kpi-monitor" },
+  { label: "AI Safety Review", agentName: "responsible-ai" },
+];
+
+/** Delivery output agents — produce governed, structured deliverables. */
+const OUTPUT_LINKS: { label: string; agentName: string }[] = [
   { label: "Governance Guardian", agentName: "governance-guardian" },
   { label: "Cost Compass", agentName: "cost-compass" },
   { label: "Roadmap Architect", agentName: "roadmap-architect" },
@@ -53,22 +63,46 @@ export function Header({ programme }: HeaderProps) {
         </Link>
       </div>
 
-      {/* Right: cross-cutting agent buttons */}
-      <div className="flex items-center gap-2">
-        {CROSS_CUTTING_LINKS.map(({ label, agentName }) => (
-          <Link
-            key={agentName}
-            href={`/programme/${programme.id}/agents/${agentName}`}
-            className="rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80"
-            style={{
-              background: "var(--coral-light)",
-              color: "var(--coral)",
-              border: "1px solid transparent",
-            }}
-          >
-            {label}
-          </Link>
-        ))}
+      {/* Right: cross-cutting agent buttons — two visual groups */}
+      <div className="flex items-center gap-3">
+        {/* Group 1: programme intelligence */}
+        <div className="flex items-center gap-1.5">
+          {INTELLIGENCE_LINKS.map(({ label, agentName }) => (
+            <Link
+              key={agentName}
+              href={`/programme/${programme.id}/agents/${agentName}`}
+              className="rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80"
+              style={{
+                background: "var(--bg)",
+                color: "var(--text-secondary)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Divider */}
+        <span style={{ color: "var(--border)", userSelect: "none" }}>|</span>
+
+        {/* Group 2: delivery outputs */}
+        <div className="flex items-center gap-1.5">
+          {OUTPUT_LINKS.map(({ label, agentName }) => (
+            <Link
+              key={agentName}
+              href={`/programme/${programme.id}/agents/${agentName}`}
+              className="rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80"
+              style={{
+                background: "var(--coral-light)",
+                color: "var(--coral)",
+                border: "1px solid transparent",
+              }}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
       </div>
     </header>
   );

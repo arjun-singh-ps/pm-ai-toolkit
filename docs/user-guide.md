@@ -5,7 +5,7 @@
 > in `CLAUDE.md`.
 
 This guide covers what's actually usable today: both personas (Modernising Legacy Journey and
-Agentic Delivery), all four cross-cutting header agents, and accounts. For the complete agent
+Agentic Delivery), all nine cross-cutting header agents, and accounts. For the complete agent
 and artefact listing, see `docs/business-specification.md`.
 
 ## 1. Sign up and sign in
@@ -64,9 +64,10 @@ Once inside a programme, you'll see three panels:
   - **Gate** — a checklist of every artefact required to clear the current phase, and an
     **Advance to [next phase]** button.
 
-At the top, **History** and **KPIs** links open full-page views of the same data. All four
-cross-cutting buttons (**Governance Guardian**, **Cost Compass**, **Roadmap Architect**,
-**Comms Architect**) are live — see §4.1–4.4 below.
+At the top, **History** and **KPIs** links open full-page views of the same data. All nine
+cross-cutting header buttons are live — see §4.1–4.9 below. They sit in two groups:
+- **Programme Intelligence** (grey pills): Navigator, Persona Guide, Artefact State, KPI Monitor, AI Safety Review
+- **Delivery Outputs** (coral pills): Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect
 
 ## 4. Talking to an agent
 
@@ -82,15 +83,55 @@ cross-cutting buttons (**Governance Guardian**, **Cost Compass**, **Roadmap Arch
 5. You can keep chatting in the same conversation — history persists, so leaving and coming
    back later picks up exactly where you left off.
 
-### 4.1–4.4 Cross-cutting agents — available any time, from the header
+### 4.1–4.9 Cross-cutting agents — available any time, from the header
 
-All four header buttons open an agent chat that isn't locked behind any phase progression. Their
+All nine header buttons open an agent chat that isn't locked behind any phase progression. Their
 artefacts appear in the **Artefacts** tab and **History** like any phase agent's, but never in
 the **Gate** tab — they don't block or contribute to phase progression. Each one automatically
 reads the programme's existing artefacts (and, in some cases, KPI or cost data) before
 responding, so you don't need to brief it on what's already been done.
 
-#### 4.1 Governance Guardian
+#### Programme Intelligence group
+
+#### 4.1 Navigator
+
+Helps you understand exactly where you are in the delivery journey, what's blocking progress,
+and what to work on next. Ask it things like "what should I do next?" or "why is agent X
+locked?" It reads your full progress map before every response and gives grounded, specific
+advice — not generic sequencing guidance. Advisory only: it produces no artefacts.
+
+#### 4.2 Persona Guide
+
+Helps you choose between the two delivery personas (Modernising Legacy Journey vs Agentic
+Delivery), or reviews whether your current persona still fits if the nature of the work has
+changed. If you've already produced artefacts, it'll tell you what a persona switch would mean
+before recommending one. Produces a **Persona Recommendation** document if you need something
+to take to your SteerCo sponsor.
+
+#### 4.3 Artefact State
+
+Produces a **Programme Status Report** — a structured, decision-ready view of every artefact
+grouped by agent in phase order: what's approved, what's awaiting your review, what hasn't been
+started yet, and what comes next. Use this to prepare for gate reviews or SteerCo packs.
+
+#### 4.4 KPI Monitor
+
+Interprets your programme's KPI data — what the numbers mean, what's moving in the wrong
+direction, and what specific actions are available to respond. Ask for an overview or a focused
+question ("why is human review effort still high?"). Produces a **KPI Interpretation Report**
+for the PM view or SteerCo view — ask it which you need before drafting.
+
+#### 4.5 AI Safety Review
+
+Reviews any AI-generated artefact for safety, fairness, and regulatory compliance before you
+approve it. Tell it which artefact you'd like reviewed. It will cite the regulatory frameworks
+active on this programme by name, assess the artefact on six risk dimensions, and give a clear
+verdict: Approved / Approved with conditions / Requires revision. Produces an **AI Safety
+Review** (per artefact) and a **Guardrail Compliance Report** (programme-wide audit trail).
+
+#### Delivery Outputs group
+
+#### 4.6 Governance Guardian
 
 Reviews your programme's existing artefacts against the regulatory frameworks you selected when
 creating the programme, and produces a **Compliance Charter**, **Governance Pulse**, and
@@ -100,7 +141,7 @@ creating the programme, and produces a **Compliance Charter**, **Governance Puls
   programme creation form — there's no way to edit them after creation yet).
 - If nothing's been built yet, it'll say so and ask you to return once some artefacts exist.
 
-#### 4.2 Cost Compass
+#### 4.7 Cost Compass
 
 Reviews your programme's actual AI token spend and surfaces where the budget is going. Produces
 a **Cost Blueprint** (total spend by agent, plain-language interpretation, what's driving cost)
@@ -108,10 +149,10 @@ and a **Spend Signal** (spend velocity, forward projection, cost optimisation op
 
 - On a brand-new programme with no conversations yet, it'll tell you there's no data yet and
   explain what it will track once conversations start.
-- For Legacy programmes it frames cost per agent and artefact; for Agentic Delivery it will
-  frame chassis vs pillar costs and cost per user (once that persona is built).
+- For Legacy programmes it frames cost per agent and artefact; for Agentic Delivery it frames
+  chassis vs pillar costs and cost per user.
 
-#### 4.3 Roadmap Architect
+#### 4.8 Roadmap Architect
 
 Turns your programme's current phase state and artefacts into planning outputs for three
 different audiences:
@@ -124,7 +165,7 @@ different audiences:
   value has been delivered, what's coming next quarter, and what decisions are needed. No
   programme management jargon.
 
-#### 4.4 Comms Architect
+#### 4.9 Comms Architect
 
 Produces stakeholder communications grounded in your actual artefact content and KPI data. It
 will ask you for the current RAG status, any open decisions, and the intended distribution date

@@ -144,9 +144,9 @@ function hasGoodOutputField(agent: AgentConfig): boolean {
 
 describe("Agent registry — basic schema", () => {
   it("total registered agent count matches expected", () => {
-    // 4 cross-cutting + 7 foundation + 3 forge + 6 amplify
-    // + 2 envision + 3 shape + 3 incubate + 3 prove + 4 scale = 35
-    expect(ALL_AGENTS).toHaveLength(35);
+    // 9 cross-cutting + 7 foundation + 3 forge + 6 amplify
+    // + 2 envision + 3 shape + 3 incubate + 3 prove + 4 scale = 40
+    expect(ALL_AGENTS).toHaveLength(40);
   });
 
   it.each(ALL_AGENTS)("$name has a non-trivial systemPrompt (>200 chars)", (agent) => {
@@ -162,10 +162,11 @@ describe("Agent registry — basic schema", () => {
   );
 
   it.each(ALL_AGENTS)(
-    "$name is either a scale adviser (produces:[]) or produces at least one artefact",
+    "$name is either an advisory agent (produces:[]) or produces at least one artefact",
     (agent) => {
-      const isScaleAdviser = agent.phase === "scale";
-      expect(isScaleAdviser || agent.produces.length > 0).toBe(true);
+      // Scale agents and cross-cutting orchestrator are intentional non-producers.
+      const isAdvisory = agent.phase === "scale" || agent.name === "orchestrator";
+      expect(isAdvisory || agent.produces.length > 0).toBe(true);
     }
   );
 

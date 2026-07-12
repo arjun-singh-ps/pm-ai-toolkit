@@ -103,7 +103,7 @@ export function CreateProgrammeForm() {
           {(
             [
               { value: "legacy", label: "Modernising Legacy Journey", available: true },
-              { value: "agentic", label: "Agentic Delivery", available: false },
+              { value: "agentic", label: "Agentic Delivery", available: true },
             ] as const
           ).map(({ value, label, available }) => (
             <label
@@ -181,7 +181,7 @@ export function CreateProgrammeForm() {
 
       <button
         type="submit"
-        disabled={isSubmitting || persona === "agentic"}
+        disabled={isSubmitting}
         className="w-full rounded-xl py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40"
         style={{ background: "var(--coral)" }}
       >

@@ -24,6 +24,21 @@ import { governanceGuardianAgent } from "@/agents/cross-cutting/governanceGuardi
 import { costCompassAgent } from "@/agents/cross-cutting/costCompass";
 import { roadmapArchitectAgent } from "@/agents/cross-cutting/roadmapArchitect";
 import { commsArchitectAgent } from "@/agents/cross-cutting/commsArchitect";
+import { visionIgnitionAgent } from "@/agents/agentic/envision/visionIgnition";
+import { mvpCovenantAgent } from "@/agents/agentic/envision/mvpCovenant";
+import { useCaseDiscoveryAgent } from "@/agents/agentic/shape/useCaseDiscovery";
+import { agenticBlueprintAgent } from "@/agents/agentic/shape/agenticBlueprint";
+import { teamLaunchAgent } from "@/agents/agentic/shape/teamLaunch";
+import { environmentIgnitionAgent } from "@/agents/agentic/incubate/environmentIgnition";
+import { agentFoundationsAgent } from "@/agents/agentic/incubate/agentFoundations";
+import { provingGroundAgent } from "@/agents/agentic/incubate/provingGround";
+import { valueDeliverySprintAgent } from "@/agents/agentic/prove/valueDeliverySprint";
+import { performancePulseAgent } from "@/agents/agentic/prove/performancePulse";
+import { scaleReadinessAgent } from "@/agents/agentic/prove/scaleReadiness";
+import { platformExpansionAgent } from "@/agents/agentic/scale/platformExpansion";
+import { governanceEngineAgent } from "@/agents/agentic/scale/governanceEngine";
+import { valueSequencerAgent } from "@/agents/agentic/scale/valueSequencer";
+import { transformationBlueprintAgent } from "@/agents/agentic/scale/transformationBlueprint";
 
 /**
  * Foundation-phase agents in their required completion order. This list is
@@ -53,6 +68,29 @@ export const AMPLIFY_AGENTS: AgentConfig[] = [
   evolutionEngineAgent,
 ];
 
+/** Agentic Delivery — Envision phase. */
+export const ENVISION_AGENTS: AgentConfig[] = [visionIgnitionAgent, mvpCovenantAgent];
+
+/** Agentic Delivery — Shape phase. */
+export const SHAPE_AGENTS: AgentConfig[] = [useCaseDiscoveryAgent, agenticBlueprintAgent, teamLaunchAgent];
+
+/** Agentic Delivery — Incubate phase. */
+export const INCUBATE_AGENTS: AgentConfig[] = [environmentIgnitionAgent, agentFoundationsAgent, provingGroundAgent];
+
+/** Agentic Delivery — Prove phase. */
+export const PROVE_AGENTS: AgentConfig[] = [valueDeliverySprintAgent, performancePulseAgent, scaleReadinessAgent];
+
+/**
+ * Agentic Delivery — Scale phase. Strategic adviser mode only; no fixed artefacts.
+ * All four are available once scale-readiness is complete and can be used in any order.
+ */
+export const SCALE_AGENTS: AgentConfig[] = [
+  platformExpansionAgent,
+  governanceEngineAgent,
+  valueSequencerAgent,
+  transformationBlueprintAgent,
+];
+
 /**
  * Cross-cutting agents: available regardless of phase, surfaced via the
  * header button rather than the phase-scoped sidebar. `phase:
@@ -72,6 +110,11 @@ const ALL_AGENTS: AgentConfig[] = [
   ...FOUNDATION_AGENTS,
   ...FORGE_AGENTS,
   ...AMPLIFY_AGENTS,
+  ...ENVISION_AGENTS,
+  ...SHAPE_AGENTS,
+  ...INCUBATE_AGENTS,
+  ...PROVE_AGENTS,
+  ...SCALE_AGENTS,
   ...CROSS_CUTTING_AGENTS,
 ];
 

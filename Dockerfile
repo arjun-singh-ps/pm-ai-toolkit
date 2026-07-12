@@ -15,8 +15,10 @@ COPY . .
 # they're intentionally embedded in the browser bundle served to every user.
 ARG NEXT_PUBLIC_SUPABASE_URL=https://dpruizflifxbprdcmhgi.supabase.co
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_tt9_OD8RuZ16SqviEvGEcg_O_6JcDeq
+ARG NEXT_PUBLIC_APP_URL=https://pm-ai-toolkit-271878266706.europe-west2.run.app
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 RUN npm run build
 
 FROM base AS runner

@@ -22,8 +22,14 @@ export const INITIAL_PHASE_BY_PERSONA: Record<Persona, string> = {
 
 /** The phase that follows each phase, once its gate is clear. */
 export const NEXT_PHASE: Record<string, string> = {
+  // Modernising Legacy journey
   foundation: "forge",
   forge: "amplify",
+  // Agentic Delivery journey
+  envision: "shape",
+  shape: "incubate",
+  incubate: "prove",
+  prove: "scale",
 };
 
 /**
@@ -36,7 +42,7 @@ export const MONITORING_AGENTS: { name: string; displayName: string; built: bool
   { name: "signal-watch",          displayName: "Signal Watch",          built: true  },
   { name: "delivery-heartbeat",    displayName: "Delivery Heartbeat",    built: true  },
   { name: "cost-compass",          displayName: "Cost Compass",          built: true  },
-  { name: "performance-pulse",     displayName: "Performance Pulse",     built: false },
+  { name: "performance-pulse",     displayName: "Performance Pulse",     built: true  },
 ];
 
 /**

@@ -1,12 +1,8 @@
 # User Guide — GenAI Delivery Copilot
 
-> **Living document.** Update this whenever a UI flow changes — a new field, a renamed button,
-> a new page. Every step below should match what's actually on screen. See the maintenance rule
-> in `CLAUDE.md`.
-
 This guide covers what's actually usable today: both personas (Modernising Legacy Journey and
 Agentic Delivery), all nine cross-cutting header agents, and accounts. For the complete agent
-and artefact listing, see `docs/business-specification.md`.
+and artefact listing
 
 ## 1. Sign up and sign in
 
@@ -49,7 +45,7 @@ Once inside a programme, you'll see three panels:
   - **Grey** — locked (its dependencies aren't approved yet) or not started.
   - **Blue** — in progress (at least one draft artefact exists).
   - **Green** — complete (every artefact this agent produces is approved).
-  Locked agents aren't clickable — hover over one to see exactly what it's waiting on.
+    Locked agents aren't clickable — hover over one to see exactly what it's waiting on.
 - **Centre panel**: by default, shows **Programme Notes** (see §7). Click an unlocked agent in
   the sidebar to open a chat with it instead.
 - **Right panel**: three tabs —
@@ -66,6 +62,7 @@ Once inside a programme, you'll see three panels:
 
 At the top, **History** and **KPIs** links open full-page views of the same data. All nine
 cross-cutting header buttons are live — see §4.1–4.9 below. They sit in two groups:
+
 - **Programme Intelligence** (grey pills): Navigator, Persona Guide, Artefact State, KPI Monitor, AI Safety Review
 - **Delivery Outputs** (coral pills): Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect
 
@@ -246,12 +243,12 @@ selection immediately.
 **Agent Mode** — toggle switches for each monitoring agent between **Reactive** (default) and
 **Proactive** (⚡). The four monitoring agents are:
 
-| Agent | Available |
-|---|---|
-| Signal Watch | ✅ |
-| Delivery Heartbeat | ✅ |
-| Cost Compass | ✅ |
-| Performance Pulse | ✅ |
+| Agent              | Available |
+| ------------------ | --------- |
+| Signal Watch       | ✅        |
+| Delivery Heartbeat | ✅        |
+| Cost Compass       | ✅        |
+| Performance Pulse  | ✅        |
 
 - **Reactive** (default): the agent runs when you open it. Nothing happens automatically.
 - **Proactive** (⚡): the agent gets a ⚡ badge in the sidebar and appears in a banner on

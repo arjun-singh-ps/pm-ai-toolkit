@@ -43,6 +43,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               >
                 Settings
               </Link>
+              <Link
+                href="/user-guide"
+                className="text-sm transition-colors hover:opacity-100"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                User Guide
+              </Link>
             </div>
 
             {/* User */}

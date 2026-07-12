@@ -30,10 +30,10 @@ produced → approve it → the next step unlocks.**
 - **Programme** — the top-level thing you're delivering (e.g. "Mortgage Origination
   Modernisation"). Has a name, an optional client, a chosen delivery approach, and free-text
   notes shared with every agent working on it.
-- **Persona** — the overall delivery approach for the programme. Today: "Modernising Legacy
-  Journey" (for replacing/upgrading an existing legacy system). A second persona, "Agentic
-  Delivery" (for building new AI-agent-based capability from scratch), exists in the product
-  vision but isn't usable yet.
+- **Persona** — the overall delivery approach for the programme. Two personas are available:
+  "Modernising Legacy Journey" (for replacing/upgrading an existing legacy system, three phases:
+  Foundation → Forge → Amplify) and "Agentic Delivery" (for building new AI-agent-based
+  capability from scratch, five phases: Envision → Shape → Incubate → Prove → Scale).
 - **Phase** — a stage within a persona's journey (e.g. "Foundation"). Phases happen in order;
   you can't skip ahead.
 - **Agent** — a specialist within a phase, responsible for a specific slice of the work (e.g.
@@ -98,9 +98,11 @@ server in Settings, and every agent automatically has access to those tools when
 artefacts. Claude can fetch real Jira tickets or read Confluence pages mid-conversation without
 you copying and pasting anything.
 
-The **Agentic Delivery persona** is the main remaining gap — visible but not yet selectable when
-creating a programme. See `docs/business-specification.md` for the exact build status of every
-piece.
+The **Agentic Delivery persona** is now fully built — selectable when creating a programme, with
+all 15 agents across five phases (Envision, Shape, Incubate, Prove, Scale). Scale-phase agents
+act as strategic advisers with no fixed artefacts. Performance Pulse (Prove phase) covers the
+Agentic KPI dimensions: AI and Engineering Impact, People Impact, and Financial Impact. See
+`docs/business-specification.md` for the complete agent and artefact listing.
 
 ## Who it's for
 

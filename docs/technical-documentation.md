@@ -80,14 +80,20 @@ Tables:
 ## 4. Agent architecture pattern
 
 Agents are **plain typed config objects**, not classes — see `src/agents/types.ts`
-(`AgentConfig`: name, displayName, persona, phase, systemPrompt, produces, dependsOnAgents).
-Each phase-scoped agent is one small file under
-`src/agents/modernisation/{foundation,forge,amplify}/`; cross-cutting agents (§4.1) live under
-`src/agents/cross-cutting/` instead. All of them aggregate into a single lookup in
+(`AgentConfig`: name, displayName, persona, phase, systemPrompt, produces, dependsOnAgents,
+kpiLevers?, canRecordAlerts?). Phase-scoped agents live in two directories by persona:
+`src/agents/modernisation/{foundation,forge,amplify}/` (Legacy) and
+`src/agents/agentic/{envision,shape,incubate,prove,scale}/` (Agentic Delivery). Cross-cutting
+agents live under `src/agents/cross-cutting/`. All aggregate into a single lookup in
 `src/agents/registry.ts` (`getAgent`, `listAgentsForPhase`, `FOUNDATION_AGENTS`, `FORGE_AGENTS`,
-`AMPLIFY_AGENTS`, `CROSS_CUTTING_AGENTS`). The registry is the single source of truth — the
+`AMPLIFY_AGENTS`, `ENVISION_AGENTS`, `SHAPE_AGENTS`, `INCUBATE_AGENTS`, `PROVE_AGENTS`,
+`SCALE_AGENTS`, `CROSS_CUTTING_AGENTS`). The registry is the single source of truth — the
 sidebar, the gating logic, and the chat API route all read agent metadata from here, never
 hardcoded elsewhere.
+
+`NEXT_PHASE` in `src/lib/constants.ts` now covers both persona chains:
+- Legacy: `foundation → forge → amplify` (no entry for `amplify` — terminal)
+- Agentic: `envision → shape → incubate → prove → scale` (no entry for `scale` — terminal)
 
 ### 4.1 Cross-cutting agents — a phase-independent variant of the same config
 
@@ -99,9 +105,10 @@ separate type — no code path needed to change. Two sentinel-like choices make 
   confirmed by a dedicated test (`tests/unit/registry.test.ts`) iterating every real phase
   across both personas. **Any future "list a programme's available agents" code must filter
   `phase === "cross-cutting"` directly — never reuse `listAgentsForPhase` for that.**
-- `persona: "legacy"` is a pragmatic stand-in (Agentic Delivery isn't built, so there's no real
-  second case to handle yet) — conceptually this agent should be persona-agnostic, but the type
-  doesn't support that today. Revisit if/when Agentic Delivery is built.
+- `persona: "legacy"` is a pragmatic stand-in — all four cross-cutting agents use it. Agentic
+  Delivery is now built, but these agents are genuinely persona-agnostic; the type doesn't
+  support that today. Any future "list all agents for a programme" code must filter
+  `phase === "cross-cutting"` directly, never via `listAgentsForPhase`.
 - `dependsOnAgents: []` — no gating, available the instant a programme exists. The existing
   generic chat route (`src/app/programme/[id]/agents/[agentName]/page.tsx`) needed **zero
   changes** — `canRunAgent` already returns `{allowed: true}` unconditionally for an empty
@@ -204,11 +211,15 @@ them. Acceptable for this product's current scope; revisit if it ever matters.
 
 ### 5.4 Email confirmation flow
 
-Sign-up (`src/components/SignupForm.tsx`) calls `signUp()` with `emailRedirectTo` pointing at
-`/auth/callback`, then shows a "check your email" message — no session exists yet, since
-confirmation is required (a project setting, not something this app's code controls). Clicking
-the emailed link hits `src/app/auth/callback/route.ts`, which exchanges the link's `code` for a
-session (`exchangeCodeForSession`) and redirects to `/`. Sign-in (`LoginForm.tsx`) needs no
+Sign-up (`src/components/SignupForm.tsx`) calls `signUp()` with `emailRedirectTo` set to
+`${process.env.NEXT_PUBLIC_APP_URL}/auth/callback` — using the build-time env var rather than
+`window.location.origin`, which resolves to the internal container address (`0.0.0.0:8080`) on
+Cloud Run. Clicking the emailed link hits `src/app/auth/callback/route.ts`, which exchanges the
+link's `code` for a session (`exchangeCodeForSession`) and redirects to `/`. **Important**: the
+callback route also cannot use `new URL("/", request.url)` for the redirect — `request.url` on
+Cloud Run is the internal container address. Instead it reads the `x-forwarded-host` and
+`x-forwarded-proto` headers (set by Cloud Run's load balancer to the public hostname) and falls
+back to `NEXT_PUBLIC_APP_URL` if those headers aren't present. Sign-in (`LoginForm.tsx`) needs no
 callback — `signInWithPassword()` establishes a session directly, no redirect round-trip.
 
 Sign-out is a Server Action (`src/app/actions/auth.ts`'s `signOutAction`), invoked via a `<form
@@ -373,6 +384,10 @@ ANTHROPIC_API_KEY=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_APP_URL=        # The public-facing URL (e.g. https://pm-ai-toolkit-....run.app).
+                            # Used in email confirmation redirects — must match the deployed URL.
+                            # Baked into the JS bundle at build time (NEXT_PUBLIC_ prefix).
+                            # Hardcoded as an ARG default in the Dockerfile for Cloud Run builds.
 ```
 
 `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` are safe to expose to the browser —
@@ -408,15 +423,16 @@ same pattern as `regulatory_frameworks`.
 
 ```typescript
 export const MONITORING_AGENTS: { name: string; displayName: string; built: boolean }[] = [
-  { name: "signal-watch",       displayName: "Signal Watch",       built: true  },
-  { name: "delivery-heartbeat", displayName: "Delivery Heartbeat", built: true  },
-  { name: "cost-compass",       displayName: "Cost Compass",       built: true  },
-  { name: "performance-pulse",  displayName: "Performance Pulse",  built: false },
+  { name: "signal-watch",       displayName: "Signal Watch",       built: true },
+  { name: "delivery-heartbeat", displayName: "Delivery Heartbeat", built: true },
+  { name: "cost-compass",       displayName: "Cost Compass",       built: true },
+  { name: "performance-pulse",  displayName: "Performance Pulse",  built: true },
 ];
 ```
 
-`built: false` entries are shown in the toggle UI but disabled — the user can see what's coming
-without being able to select it.
+All four monitoring agents are now built and selectable in the toggle UI. Performance Pulse is
+the Agentic Delivery equivalent of Signal Watch / Delivery Heartbeat — it covers the three
+Agentic KPI dimensions (AI and Engineering Impact, People Impact, Financial Impact).
 
 ### 13.3 Current implementation vs full proactive behaviour
 

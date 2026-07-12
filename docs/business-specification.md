@@ -76,10 +76,40 @@ permanently-disabled "Advance" button, since the latter would read like a bug ra
 intentional stopping point. Confirmed visually via a Playwright screenshot during this build,
 not just by code review.
 
-### 2.4 Agentic Delivery persona (NOT BUILT)
-Five phases (Envision, Shape, Incubate, Prove, Scale), 15 agents total, per the original vision.
-Scale-phase agents are intended to act as strategic advisers with no fixed artefacts, never as
-deliverable generators.
+### 2.4 Agentic Delivery persona (BUILT)
+
+Five phases (Envision → Shape → Incubate → Prove → Scale), 15 agents total. The persona is
+selectable when creating a programme and fully functional end to end. Scale-phase agents act as
+strategic advisers with no fixed artefacts, as designed.
+
+| Phase | Agents | Artefacts produced |
+|---|---|---|
+| **Envision** | Vision Ignition | Agentic North Star, Vision Proof |
+| | MVP Covenant | Solution Proposal, Engagement Charter |
+| **Shape** | Use Case Discovery | Shared Vision Document, Impact Scorecard, Discovery Shortlist |
+| | Agentic Blueprint | Agent Architecture Blueprint, Human-Agent Workflow Map, Data Signal Map, Agent Intervention Backlog |
+| | Team Launch | Team Covenant, Delivery Flight Plan, Access Readiness Log |
+| **Incubate** | Environment Ignition | Compliant Agent Environment, Data Integration Layer |
+| | Agent Foundations | Agent Prompt Fabric, Responsible AI Shield, Agent Engine Blueprint, Evaluation Covenant |
+| | Proving Ground | Agent Command Centre, Proving Charter, Pioneer Agent Release |
+| **Prove** | Value Delivery Sprint | Proven Feature Releases, Refined Intelligence Fabric, Adoption Accelerator Pack |
+| | Performance Pulse | Live Agent Signal, Full Spectrum KPI Report |
+| | Scale Readiness | Prompt Catalogue, Scale Agent Register, Organisation Rollout Plan |
+| **Scale** | Platform Expansion | *(strategic adviser — no fixed artefacts)* |
+| | Governance Engine | *(strategic adviser — no fixed artefacts)* |
+| | Value Sequencer | *(strategic adviser — no fixed artefacts)* |
+| | Transformation Blueprint | *(strategic adviser — no fixed artefacts)* |
+
+Phase advance chain mirrors Legacy: each phase's gate (all artefacts approved) unlocks the next.
+Scale has no further phase — the Gate tab shows "Final phase of this persona." rather than a stuck
+Advance button. All four Scale agents become available simultaneously once Scale Readiness is
+approved (they depend on `scale-readiness` but not on each other — strategic advisers don't have
+a prescribed order).
+
+**Performance Pulse** is the fourth monitoring-reactive agent (alongside Signal Watch, Delivery
+Heartbeat, Cost Compass). It has `canRecordAlerts: true` and carries all three Agentic KPI
+dimensions: AI and Engineering Impact, People Impact, Financial Impact. It is fully built and
+toggleable to proactive mode in the Agent Mode settings.
 
 ## 3. Cross-cutting agents
 
@@ -127,9 +157,9 @@ never counted toward any phase's gate checklist.
 | 4 | Phase gates checked before unlocking the next phase | **Enforced**, server-side, for Foundation → Forge and Forge → Amplify. Amplify has no further phase to unlock — correctly shown as a "final phase" end state, not a stuck gate. |
 | 5 | Skipped input → warn of risk, proceed with a stated assumption, flag in the artefact | **Enforced via agent prompting** — agents are instructed to do this; not independently validated by code. |
 | 6 | Tone varies by audience (engineering / SteerCo / board) | **Not enforced** — no audience-selection mechanism exists yet. |
-| 7 | Scale-phase agents are strategic advisers only, no fixed artefacts | N/A — Scale phase not built. |
+| 7 | Scale-phase agents are strategic advisers only, no fixed artefacts | **Enforced structurally** — Scale agents have `produces: []`; the engine's `record_artefact` validation rejects any artefact name not in the produces list, and the Gate tab has nothing to check. |
 | 8 | Responsible AI guardrails surfaced proactively | **Partially enforced** — every artefact is labelled "AI-generated, review before use"; no dedicated guardrail agent exists. |
-| 9 | Never conflate "Prompt Catalogue" with "Agent Prompt Fabric" | N/A — neither artefact exists yet (not in the Foundation phase). |
+| 9 | Never conflate "Prompt Catalogue" with "Agent Prompt Fabric" | **Enforced via agent prompting** — Agent Foundations (Incubate) explicitly distinguishes the two in its system prompt; Scale Readiness (Prove) explains Prompt Catalogue as the scaled, shareable version distinct from the operational Fabric. |
 | 10 | Governance Guardian must reference selected regulatory frameworks | **Enforced via agent prompting** — its system prompt requires referencing the programme's actual selected frameworks and existing artefact content, and explicitly refuses to produce generic output when frameworks or artefacts are missing; verified live, not just in the prompt text. |
 
 ## 5. Data captured today
@@ -277,7 +307,7 @@ Within reactive, three sub-types describe the design intent of each agent:
 | Roadmap Architect | Synthesis reactive | Synthesises artefact state into delivery team, sprint, and executive planning outputs |
 | Comms Architect | Synthesis reactive | Synthesises artefacts and KPIs into stakeholder communications |
 
-#### Agentic Delivery — Envision and Shape (not yet built)
+#### Agentic Delivery — Envision and Shape (BUILT)
 
 | Agent | Sub-type | Design intent |
 |---|---|---|
@@ -287,7 +317,7 @@ Within reactive, three sub-types describe the design intent of each agent:
 | Agentic Blueprint | Conversational reactive | Designs the agent architecture through dialogue |
 | Team Launch | Conversational reactive | Establishes the team covenant and delivery flight plan |
 
-#### Agentic Delivery — Incubate and Prove (not yet built)
+#### Agentic Delivery — Incubate and Prove (BUILT)
 
 | Agent | Sub-type | Design intent |
 |---|---|---|
@@ -295,17 +325,17 @@ Within reactive, three sub-types describe the design intent of each agent:
 | Agent Foundations | Conversational reactive | Builds the prompt fabric and evaluation covenant through dialogue |
 | Proving Ground | Synthesis reactive | Synthesises the proving charter and pioneer agent release |
 | Value Delivery Sprint | Synthesis reactive | Synthesises sprint outcomes into refined releases |
-| Performance Pulse | **Monitoring reactive** | Designed to watch live agent signals across KPI dimensions — runs only when opened |
+| Performance Pulse | **Monitoring reactive** | Watches live agent signals across all three Agentic KPI dimensions — runs only when opened; toggleable to proactive mode |
 | Scale Readiness | Conversational reactive | Prepares the prompt catalogue and organisation rollout plan |
 
-#### Agentic Delivery — Scale (not yet built, strategic adviser mode)
+#### Agentic Delivery — Scale (BUILT, strategic adviser mode)
 
 | Agent | Sub-type | Design intent |
 |---|---|---|
-| Platform Expansion | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
-| Governance Engine | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
-| Value Sequencer | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
-| Transformation Blueprint | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions |
+| Platform Expansion | Synthesis reactive (strategic adviser) | No fixed artefacts — responds to strategic questions about platform evolution |
+| Governance Engine | Synthesis reactive (strategic adviser) | No fixed artefacts — advises on governance and compliance at scale |
+| Value Sequencer | Synthesis reactive (strategic adviser) | No fixed artefacts — advises on use-case and rollout sequencing |
+| Transformation Blueprint | Synthesis reactive (strategic adviser) | No fixed artefacts — advises on organisational transformation at the highest strategic level |
 
 ### 10.4 Agents most suited to become proactive
 
@@ -317,7 +347,7 @@ threshold logic and cross-session memory are built:
 | **Signal Watch** | ✅ | Detects pilot velocity drop > threshold, cross-references against open RAID items, drafts an Intelligence Pulse with the right escalation flag — before the PM notices the trend |
 | **Delivery Heartbeat** | ✅ | Monitors all three KPI levers; surfaces a Delivery Signal Report automatically when any metric crosses its warning threshold |
 | **Cost Compass** | ✅ | Monitors spend rate; alerts when the projected monthly cost exceeds a defined programme budget before the sprint ends |
-| **Performance Pulse** | 🔲 | Watches live agent accuracy and latency across the Agentic Delivery KPI dimensions; drafts a Full Spectrum KPI Report when a dimension dips below its agreed threshold |
+| **Performance Pulse** | ✅ | Watches live agent accuracy and latency across the Agentic Delivery KPI dimensions; drafts a Full Spectrum KPI Report when a dimension dips below its agreed threshold |
 
 **Agent mode toggle (BUILT)** — users can now set each monitoring agent to **Proactive** or
 **Reactive** per programme from the programme settings screen (the same screen as Notes and
@@ -325,8 +355,9 @@ Regulatory Frameworks). The preference is stored in `programmes.proactive_agents
 displayed as a ⚡ badge in the sidebar for proactive agents. A banner on the programme home
 screen lists active proactive agents.
 
-Performance Pulse is shown in the toggle UI but disabled (marked "coming soon") — it is not
-yet implemented.
+Performance Pulse is now built and enabled in the toggle UI — it is the fourth monitoring agent,
+covering the Agentic Delivery KPI dimensions (AI and Engineering Impact, People Impact, Financial
+Impact).
 
 **Proactive insight cards (BUILT)** — when a monitoring agent (Signal Watch, Delivery Heartbeat,
 Cost Compass) runs and detects something worth flagging, it calls a `record_alert` tool that

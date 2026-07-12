@@ -4,9 +4,9 @@
 > a new page. Every step below should match what's actually on screen. See the maintenance rule
 > in `CLAUDE.md`.
 
-This guide covers what's actually usable today: the Modernising Legacy Journey persona (all
-three phases, 16 agents), all four cross-cutting header agents, and accounts. For what's still
-aspirational, see `docs/business-specification.md`.
+This guide covers what's actually usable today: both personas (Modernising Legacy Journey and
+Agentic Delivery), all four cross-cutting header agents, and accounts. For the complete agent
+and artefact listing, see `docs/business-specification.md`.
 
 ## 1. Sign up and sign in
 
@@ -29,8 +29,9 @@ From the homepage (`/`):
 
 1. Under **New programme**, enter a **Programme name** (required).
 2. Optionally enter a **Client**.
-3. Choose a **Persona**. Only **Modernising Legacy Journey** is selectable — **Agentic
-   Delivery** is shown but disabled, since it isn't built yet.
+3. Choose a **Persona**:
+   - **Modernising Legacy Journey** — for replacing or modernising an existing legacy system. Starts in Foundation phase (7 agents), then Forge (3 agents), then Amplify (6 agents).
+   - **Agentic Delivery** — for building new AI-agent-based capability from scratch. Starts in Envision phase (2 agents), then Shape (3), Incubate (3), Prove (3), then Scale (4 strategic advisers).
 4. Optionally tick any **Regulatory frameworks** that apply (PRA, FCA, ECB/SSM, SR 11-7, EBA
    Guidelines, DORA, ISO 42001, Client Custom). These are used by the Governance Guardian agent
    to review your artefacts — select the ones that actually apply to this programme, since
@@ -54,10 +55,12 @@ Once inside a programme, you'll see three panels:
 - **Right panel**: three tabs —
   - **Artefacts** — every artefact produced so far, with **View** (read the full content) and
     **Approve** buttons.
-  - **KPIs** — KPI metrics recorded during agent conversations, grouped by lever (Quality of
-    Modernisation, Pace of Modernisation, AI Tool Upskill). Empty until you've had a
-    conversation with Delivery Intelligence, Signal Watch, or Delivery Heartbeat and confirmed
-    specific metric values with them.
+  - **KPIs** — KPI metrics recorded during agent conversations, grouped by lever or dimension.
+    For **Legacy** programmes: Quality of Modernisation, Pace of Modernisation, AI Tool Upskill
+    — captured by Delivery Intelligence, Signal Watch, and Delivery Heartbeat. For **Agentic
+    Delivery** programmes: AI and Engineering Impact, People Impact, Financial Impact — captured
+    by Performance Pulse. Empty until you've had a conversation with the relevant agent and
+    confirmed specific numeric values with it.
   - **Gate** — a checklist of every artefact required to clear the current phase, and an
     **Advance to [next phase]** button.
 
@@ -173,10 +176,16 @@ as before. This is enforced on the server, not just by the button being disabled
 could somehow trigger the action early, it would be rejected with the same missing-artefacts
 message.
 
-Once a programme reaches **Amplify** — the last phase of the Modernising Legacy Journey
-persona — the Gate tab shows "🏁 This is the final phase of this persona." instead of an
-Advance button. There's nowhere further to go within this persona; this is the intended end
-state, not a stuck gate.
+Once a programme reaches **Amplify** (Legacy) or **Scale** (Agentic Delivery) — the final phase
+of each persona — the Gate tab shows "🏁 This is the final phase of this persona." instead of
+an Advance button. This is the intended end state, not a stuck gate.
+
+**Note for Agentic Delivery**: the Scale phase is different from every other phase — its four
+agents (Platform Expansion, Governance Engine, Value Sequencer, Transformation Blueprint) are
+strategic advisers, not deliverable generators. They produce no fixed artefacts and the Scale
+gate is always considered clear. All four are available simultaneously once Scale Readiness (the
+last Prove-phase agent) is approved — use whichever is relevant to the question you're working
+through.
 
 ## 7. Programme settings (Notes, Regulatory Frameworks, and Agent Mode)
 
@@ -201,7 +210,7 @@ selection immediately.
 | Signal Watch | ✅ |
 | Delivery Heartbeat | ✅ |
 | Cost Compass | ✅ |
-| Performance Pulse | Coming soon |
+| Performance Pulse | ✅ |
 
 - **Reactive** (default): the agent runs when you open it. Nothing happens automatically.
 - **Proactive** (⚡): the agent gets a ⚡ badge in the sidebar and appears in a banner on

@@ -67,9 +67,13 @@ Tables:
   Anthropic `MessageParam[]` shape, replayed straight back into the next API call.
 - **`kpi_snapshots`**: `id, programme_id, persona, lever_or_dimension, metric_name, value,
   recorded_at` — written via `writeKpiSnapshot` in `src/lib/kpiSnapshots.ts`, called by
-  `agentEngine.ts` when it handles a `record_kpi` tool call. Three agents have `kpiLevers`
-  set in their config and therefore receive the `record_kpi` tool: Delivery Intelligence,
-  Signal Watch, Delivery Heartbeat (see §4 and §6).
+  `agentEngine.ts` when it handles a `record_kpi` tool call. Agents with `kpiLevers` set
+  in their config receive the `record_kpi` tool: Delivery Intelligence, Signal Watch,
+  Delivery Heartbeat (Legacy — levers: Quality of Modernisation, Pace of Modernisation, AI
+  Tool Upskill) and Performance Pulse (Agentic — dimensions: AI and Engineering Impact,
+  People Impact, Financial Impact). The full KPI dashboard at `/programme/[id]/kpis`
+  groups snapshots by lever/dimension, de-duplicates to the most recent value per metric,
+  and shows a trend badge (▲/▼ vs previous value) where history exists (see §6).
 - **`cost_records`**: `id, programme_id, agent_name, tokens_in, tokens_out, cost_usd
   (numeric(10,6)), artefact_id, created_at`.
 - **`mcp_integrations`**: `id, name, type (jira|confluence|sharepoint|custom), server_url,

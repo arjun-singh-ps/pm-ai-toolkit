@@ -227,6 +227,12 @@ Click **Save agent mode** after making changes.
 
 - **History** (top of centre panel): every artefact ever produced for this programme, with a
   search box (filters by artefact name) and a status dropdown filter.
+- **KPIs** (top of centre panel): the full KPI dashboard — all recorded metric values grouped
+  by lever or dimension, with the most recent value per metric displayed in a tile and a trend
+  badge (▲ up / ▼ down) when there's a previous value to compare against. Includes the date
+  each metric was last updated. If no KPI data has been recorded yet, the dashboard shows
+  which agents capture each lever/dimension and what metrics they track, so you know exactly
+  where to go next.
 - **Gate tab**: the fastest way to see exactly what's left before the current phase is
   considered complete.
 

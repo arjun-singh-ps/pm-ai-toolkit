@@ -1,7 +1,7 @@
-// Data-access layer for the kpi_snapshots table. No agent writes to this
-// table yet (kpi-monitor is a cross-cutting agent, out of scope this
-// milestone) — this exists so the KPIs page reads real (currently empty)
-// data rather than fabricating a placeholder.
+// Data-access layer for the kpi_snapshots table. KPI values are captured
+// during agent conversations (Delivery Intelligence, Signal Watch, Delivery
+// Heartbeat for Legacy; Performance Pulse for Agentic) and read here by
+// the KPI dashboard page and the right-panel KPI tab.
 
 import { getSupabaseServiceClient } from "@/lib/supabase";
 

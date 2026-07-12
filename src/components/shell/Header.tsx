@@ -25,11 +25,11 @@ const OUTPUT_LINKS: { label: string; agentName: string }[] = [
   { label: "Comms Architect", agentName: "comms-architect" },
 ];
 
-/** Desktop header: breadcrumb + History/KPIs links + cross-cutting agent pill buttons. */
+/** Desktop header: breadcrumb + History/KPIs links + cross-cutting agent pill buttons in two rows. */
 export function Header({ programme }: HeaderProps) {
   return (
     <header
-      className="flex items-center justify-between px-5 py-3"
+      className="flex items-center justify-between px-5 py-2"
       style={{
         background: "var(--surface)",
         borderBottom: "1px solid var(--border)",
@@ -63,15 +63,15 @@ export function Header({ programme }: HeaderProps) {
         </Link>
       </div>
 
-      {/* Right: cross-cutting agent buttons — two visual groups */}
-      <div className="flex items-center gap-3">
-        {/* Group 1: programme intelligence */}
-        <div className="flex items-center gap-1.5">
+      {/* Right: cross-cutting agent buttons — two rows */}
+      <div className="flex flex-col items-end gap-1">
+        {/* Row 1: programme intelligence (grey) */}
+        <div className="flex flex-wrap justify-end gap-1">
           {INTELLIGENCE_LINKS.map(({ label, agentName }) => (
             <Link
               key={agentName}
               href={`/programme/${programme.id}/agents/${agentName}`}
-              className="rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80"
+              className="rounded-full px-2.5 py-1 text-xs font-medium transition-all hover:opacity-80"
               style={{
                 background: "var(--bg)",
                 color: "var(--text-secondary)",
@@ -83,16 +83,13 @@ export function Header({ programme }: HeaderProps) {
           ))}
         </div>
 
-        {/* Divider */}
-        <span style={{ color: "var(--border)", userSelect: "none" }}>|</span>
-
-        {/* Group 2: delivery outputs */}
-        <div className="flex items-center gap-1.5">
+        {/* Row 2: delivery outputs (coral) */}
+        <div className="flex flex-wrap justify-end gap-1">
           {OUTPUT_LINKS.map(({ label, agentName }) => (
             <Link
               key={agentName}
               href={`/programme/${programme.id}/agents/${agentName}`}
-              className="rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80"
+              className="rounded-full px-2.5 py-1 text-xs font-medium transition-all hover:opacity-80"
               style={{
                 background: "var(--coral-light)",
                 color: "var(--coral)",

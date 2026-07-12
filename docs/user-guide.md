@@ -137,8 +137,8 @@ Reviews your programme's existing artefacts against the regulatory frameworks yo
 creating the programme, and produces a **Compliance Charter**, **Governance Pulse**, and
 **Regulatory Gap Matrix**.
 
-- If you haven't selected any regulatory frameworks, it'll ask you to add some first (via the
-  programme creation form — there's no way to edit them after creation yet).
+- If you haven't selected any regulatory frameworks, it'll ask you to add some first — you can
+  add them from the programme settings screen (§7) without having to create a new programme.
 - If nothing's been built yet, it'll say so and ask you to return once some artefacts exist.
 
 #### 4.7 Cost Compass

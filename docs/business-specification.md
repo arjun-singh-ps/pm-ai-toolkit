@@ -188,10 +188,12 @@ Board Signal, Escalation Notice, and Stakeholder Bulletin.
 - **Chat history**: full conversation per (programme, agent) pair, replayed on every turn.
 - **Cost records**: token usage and decimal-calculated USD cost per Claude call (pricing figures
   are approximate placeholders — see Technical Documentation §8).
-- **KPI snapshots**: written by three agents during their conversations — Delivery Intelligence
+- **KPI snapshots**: written by four agents during their conversations — Delivery Intelligence
   (Foundation, Quality of Modernisation + AI Tool Upskill levers), Signal Watch (Forge, Pace of
-  Modernisation lever), and Delivery Heartbeat (Amplify, all three levers as current actuals).
-  Displayed in the KPIs tab of the right panel, grouped by lever, most recent value per metric.
+  Modernisation lever), Delivery Heartbeat (Amplify, all three levers as current actuals), and
+  Performance Pulse (Agentic Delivery/Prove, all three Agentic dimensions: AI and Engineering
+  Impact, People Impact, Financial Impact). Displayed in the KPIs tab of the right panel, grouped
+  by lever/dimension, most recent value per metric.
 
 ## 6. Authentication and multi-user (BUILT)
 
@@ -280,7 +282,7 @@ Within reactive, three sub-types describe the design intent of each agent:
   records) and turns it into analysis or communication outputs without needing to gather
   new information first.
 
-### 10.3 Categorisation — all 33 agents
+### 10.3 Categorisation — all 40 agents
 
 #### Modernising Legacy — Foundation phase
 
@@ -313,7 +315,17 @@ Within reactive, three sub-types describe the design intent of each agent:
 | Delivery Heartbeat | **Monitoring reactive** | Designed for continuous monitoring across all three KPI levers — runs only when opened |
 | Evolution Engine | Synthesis reactive | Charts the programme's next horizon |
 
-#### Cross-cutting agents
+#### Cross-cutting agents — Programme Intelligence group
+
+| Agent | Sub-type | Design intent |
+|---|---|---|
+| Navigator (Orchestrator) | Synthesis reactive | Reads the full programme progress map; advises on what to work on next and what's blocking — advisory only, no fixed artefacts |
+| Persona Guide (Persona Selector) | Conversational reactive | Helps choose or review the persona choice (Legacy vs Agentic); produces a Persona Recommendation |
+| Artefact State | Synthesis reactive | Produces a Programme Status Report: every artefact by agent in phase order, what's approved, what's awaiting review |
+| KPI Monitor | Synthesis reactive | Interprets KPI snapshot data, surfaces metrics moving the wrong way, recommends specific agent-tied actions |
+| AI Safety Review (Responsible AI) | Synthesis reactive | Reviews any AI-generated artefact for safety, fairness, and regulatory compliance; produces AI Safety Review + Guardrail Compliance Report |
+
+#### Cross-cutting agents — Delivery Outputs group
 
 | Agent | Sub-type | Design intent |
 |---|---|---|

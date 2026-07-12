@@ -423,8 +423,8 @@ be exposed.
 
 Four agents in the system have a design brief that implies monitoring rather than pure
 conversation: **Signal Watch** (Forge), **Delivery Heartbeat** (Amplify), **Cost Compass**
-(cross-cutting), and **Performance Pulse** (Agentic Delivery/Prove — not yet built). Per the
-product's reactive/proactive categorisation (see Business Specification §10), they are currently
+(cross-cutting), and **Performance Pulse** (Agentic Delivery/Prove). Per the product's
+reactive/proactive categorisation (see Business Specification §10), they are currently
 *monitoring-reactive* — designed to watch for signals, but only running when the user opens them.
 
 The proactive agent feature lets users set each of these agents to **proactive mode** per

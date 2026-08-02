@@ -60,8 +60,10 @@ Once inside a programme, you'll see three panels:
   - **Gate** — a checklist of every artefact required to clear the current phase, and an
     **Advance to [next phase]** button.
 
-At the top, **History** and **KPIs** links open full-page views of the same data. All nine
-cross-cutting header buttons are live — see §4.1–4.9 below. They sit in two groups:
+At the top, **Roadmap**, **History**, and **KPIs** links open full-page views. Agent replies in
+the chat area render as formatted Markdown — headings, **bold**, and bullet/numbered lists — so a
+multi-part answer is easy to scan rather than one long paragraph. All nine cross-cutting header
+buttons are live — see §4.1–4.9 below. They sit in two groups:
 
 - **Programme Intelligence** (grey pills): Navigator, Persona Guide, Artefact State, KPI Monitor, AI Safety Review
 - **Delivery Outputs** (coral pills): Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect
@@ -263,6 +265,12 @@ Click **Save agent mode** after making changes.
 
 ## 8. Tracking progress
 
+- **Roadmap** (top of centre panel): a timeline of every phase in your persona's journey —
+  Foundation → Forge → Amplify for Legacy, or Envision → Shape → Incubate → Prove → Scale for
+  Agentic Delivery. Each phase is marked **Complete**, **Current**, or **Not started**. Click a
+  completed or current phase to see its agents and their artefact status, with an **Open** link
+  into any unlocked agent's chat. This is read-only browsing — it never changes your programme's
+  actual current phase or gate status; use the Gate tab (§6) for that.
 - **History** (top of centre panel): every artefact ever produced for this programme, with a
   search box (filters by artefact name) and a status dropdown filter.
 - **KPIs** (top of centre panel): the full KPI dashboard — all recorded metric values grouped

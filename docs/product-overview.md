@@ -120,6 +120,15 @@ act as strategic advisers with no fixed artefacts. Performance Pulse (Prove phas
 Agentic KPI dimensions: AI and Engineering Impact, People Impact, and Financial Impact. See
 `docs/business-specification.md` for the complete agent and artefact listing.
 
+**Agent chat replies are formatted, not walls of text** — every agent's conversational reply
+renders as Markdown (headings, bold, bullet/numbered lists, tables), so a multi-part answer reads
+as structured guidance rather than one long paragraph.
+
+**A Programme Roadmap view** shows every phase of the current persona's journey as a timeline —
+completed, current, or not-started — and lets a PM click into a phase the programme has already
+passed to browse its agents and artefacts read-only, without affecting the programme's actual
+live phase or gate state.
+
 ## Who it's for
 
 Programme managers running structured delivery (especially legacy modernisation) at a bank or

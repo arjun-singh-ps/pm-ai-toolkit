@@ -135,6 +135,13 @@ export function Header({ programme }: HeaderProps) {
           {/* Right: primary navigation */}
           <div className="flex items-center gap-5 flex-shrink-0">
             <Link
+              href={`/programme/${programme.id}/roadmap`}
+              className="hdr-nav-link"
+            >
+              Roadmap
+            </Link>
+            <span style={{ color: "var(--border)", fontSize: 12 }}>·</span>
+            <Link
               href={`/programme/${programme.id}/history`}
               className="hdr-nav-link"
             >

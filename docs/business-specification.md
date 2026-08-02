@@ -447,7 +447,29 @@ Programmes can be archived from the programme settings page. Archiving is a soft
 - The programme page remains fully accessible — the PM can review history, read artefacts,
   and unarchive at any time.
 
-## 14. Known product gaps (intentional, not bugs)
+## 14. Chat reply formatting (BUILT)
+
+Agent chat replies are rendered as Markdown in the chat panel (headings, **bold**, bullet and
+numbered lists, tables) instead of a single unbroken paragraph of plain text. `COMMON_AGENT_INSTRUCTIONS`
+(§ shared across every agent) now explicitly instructs the model to format its conversational
+replies this way. This applies only to the chat turn text — the content an agent passes to
+`record_artefact` stays plain prose, since the Artefact viewer (§7) does not render Markdown.
+
+## 15. Programme Roadmap view (BUILT)
+
+A read-only timeline of every phase in the programme's persona, at `/programme/[id]/roadmap`
+(linked from the top nav, alongside History and KPIs). Each phase is marked **Complete**,
+**Current**, or **Not started** relative to `programme.active_phase`. Selecting a completed or
+current phase shows its agents with their artefact-approval status and an **Open** link into that
+agent's chat — the same generic agent-chat route every other agent link uses.
+
+This lets a PM browse back into a phase the programme has already moved past (e.g. reread Estate
+Mapping's Modernisation Blueprint while in Forge) without affecting delivery state in any way:
+**it never changes `programme.active_phase`** — that remains exclusively the job of the Gate tab's
+Advance button (§ Phase advancement in Technical Documentation §7). An "upcoming" phase (one the
+programme hasn't reached yet) is shown but not selectable, since its agents are still locked.
+
+## 16. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing — the per-million-token
   prices in `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current

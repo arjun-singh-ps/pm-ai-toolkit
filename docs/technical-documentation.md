@@ -10,6 +10,7 @@
 - **Auth**: Supabase Auth (email + password, email confirmation required), via `@supabase/ssr`
 - **AI**: Anthropic Claude API (`claude-sonnet-4-6`), `@anthropic-ai/sdk`
 - **Styling**: Tailwind CSS
+- **Chat rendering**: `react-markdown` + `remark-gfm` — agent chat replies are rendered as Markdown (headings, bold, lists, tables); no `dangerouslySetInnerHTML` anywhere, so this stays safe against HTML/script injected via MCP tool output or uploaded documents flowing into a reply
 - **Testing**: Vitest (unit), Playwright (E2E — see §11)
 - **Decimal arithmetic**: `decimal.js` (for cost calculations — see §8)
 - **Document parsing**: `pdf-parse` (PDF text extraction), `xlsx` (Excel CSV extraction), `mammoth` (DOCX raw text); all marked `serverExternalPackages` in `next.config.ts` — never bundled by webpack, Node.js only
@@ -353,6 +354,21 @@ approving it; Gate tab live; KPIs tab an honest empty state). Agent chat lives a
 `src/app/programme/[id]/agents/[agentName]/page.tsx` — one generic route for every agent, gated
 server-side by `canRunAgent` before rendering `ChatPanel`.
 
+`MessageBubble.tsx` renders assistant messages through `react-markdown` (`remark-gfm` enabled) with
+a custom `components` map styled to the app's design tokens; user messages stay plain
+`whitespace-pre-wrap` text — a PM's own typed message is never parsed as Markdown. This pairs with
+the `COMMON_AGENT_INSTRUCTIONS` formatting instruction (Business Specification §14).
+
+The **Roadmap page** (`src/app/programme/[id]/roadmap/page.tsx`) is a server component: it loads
+the programme, fetches its artefacts once, and calls `buildRoadmap` (`src/lib/phaseRoadmap.ts`) to
+compute every phase's completed/current/upcoming status and each phase's agents' approval status —
+entirely from the already-fetched artefact list, no per-agent Supabase round-trip (same
+injected-fetch pattern as `gating.ts`, see §7). It hands the result to `RoadmapView.tsx`, a client
+component that renders the timeline and an expandable read-only agent list, linking each unlocked
+agent to the standard `/programme/[id]/agents/[agentName]` chat route. Deliberately has no API
+route of its own — same reasoning as the History page, which also reads its data directly in a
+server component.
+
 **Bug fixed during the Governance Guardian build, affecting every agent, not just that one**:
 `ChatPanel` and `RightPanel` are sibling client components with no direct prop path between them
 (both are children of the server-component layout). Recording an artefact via chat never told
@@ -371,8 +387,21 @@ server-rendered lock/status dots update too); `RightPanel` listens for it and ca
 Runs Vitest over `tests/unit/**/*.test.ts` — no live Supabase or Claude calls. Covers:
 `registry.ts` lookups (including that cross-cutting agents never leak into `listAgentsForPhase`
 for any real phase/persona combination), `gating.ts`'s dependency/gate logic (injected fake
-data), `cost.ts`'s decimal arithmetic, `agentEngine.ts`'s `buildSystemPrompt`, and
-`artefactSummary.ts`'s `formatArtefactSummary` (truncation, status-ordering, empty-state).
+data), `cost.ts`'s decimal arithmetic, `agentEngine.ts`'s `buildSystemPrompt`,
+`artefactSummary.ts`'s `formatArtefactSummary` (truncation, status-ordering, empty-state), and
+`phaseRoadmap.ts`'s `buildRoadmap` (phase status relative to `active_phase`, an agent's
+approved/in-progress/locked status, and that a completed phase's artefacts still resolve correctly
+once the programme has moved past it) — same injected-fetch pattern as `gating.test.ts`.
+
+**Known pre-existing gaps in this suite, not introduced by later work**: `registry.test.ts` still
+asserts the pre-Agentic-Delivery agent counts (`listAgentsForPhase("agentic", "envision")` expected
+`0`, `CROSS_CUTTING_AGENTS` expected only the original 4) and fails against the current registry;
+`guardrailAudit.test.ts` encodes the guardrail rewrites proposed in `docs/guardrails/AUDIT.md` as
+assertions and fails for every agent whose rewrite hasn't been applied to its `systemPrompt` yet
+(the audit is deliberately read-only — see its own header). Both are stale expectations tracking
+docs/build work that hasn't landed, not regressions — do not "fix" them by loosening the
+assertions; either apply the underlying change (extend the registry test / apply an audited
+guardrail) or leave them red as a visible backlog marker.
 
 ### E2E tests (`npm run test:e2e`)
 

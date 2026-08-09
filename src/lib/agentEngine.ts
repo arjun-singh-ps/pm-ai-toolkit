@@ -239,7 +239,13 @@ export async function runAgentTurn(
       // makes every turn after the first re-use the cached system prompt,
       // tools, and prior history instead of paying full input price for all
       // of it again — see Technical Documentation §6 for the cost accounting.
-      cache_control: { type: "ephemeral" as const },
+      //
+      // Skipped on the welcome-init turn: its system prompt has the one-off
+      // artefact summary and opening-briefing instructions appended (above),
+      // so it never matches the shorter system prompt every later turn uses.
+      // That write would cost the 1.25x cache-write premium for a cache entry
+      // no future request can ever read back.
+      ...(isWelcomeInit ? {} : { cache_control: { type: "ephemeral" as const } }),
     };
 
     // Use the beta MCP client when integrations are configured; standard API otherwise.

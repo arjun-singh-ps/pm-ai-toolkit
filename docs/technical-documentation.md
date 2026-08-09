@@ -282,14 +282,20 @@ logout. Calls `supabase.auth.signOut()` via the server client so the cookie is a
    `"mcp-client-2025-04-04"`); otherwise falls back to `client.messages.create`. The beta
    response's `BetaContentBlock[]` is cast to `ContentBlock[]` for message history replay —
    safe at runtime since `BetaContentBlock` is a superset.
-6. Every request sets the top-level `cache_control: { type: "ephemeral" }` param (both the
-   standard and beta SDK request types support it), which the API applies to the last cacheable
-   block in the request — i.e. the end of `messages`. Because each turn's request is the
-   previous turn's full request (tools + system + history) with new messages appended, this
-   caches tools/system/history as one unit: turn 2 onward gets a cache **read** for everything
-   up to the end of the previous turn, and only pays full price for what's new. Default TTL is
-   5 minutes, so this mainly helps active back-and-forth within one agent conversation, not
-   sessions resumed hours later. See §8 for how cache read/write tokens are priced and stored.
+6. Every request except the welcome-init turn sets the top-level `cache_control: { type:
+   "ephemeral" }` param (both the standard and beta SDK request types support it), which the API
+   applies to the last cacheable block in the request — i.e. the end of `messages`. Because each
+   turn's request is the previous turn's full request (tools + system + history) with new
+   messages appended, this caches tools/system/history as one unit: turn 2 onward gets a cache
+   **read** for everything up to the end of the previous turn, and only pays full price for what's
+   new. Default TTL is 5 minutes, so this mainly helps active back-and-forth within one agent
+   conversation, not sessions resumed hours later. See §8 for how cache read/write tokens are
+   priced and stored.
+   **The welcome-init turn is excluded** because its system prompt has one-off content appended
+   (the artefact summary and opening-briefing instructions, above) that no later turn's system
+   prompt matches — caching it would pay the 1.25x write premium for a cache entry that can never
+   be read back. A cache write does happen naturally on turn 2 instead, once the system prompt is
+   stable, and every turn after that reads from it.
 7. Calls Claude with `record_artefact` and (if `agent.kpiLevers` is non-empty) `record_kpi`
    tools, looping up to `MAX_TOOL_ITERATIONS` (5) times while Claude keeps calling tools.
 8. **Every `tool_use` block gets a paired `tool_result`, unconditionally**, regardless of why

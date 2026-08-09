@@ -222,6 +222,8 @@ export async function runAgentTurn(
   let recordedAlerts = 0;
   let totalTokensIn = 0;
   let totalTokensOut = 0;
+  let totalCacheCreationTokens = 0;
+  let totalCacheReadTokens = 0;
   let finalAssistantText = "";
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
@@ -231,6 +233,13 @@ export async function runAgentTurn(
       system: systemPrompt,
       messages,
       tools,
+      // Marks the last cacheable block in the request (the end of `messages`)
+      // as an ephemeral (5-minute) cache breakpoint. Since each turn's request
+      // is the previous turn's full request plus new messages appended, this
+      // makes every turn after the first re-use the cached system prompt,
+      // tools, and prior history instead of paying full input price for all
+      // of it again — see Technical Documentation §6 for the cost accounting.
+      cache_control: { type: "ephemeral" as const },
     };
 
     // Use the beta MCP client when integrations are configured; standard API otherwise.
@@ -245,6 +254,8 @@ export async function runAgentTurn(
 
     totalTokensIn += response.usage.input_tokens;
     totalTokensOut += response.usage.output_tokens;
+    totalCacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
+    totalCacheReadTokens += response.usage.cache_read_input_tokens ?? 0;
     // Cast is safe: BetaContentBlock is a superset of ContentBlock at runtime;
     // we're just storing content for replay in subsequent turns.
     const responseContent = response.content as Anthropic.Messages.ContentBlock[];
@@ -398,7 +409,14 @@ export async function runAgentTurn(
   }
 
   await saveSessionMessages(session.id, messages);
-  await recordCost(programmeId, agentName, totalTokensIn, totalTokensOut);
+  await recordCost(
+    programmeId,
+    agentName,
+    totalTokensIn,
+    totalTokensOut,
+    totalCacheCreationTokens,
+    totalCacheReadTokens
+  );
 
   return { blocked: false, reply: finalAssistantText, recordedArtefacts, recordedAlerts };
 }

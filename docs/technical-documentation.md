@@ -282,19 +282,27 @@ logout. Calls `supabase.auth.signOut()` via the server client so the cookie is a
    `"mcp-client-2025-04-04"`); otherwise falls back to `client.messages.create`. The beta
    response's `BetaContentBlock[]` is cast to `ContentBlock[]` for message history replay —
    safe at runtime since `BetaContentBlock` is a superset.
-6. Calls Claude with `record_artefact` and (if `agent.kpiLevers` is non-empty) `record_kpi`
+6. Every request sets the top-level `cache_control: { type: "ephemeral" }` param (both the
+   standard and beta SDK request types support it), which the API applies to the last cacheable
+   block in the request — i.e. the end of `messages`. Because each turn's request is the
+   previous turn's full request (tools + system + history) with new messages appended, this
+   caches tools/system/history as one unit: turn 2 onward gets a cache **read** for everything
+   up to the end of the previous turn, and only pays full price for what's new. Default TTL is
+   5 minutes, so this mainly helps active back-and-forth within one agent conversation, not
+   sessions resumed hours later. See §8 for how cache read/write tokens are priced and stored.
+7. Calls Claude with `record_artefact` and (if `agent.kpiLevers` is non-empty) `record_kpi`
    tools, looping up to `MAX_TOOL_ITERATIONS` (5) times while Claude keeps calling tools.
-6. **Every `tool_use` block gets a paired `tool_result`, unconditionally**, regardless of why
+8. **Every `tool_use` block gets a paired `tool_result`, unconditionally**, regardless of why
    the response stopped. This is a deliberate fix for a real bug found during testing: a
    truncated response (`stop_reason: "max_tokens"`) could leave a `tool_use` block unpaired,
    which corrupts the saved history — the next call to Claude with that history is rejected
    outright. `MAX_OUTPUT_TOKENS` was also raised (2048 → 4096) to reduce how often truncation
    happens, but the unconditional pairing is the real fix, not the token bump.
-7. Validates each `record_artefact` call's `artefactName` against the agent's `produces` list
+9. Validates each `record_artefact` call's `artefactName` against the agent's `produces` list
    before writing anything — rejects hallucinated names with an error `tool_result`.
-8. Merges universal fields (version, date, programme name, owner, disclaimer) into artefact
-   content **server-side**, never trusting the model for these.
-9. Persists the full message history and a `cost_records` row, every turn.
+10. Merges universal fields (version, date, programme name, owner, disclaimer) into artefact
+    content **server-side**, never trusting the model for these.
+11. Persists the full message history and a `cost_records` row, every turn.
 
 ## 7. Gating (`src/lib/gating.ts`)
 
@@ -329,10 +337,23 @@ already correct for both cases (a missing key and an empty agent list both fail 
 
 ## 8. Cost tracking (`src/lib/cost.ts`)
 
-`calculateCostUsd(tokensIn, tokensOut)` uses `decimal.js`, never floating point, per the "all
-financial calculations use Decimal" rule. **The per-million-token prices ($3 input / $15 output)
-are approximate and must be verified against Anthropic's current pricing page** before these
-figures are used for real spend reporting.
+`calculateCostUsd(tokensIn, tokensOut, cacheCreationTokens?, cacheReadTokens?)` uses `decimal.js`,
+never floating point, per the "all financial calculations use Decimal" rule. **The per-million-
+token prices ($3 input / $15 output / $3.75 cache write / $0.30 cache read) are approximate and
+must be verified against Anthropic's current pricing page** before these figures are used for real
+spend reporting.
+
+Since §6 enables prompt caching on every request, a call can now have up to four differently-priced
+token categories in one response (`response.usage.input_tokens`, `.output_tokens`,
+`.cache_creation_input_tokens`, `.cache_read_input_tokens`) — `agentEngine.ts` accumulates all four
+across the tool-use loop and passes them to `recordCost` (`src/lib/costRecords.ts`), which prices
+each category separately via `calculateCostUsd` rather than treating cache tokens as regular input
+(a cache write costs *more* than a normal input token, a cache read costs far *less* — folding them
+into `tokens_in` at the base input rate would silently misprice both directions). The stored
+`cost_records.tokens_in` column is deliberately the **sum** of all three input-side categories
+(regular + cache write + cache read), not just `response.usage.input_tokens` — Cost Compass's "how
+many tokens did this cost" narrative should reflect the true size of context processed, even when
+most of it was served from cache and therefore billed at a fraction of the price.
 
 ## 9. API routes
 

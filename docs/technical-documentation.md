@@ -40,7 +40,7 @@ exception, built specifically to be client-safe (§5.1).
 
 ## 3. Data model
 
-6 tables across two migration files. **RLS is enabled on all of them**, with a single `to
+8 tables across 7 migration files. **RLS is enabled on all of them**, with a single `to
 authenticated using (true) with check (true)` policy per table — any logged-in user, full
 access, matching the shared-workspace model. This is a backstop against the now-public
 anon/publishable key being used to call Supabase's REST API directly; it is **not** this
@@ -53,11 +53,21 @@ Migrations:
   already enabled inline.
 - `supabase/migrations/0004_proactive_agents.sql` — adds `proactive_agents text[] NOT NULL
   DEFAULT '{}'` to `programmes`.
+- `supabase/migrations/0005_agent_alerts.sql` — adds the 7th table, `agent_alerts` (below),
+  RLS enabled inline.
+- `supabase/migrations/0006_programme_documents.sql` — adds the 8th table,
+  `programme_documents` (below), RLS enabled inline.
+- `supabase/migrations/0007_archive_programmes.sql` — adds `archived boolean NOT NULL
+  DEFAULT false` to `programmes`, plus an index on it.
 
 Tables:
 - **`programmes`**: `id, name, client, persona, active_phase, regulatory_frameworks[], notes,
-  proactive_agents[], created_at` — `proactive_agents` stores the agent names the user has
-  opted into proactive mode for this programme (see §14)
+  proactive_agents[], archived, created_at` — `proactive_agents` stores the agent names the user
+  has opted into proactive mode for this programme (see §14). `archived` is a soft-delete flag:
+  `listActiveProgrammes`/`listArchivedProgrammes` (`src/lib/programmes.ts`) filter on it for the
+  landing page's active list vs. its "View N archived programmes" expander; nothing is deleted,
+  and the programme page stays fully accessible either way. Set through the same generic `PATCH
+  /api/programmes/[id]` route as `notes`/`regulatory_frameworks`/`proactive_agents` (§9).
 - **`artefacts`**: `id, programme_id, artefact_name, phase, activity, agent_name, version,
   status (draft/in_progress/approved), content (jsonb), created_at, approved_at, approved_by`
   - `content` is structured JSON (`{ title, sections: [{heading, body}] }` plus universal fields
@@ -81,6 +91,15 @@ Tables:
   auth_token (nullable, plain text for MVP), enabled, created_at` — workspace-scoped, not
   programme-scoped. Auth tokens are protected by RLS (requires authenticated session) but are
   not encrypted at rest — encrypt before production use with real API keys.
+- **`agent_alerts`**: `id, programme_id, agent_name, what, why_matters[], suggested_action,
+  triggered_at, status (active/dismissed), dismissed_at, dismissed_by, dismiss_reason` — full
+  behaviour (which agents write to it, how the UI surfaces it) is in §13.2.
+- **`programme_documents`**: `id, programme_id, filename, file_type (pdf/xlsx/xls/docx/doc),
+  content_text, uploaded_by, created_at` — stores only the parsed text from an uploaded
+  Excel/PDF/Word file, never the raw binary. Written by `POST /api/documents` (§9), which
+  extracts text server-side via `pdf-parse`/`xlsx`/`mammoth` before insert. `content_text` is
+  injected into the Delivery Intelligence agent's system prompt as RAID source material
+  (Business Specification §11–§12).
 
 ## 4. Agent architecture pattern
 
@@ -320,7 +339,7 @@ figures are used for real spend reporting.
 | Route | Method | Purpose |
 |---|---|---|
 | `/api/programmes` | GET, POST | List / create programmes |
-| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, regulatory_frameworks, proactive_agents (PATCH should not be used to change active_phase — see §7.1) |
+| `/api/programmes/[id]` | GET, PATCH | Fetch one programme / update notes, regulatory_frameworks, proactive_agents, archived (PATCH should not be used to change active_phase — see §7.1) |
 | `/api/programmes/[id]/advance-phase` | POST | Gate-enforced phase transition — the only path allowed to change active_phase |
 | `/api/agents/[agentName]/chat` | POST | Run one chat turn (the only path to `agentEngine.ts`); 401s without a session (§5.3) |
 | `/api/agents/[agentName]/session` | GET | Fetch display-ready chat history for hydrating the UI |

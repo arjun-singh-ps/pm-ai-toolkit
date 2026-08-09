@@ -1,6 +1,16 @@
 # Agent Guardrail Audit
 <!-- Generated: 2026-07-12 -->
 
+> **2026-08-09 correction note**: §1's agent inventory is now stale. The five cross-cutting
+> agents listed below as "not built" (`orchestrator.ts`, `persona-selector.ts`,
+> `artefact-state.ts`, `kpi-monitor.ts`, `responsible-ai.ts`) were built after this audit ran —
+> see `docs/business-specification.md` §3. The registry is 40 agents today, not 35. Those five
+> agents have **not** been audited against the 4-field guardrail template below — that's a gap
+> this audit doesn't cover, not a clean bill of health. Everything from §2 onward (the per-agent
+> guardrail verdicts and proposed rewrites for the original 35 agents) is unaffected by this and
+> still reflects those agents' current `systemPrompt`s: none of the proposed rewrites have been
+> applied yet, per this file's own read-only rule below.
+
 This is a **read-only audit**. Agent files are not changed until the programme manager
 confirms which rewrites to apply. Once confirmed, a single commit applies all approved changes.
 
@@ -8,7 +18,8 @@ confirms which rewrites to apply. Once confirmed, a single commit applies all ap
 
 ## 1. Discovery — Agent inventory
 
-**Registered agents: 35** (not 40 as specified in CLAUDE.md).
+**Registered agents: 35** (not 40 as specified in CLAUDE.md) — see the correction note above;
+this count is now out of date.
 
 Five cross-cutting agents specified in CLAUDE.md are **not built**:
 

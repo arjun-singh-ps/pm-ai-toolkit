@@ -17,8 +17,11 @@ description: >
 
 An AI-powered delivery copilot for banking and enterprise programme
 managers. It is a multi-agent system built on the Anthropic Claude API.
-Two personas, eight phases, 29 specialist agents, four cross-cutting
-agents, 64 named artefacts across both personas.
+Two personas, eight phases, 31 specialist agents, nine cross-cutting
+agents, named artefacts across both personas (see
+docs/business-specification.md for the current, authoritative count —
+this file describes the target architecture, that one tracks what's
+actually built).
 
 The user is an 18-year programme management veteran who is a beginner
 developer. Always explain WHY before HOW. Always state which file to
@@ -147,11 +150,17 @@ monthly runtime cost projection
 
 src/agents/cross-cutting/
 
-- orchestrator.ts → master router, intent detection, phase tracking
-- persona-selector.ts → detects and switches between personas
-- artefact-state.ts → tracks completion status of all 64 artefacts
-- kpi-monitor.ts → surfaces correct KPI framework per persona
-- responsible-ai.ts → guardrail review on all generated artefacts
+- orchestrator.ts → master router, intent detection, phase tracking.
+  Advisory only — produces no fixed artefacts.
+- persona-selector.ts → detects and switches between personas.
+  Produces: Persona Recommendation
+- artefact-state.ts → tracks completion status of every artefact across
+  both personas. Produces: Programme Status Report
+- kpi-monitor.ts → surfaces correct KPI framework per persona.
+  Produces: KPI Interpretation Report
+- responsible-ai.ts → guardrail review on all generated artefacts.
+  Produces: AI Safety Review (per artefact), Guardrail Compliance Report
+  (programme-wide)
 - governance-guardian.ts → compliance, regulatory framework evaluation
 - cost-compass.ts → token cost tracking and optimisation
 - roadmap-architect.ts → Horizon Map, Sprint Canvas, Stakeholder Roadmap
@@ -214,12 +223,14 @@ Stakeholder Bulletin: wider team update, non-technical
 
 ## Tech stack
 
-Framework: Next.js 14 App Router, TypeScript strict mode
-Database: Supabase — Postgres + pgvector for semantic search
+Framework: Next.js 16 App Router, TypeScript strict mode
+Database: Supabase — Postgres (pgvector for semantic search is speced but not yet
+  built — 6 tables exist today, see docs/technical-documentation.md §3)
 AI: Anthropic Claude API — claude-sonnet-4-6 for all agents
 Styling: Tailwind CSS
 Testing: Vitest (unit), Playwright (E2E)
-Deploy: Vercel (frontend), Supabase (DB)
+Deploy: Google Cloud Run (app), Supabase (DB) — see docs/technical-documentation.md
+  for the Dockerfile/Cloud Build setup
 Auth: Supabase Auth
 
 ---
@@ -242,7 +253,7 @@ Auth: Supabase Auth
 
 programmes
 id, name, client, persona, active_phase,
-regulatory_frameworks[], created_at
+regulatory_frameworks[], notes, proactive_agents[], created_at
 
 artefacts
 id, programme_id, artefact_name, phase, activity,
@@ -267,15 +278,18 @@ cost_usd, artefact_id, created_at
 
 Left sidebar (220px):
 
-- Persona toggle: Legacy / Agentic
-- Programme name
+- Persona and programme name (persona is fixed at programme creation —
+  there is no switch toggle; Persona Guide only advises, it never
+  changes `programme.persona`)
 - Phase and activity navigator with status dots and phase gate markers
 
 Centre panel (flex):
 
-- Header: breadcrumb + active agent badge +
-  four cross-cutting agent buttons
-  (Governance Guardian, Cost Compass, Roadmap Architect, Comms Architect)
+- Header: programme name + phase chip, Roadmap/History/KPIs nav, and
+  nine cross-cutting agent buttons in two labelled groups — Programme
+  Intelligence (Navigator, Persona Guide, Artefact State, KPI Monitor,
+  AI Safety Review) and Delivery Outputs (Governance Guardian, Cost
+  Compass, Roadmap Architect, Comms Architect)
 - Chat area: agent messages with inline artefact cards
 - Input bar: textarea + send button
 
@@ -286,8 +300,8 @@ Right panel (240px):
 - Tab 3 Gate: phase gate checklist and advance button
 
 Colour coding:
-Legacy persona: teal accent
-Agentic persona: coral accent
+Legacy persona: coral accent
+Agentic persona: purple accent
 Artefact approved: green
 Artefact in progress: blue
 Artefact pending: grey
@@ -297,9 +311,11 @@ Phase gate clear: green
 Routes:
 / landing — programme select or create
 /programme/[id] main three-panel shell
+/programme/[id]/roadmap phase timeline, browse a completed phase read-only
 /programme/[id]/history all artefacts with filter and search
 /programme/[id]/kpis full KPI dashboard
-/settings account, API keys, regulatory frameworks
+/settings MCP integrations and regulatory framework reference
+/user-guide practical step-by-step usage guide
 
 ---
 

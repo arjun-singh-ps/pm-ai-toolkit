@@ -30,9 +30,16 @@ artefacts that a human must explicitly approve before they count.
 
 ---
 
+## Two delivery personas, both fully built
+
+Pick the journey that matches the work: **Modernising Legacy Journey**, for replacing or
+upgrading an existing legacy system, or **Agentic Delivery**, for building new AI-agent-based
+capability from scratch. Both are complete end to end — agent conversations, artefact
+approval, and phase-gating.
+
 ## The delivery journey — Modernising Legacy (fully built)
 
-Three phases, 16 specialist agents, 29 named artefacts. Each agent unlocks only when the
+Three phases, 16 specialist agents, 31 named artefacts. Each agent unlocks only when the
 previous agent's artefacts are approved. Each phase advances only when every artefact in it
 is signed off.
 
@@ -47,10 +54,10 @@ Establishes the programme before any technical work begins. Seven agents, run in
 | **Infrastructure Blueprint** | Platform Readiness Report | Assesses whether the target platform is ready to receive modernised components |
 | **Knowledge Forge** | Intelligence Fabric | Captures the institutional knowledge the AI agents need to work on this specific programme |
 | **Backlog Architecture** | Delivery Backlog | Sequences the modernisation work into a prioritised, delivery-ready backlog |
-| **Delivery Intelligence** | Command Centre, Signal Engine, Quality Covenant | Sets up reporting cadence, leading indicators, and the team's quality commitment |
+| **Delivery Intelligence** | Command Centre, Signal Engine, Quality Covenant, RAID Register | Sets up reporting cadence, leading indicators, the team's quality commitment, and a structured Risks/Assumptions/Issues/Dependencies register |
 | **Launch Readiness** | Forge Charter, Crew Blueprint, Forge Compass | Confirms the programme is ready to move from planning into active pilot delivery |
 
-**Phase gate**: all 14 Foundation artefacts must be approved before Forge unlocks.
+**Phase gate**: all 15 Foundation artefacts must be approved before Forge unlocks.
 Gate is enforced server-side — not just a disabled button.
 
 ---
@@ -86,6 +93,26 @@ Scales what's been proven. Six agents:
 
 ---
 
+## The delivery journey — Agentic Delivery (fully built)
+
+Five phases, 15 specialist agents, 31 named artefacts, for building new AI-agent-based capability
+rather than modernising an existing system. Same conversation-then-approve-then-unlock model as
+Legacy, same server-enforced phase gates.
+
+| Phase | Agents | What it covers |
+|---|---|---|
+| **Envision** (2 weeks) | Vision Ignition, MVP Covenant | Commercial case and vision: the Agentic North Star, then a bounded solution proposal and engagement charter |
+| **Shape** (4 weeks) | Use Case Discovery, Agentic Blueprint, Team Launch | Discovery and architecture: prioritised use cases, the agent architecture and human-agent workflow design, and the delivery team's launch plan |
+| **Incubate** (8 weeks) | Environment Ignition, Agent Foundations, Proving Ground | Builds the foundation: a compliant agent environment, the prompt fabric and responsible-AI guardrails, and the first pioneer agent release |
+| **Prove** (12 weeks) | Value Delivery Sprint, Performance Pulse, Scale Readiness | MVP to production: proven feature releases, live performance monitoring across all three Agentic KPI dimensions, and the organisation-wide rollout plan |
+| **Scale** (principles-led) | Platform Expansion, Governance Engine, Value Sequencer, Transformation Blueprint | Strategic advisers, not deliverable generators — no fixed artefacts. All four unlock together once Scale Readiness is approved, for whichever strategic question is live |
+
+**Phase gates**: enforced the same way as Legacy — each phase's gate requires every artefact from
+every agent in it approved before the next phase unlocks. Scale is the persona's final phase; the
+Gate tab shows the same "final phase" notice Legacy shows at Amplify.
+
+---
+
 ## How every agent conversation works
 
 1. Open the agent from the sidebar (locked agents show exactly what they're waiting for).
@@ -108,13 +135,26 @@ Your conversation history is saved. Leave and come back — it picks up exactly 
 
 ## Cross-cutting agents — available at any time
 
-Four agents accessible from the header on any programme, regardless of phase. They read the
-programme's existing artefacts before responding — no briefing needed.
+Nine agents accessible from the header on any programme, regardless of phase or persona. They
+read the programme's existing artefacts (and, for some, KPI or cost data) before responding —
+no briefing needed. Split into two groups in the header.
+
+### Programme Intelligence group — advisory, contextual
+
+| Agent | Artefacts produced | What it does |
+|---|---|---|
+| **Navigator** | None — advisory only | Reads the programme's full progress map and advises on what to work on next, what's blocking progress, and the specific risk of skipping a step. |
+| **Persona Guide** | Persona Recommendation | Helps choose between Legacy and Agentic Delivery, or reviews whether the current choice still fits given work already done. |
+| **Artefact State** | Programme Status Report | A decision-ready view of every artefact by agent in phase order: approved, awaiting review, or not started. |
+| **KPI Monitor** | KPI Interpretation Report | Interprets recorded KPI data, flags metrics moving the wrong way, and recommends actions tied to specific agents. |
+| **AI Safety Review** | AI Safety Review (per artefact), Guardrail Compliance Report | Reviews any artefact for safety, fairness, and regulatory compliance before approval, citing the programme's active regulatory frameworks by name. |
+
+### Delivery Outputs group — produce governed artefacts
 
 | Agent | Artefacts produced | What it does |
 |---|---|---|
 | **Governance Guardian** | Compliance Charter, Governance Pulse, Regulatory Gap Matrix | Reviews every artefact against the regulatory frameworks selected for this programme. References specific artefact content — never produces generic boilerplate. If no frameworks are selected, it says so and asks you to add some. |
-| **Cost Compass** | Cost Blueprint, Spend Signal | Shows where the AI budget is going: spend by agent, spend velocity, forward projection at current run rate, and optimisation options. Tracks cost per agent and artefact for Legacy. |
+| **Cost Compass** | Cost Blueprint, Spend Signal | Shows where the AI budget is going: spend by agent, spend velocity, forward projection at current run rate, and optimisation options. Frames cost per agent/artefact for Legacy, chassis/pillar cost per user for Agentic Delivery. |
 | **Roadmap Architect** | Horizon Map, Sprint Canvas, Stakeholder Roadmap | Three outputs for three audiences: a delivery-team phase timeline, a sprint-by-sprint plan from the active backlog, and a one-page executive summary (business outcomes only, no jargon). |
 | **Comms Architect** | SteerCo Pack, Board Signal, Escalation Notice, Stakeholder Bulletin | Four stakeholder communications, each for a distinct audience and cadence. The SteerCo Pack and Board Signal are grounded in actual artefact content — not templates filled with generic language. |
 
@@ -133,7 +173,10 @@ conversation turn.
 
 ## KPI capture — built into delivery conversations
 
-Three agents record real metrics during their conversations, covering the full Legacy KPI framework:
+Four agents record real metrics during their conversations, covering both personas' full KPI
+frameworks:
+
+**Legacy — Quality / Pace of Modernisation, AI Tool Upskill**
 
 | KPI lever | Agent | Metrics captured |
 |---|---|---|
@@ -142,8 +185,17 @@ Three agents record real metrics during their conversations, covering the full L
 | **AI Tool Upskill** | Delivery Intelligence (Foundation) | Time to Understand Tool Components (hrs), Time to Understand Agent Outcomes (hrs) |
 | All three levers updated | Delivery Heartbeat (Amplify) | All of the above, refreshed with current actuals |
 
-Metrics appear in the **KPIs tab** of the right panel, grouped by lever, showing the most
-recent confirmed value for each metric. The PM confirms every figure — no values are invented.
+**Agentic Delivery — AI and Engineering Impact, People Impact, Financial Impact**
+
+| KPI dimension | Agent | Metrics captured |
+|---|---|---|
+| **AI and Engineering Impact** | Performance Pulse (Prove) | Accuracy, Relevancy, Faithfulness, Latency (ms) |
+| **People Impact** | Performance Pulse (Prove) | Active Users, Total Enrolled Users, Prompts per Department, Prompts per User |
+| **Financial Impact** | Performance Pulse (Prove) | Chassis Run Cost, Pillar Run Cost, Monthly Runtime Cost Projection, Cost per 1,000 Prompts |
+
+Metrics appear in the **KPIs tab** of the right panel and the full-page KPI dashboard, grouped by
+lever/dimension, showing the most recent confirmed value for each metric with a trend indicator.
+The PM confirms every figure — no values are invented.
 
 ---
 
@@ -202,17 +254,18 @@ delivery teams working together on the same programme, not for siloing individua
 | Capability | Status |
 |---|---|
 | Modernising Legacy Journey — Foundation, Forge, Amplify | ✅ Complete |
-| Governance Guardian | ✅ Complete |
-| Cost Compass | ✅ Complete |
-| Roadmap Architect | ✅ Complete |
-| Comms Architect | ✅ Complete |
-| KPI capture (3 levers, 3 agents) | ✅ Complete |
+| **Agentic Delivery persona** (Envision → Shape → Incubate → Prove → Scale) | ✅ Complete |
+| All nine cross-cutting agents (Programme Intelligence + Delivery Outputs groups) | ✅ Complete |
+| KPI capture (Legacy's 3 levers + Agentic's 3 dimensions, 4 agents) | ✅ Complete |
 | Regulatory framework editing | ✅ Complete |
 | MCP integrations (Jira, Confluence, SharePoint, custom) | ✅ Complete |
 | Multi-user shared workspace with auth | ✅ Complete |
+| Proactive agent mode (toggle + insight cards + pre-briefed sessions) | ✅ Complete |
+| Programme Documents upload (Excel/PDF/Word parsed into agent context) | ✅ Complete |
+| Programme Roadmap view (phase timeline, browse a completed phase read-only) | ✅ Complete |
+| Markdown-formatted agent chat replies | ✅ Complete |
 | Cloud Run deployment | ✅ Complete |
-| **Agentic Delivery persona** (Envision → Shape → Incubate → Prove → Scale) | 🔲 Next |
-| Responsible AI cross-cutting agent | 🔲 Planned |
+| Scheduled/automatic proactive triggering (cron-based threshold checks) | 🔲 Next — proactive mode today is a toggle + manual open, not a background check |
 
 ---
 

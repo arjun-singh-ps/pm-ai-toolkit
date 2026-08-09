@@ -28,6 +28,15 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  function scrollToTop() {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function scrollToBottom() {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -160,7 +169,7 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
         </div>
       )}
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
+      <div ref={scrollContainerRef} className="relative flex flex-1 flex-col gap-3 overflow-y-auto p-4">
         {isLoadingHistory ? (
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading conversation…</p>
         ) : (
@@ -174,6 +183,41 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
           </p>
         )}
         <div ref={bottomRef} />
+
+        {/* Floating scroll shortcuts — absolute within this relative scroll container, so
+            they stay pinned to its viewport corner instead of scrolling with the messages. */}
+        <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={scrollToTop}
+            title="Scroll to top"
+            aria-label="Scroll to top"
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm transition-opacity hover:opacity-80"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              boxShadow: "var(--shadow-card)",
+              color: "var(--navy)",
+            }}
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            title="Scroll to latest message"
+            aria-label="Scroll to latest message"
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm transition-opacity hover:opacity-80"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              boxShadow: "var(--shadow-card)",
+              color: "var(--navy)",
+            }}
+          >
+            ↓
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -195,16 +239,17 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
         style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}
       >
         <textarea
-          rows={2}
+          rows={4}
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={`Message ${agentDisplayName}…`}
-          className="flex-1 resize-none rounded-2xl px-4 py-2.5 text-sm outline-none transition-shadow focus:ring-2"
+          className="flex-1 resize-y rounded-2xl px-4 py-2.5 text-sm outline-none transition-shadow focus:ring-2"
           style={{
             background: "var(--bg)",
             border: "1px solid var(--border)",
             color: "var(--navy)",
+            minHeight: "5.5rem",
           }}
         />
         <button

@@ -27,11 +27,11 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const topRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   function scrollToTop() {
-    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function scrollToBottom() {
@@ -169,12 +169,13 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
         </div>
       )}
 
-      <div ref={scrollContainerRef} className="flex flex-1 flex-col overflow-y-auto p-4">
+      <div className="flex flex-1 flex-col overflow-y-auto p-4">
         {/* mt-auto pushes this block to the bottom when the conversation is short —
             without it, a flex-1 scroll container top-aligns its content and leaves a
             large empty gap above the input bar. Long conversations still scroll normally,
             since mt-auto just resolves to 0 once content overflows the container. */}
         <div className="mt-auto flex flex-col gap-3">
+          <div ref={topRef} />
           {isLoadingHistory ? (
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading conversation…</p>
           ) : (

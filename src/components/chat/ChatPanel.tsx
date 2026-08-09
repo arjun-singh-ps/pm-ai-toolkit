@@ -169,54 +169,25 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
         </div>
       )}
 
-      <div ref={scrollContainerRef} className="relative flex flex-1 flex-col gap-3 overflow-y-auto p-4">
-        {isLoadingHistory ? (
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading conversation…</p>
-        ) : (
-          messages
-            .filter((m) => m.text !== WELCOME_INIT_MARKER)
-            .map((message, index) => <MessageBubble key={index} message={message} />)
-        )}
-        {isSending && (
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {messages.length === 0 ? `${agentDisplayName} is preparing your briefing…` : `${agentDisplayName} is thinking…`}
-          </p>
-        )}
-        <div ref={bottomRef} />
-
-        {/* Floating scroll shortcuts — absolute within this relative scroll container, so
-            they stay pinned to its viewport corner instead of scrolling with the messages. */}
-        <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={scrollToTop}
-            title="Scroll to top"
-            aria-label="Scroll to top"
-            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm transition-opacity hover:opacity-80"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              boxShadow: "var(--shadow-card)",
-              color: "var(--navy)",
-            }}
-          >
-            ↑
-          </button>
-          <button
-            type="button"
-            onClick={scrollToBottom}
-            title="Scroll to latest message"
-            aria-label="Scroll to latest message"
-            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm transition-opacity hover:opacity-80"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              boxShadow: "var(--shadow-card)",
-              color: "var(--navy)",
-            }}
-          >
-            ↓
-          </button>
+      <div ref={scrollContainerRef} className="flex flex-1 flex-col overflow-y-auto p-4">
+        {/* mt-auto pushes this block to the bottom when the conversation is short —
+            without it, a flex-1 scroll container top-aligns its content and leaves a
+            large empty gap above the input bar. Long conversations still scroll normally,
+            since mt-auto just resolves to 0 once content overflows the container. */}
+        <div className="mt-auto flex flex-col gap-3">
+          {isLoadingHistory ? (
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading conversation…</p>
+          ) : (
+            messages
+              .filter((m) => m.text !== WELCOME_INIT_MARKER)
+              .map((message, index) => <MessageBubble key={index} message={message} />)
+          )}
+          {isSending && (
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              {messages.length === 0 ? `${agentDisplayName} is preparing your briefing…` : `${agentDisplayName} is thinking…`}
+            </p>
+          )}
+          <div ref={bottomRef} />
         </div>
       </div>
 
@@ -238,6 +209,36 @@ export function ChatPanel({ programmeId, agentName, agentDisplayName, alertConte
         className="flex items-end gap-2 p-3"
         style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}
       >
+        <div className="flex flex-shrink-0 flex-col gap-1.5">
+          <button
+            type="button"
+            onClick={scrollToTop}
+            title="Scroll to top"
+            aria-label="Scroll to top"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-sm transition-opacity hover:opacity-80"
+            style={{
+              background: "var(--bg)",
+              border: "1px solid var(--border)",
+              color: "var(--navy)",
+            }}
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            title="Scroll to latest message"
+            aria-label="Scroll to latest message"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-sm transition-opacity hover:opacity-80"
+            style={{
+              background: "var(--bg)",
+              border: "1px solid var(--border)",
+              color: "var(--navy)",
+            }}
+          >
+            ↓
+          </button>
+        </div>
         <textarea
           rows={4}
           value={input}

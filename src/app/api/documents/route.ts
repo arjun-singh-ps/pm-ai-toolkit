@@ -7,6 +7,12 @@
 //
 // All three parsing packages are marked in next.config.ts as serverExternalPackages
 // so webpack skips bundling them; they are require()'d at runtime in Node.js only.
+//
+// pdf-parse is pinned to 1.x — 2.x pulls in @napi-rs/canvas + pdfjs-dist for
+// rendering, and that native binary doesn't load reliably on this app's
+// Alpine/musl deploy target, which crashed every request here (even GET) with
+// "ReferenceError: DOMMatrix is not defined". 1.x has no canvas dependency and
+// is enough since this only ever needs plain text, never rendering.
 
 import { NextResponse } from "next/server";
 import pdfParse from "pdf-parse";

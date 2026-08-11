@@ -13,7 +13,7 @@
 - **Chat rendering**: `react-markdown` + `remark-gfm` — agent chat replies are rendered as Markdown (headings, bold, lists, tables); no `dangerouslySetInnerHTML` anywhere, so this stays safe against HTML/script injected via MCP tool output or uploaded documents flowing into a reply
 - **Testing**: Vitest (unit), Playwright (E2E — see §11)
 - **Decimal arithmetic**: `decimal.js` (for cost calculations — see §8)
-- **Document parsing**: `pdf-parse` (PDF text extraction), `xlsx` (Excel CSV extraction), `mammoth` (DOCX raw text); all marked `serverExternalPackages` in `next.config.ts` — never bundled by webpack, Node.js only
+- **Document parsing**: `pdf-parse` (PDF text extraction), `xlsx` (Excel CSV extraction), `mammoth` (DOCX raw text); all marked `serverExternalPackages` in `next.config.ts` — never bundled by webpack, Node.js only. **`pdf-parse` is deliberately pinned to the 1.x line** (`^1.1.4`), not 2.x — 2.x depends on `@napi-rs/canvas` + `pdfjs-dist` for its rendering-capable engine, and `@napi-rs/canvas`'s native binary doesn't reliably load on the Alpine/musl base image this app deploys on (`Dockerfile`'s `node:20-alpine`), which surfaced in production as `ReferenceError: DOMMatrix is not defined` on every `/api/documents` call — including plain listing (`GET`), since the crash happens at module load, not inside the PDF-specific code path. 1.x has no canvas dependency at all (`node-ensure` is its only dependency) and is sufficient since this app only needs plain text extraction, never rendering.
 - **Document generation**: `docx` — builds a formatted Word document from an artefact's content entirely client-side (`Packer.toBlob`, no server round trip); see §10 for where it's wired in
 
 ## 2. Architecture overview

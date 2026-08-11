@@ -194,6 +194,11 @@ before drafting. Produces:
    re-approval.
 5. Once **every** artefact a locked agent depends on is approved, that agent unlocks
    automatically in the sidebar — no extra action needed.
+6. Click **Download .docx** (inside the View modal, or directly from a row on the History page —
+   see §8) to save the artefact as a formatted Word document — title, metadata, each section, and
+   the disclaimer, laid out the same way it reads on screen. Handy for attaching to an email or a
+   SteerCo pack. This is a local file generated in your browser — it doesn't get recorded or
+   version-tracked, and downloading has no effect on the artefact's Draft/Approved status.
 
 ### Have feedback on a generated artefact?
 
@@ -272,7 +277,8 @@ Click **Save agent mode** after making changes.
   into any unlocked agent's chat. This is read-only browsing — it never changes your programme's
   actual current phase or gate status; use the Gate tab (§6) for that.
 - **History** (top of centre panel): every artefact ever produced for this programme, with a
-  search box (filters by artefact name) and a status dropdown filter.
+  search box (filters by artefact name), a status dropdown filter, and a **Download .docx**
+  button on each row — no need to open an agent's chat to get a copy of an old version.
 - **KPIs** (top of centre panel): the full KPI dashboard — all recorded metric values grouped
   by lever or dimension, with the most recent value per metric displayed in a tile and a trend
   badge (▲ up / ▼ down) when there's a previous value to compare against. Includes the date

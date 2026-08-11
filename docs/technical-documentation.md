@@ -14,6 +14,7 @@
 - **Testing**: Vitest (unit), Playwright (E2E — see §11)
 - **Decimal arithmetic**: `decimal.js` (for cost calculations — see §8)
 - **Document parsing**: `pdf-parse` (PDF text extraction), `xlsx` (Excel CSV extraction), `mammoth` (DOCX raw text); all marked `serverExternalPackages` in `next.config.ts` — never bundled by webpack, Node.js only
+- **Document generation**: `docx` — builds a formatted Word document from an artefact's content entirely client-side (`Packer.toBlob`, no server round trip); see §10 for where it's wired in
 
 ## 2. Architecture overview
 
@@ -399,6 +400,17 @@ auth build surfaced that there was previously no way to actually read an artefac
 approving it; Gate tab live; KPIs tab an honest empty state). Agent chat lives at
 `src/app/programme/[id]/agents/[agentName]/page.tsx` — one generic route for every agent, gated
 server-side by `canRunAgent` before rendering `ChatPanel`.
+
+**Downloading an artefact as Word** (`src/lib/artefactDocx.ts`): `downloadArtefactAsDocx(artefact)`
+builds a `docx` `Document` (title as Heading1, a metadata line, each section as Heading2 + body
+paragraphs, the disclaimer styled distinctly) from the artefact object already held in memory —
+no new API route, no server round trip, since `ArtefactModal`/`HistoryTable` already have the full
+`content` loaded. `Packer.toBlob()` produces the file client-side and a temporary anchor element
+triggers the browser download. Wired into both places an artefact can be viewed: the **Download
+.docx** button in `ArtefactModal`'s footer, and a per-row **Download .docx** button in
+`HistoryTable` (which has no viewer of its own, so this is its only per-artefact action). Section
+bodies are split into paragraphs on blank lines rather than dumped as one block, since artefact
+content is deliberately kept as plain prose, never Markdown (§14) — there's no markup to strip.
 
 `MessageBubble.tsx` renders assistant messages through `react-markdown` (`remark-gfm` enabled) with
 a custom `components` map styled to the app's design tokens; user messages stay plain

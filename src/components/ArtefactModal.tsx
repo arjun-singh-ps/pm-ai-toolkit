@@ -4,7 +4,9 @@
 
 "use client";
 
+import { useState } from "react";
 import type { Artefact } from "@/types/artefact";
+import { downloadArtefactAsDocx } from "@/lib/artefactDocx";
 
 interface ArtefactSection {
   heading: string;
@@ -20,6 +22,21 @@ interface ArtefactModalProps {
 
 /** Modal overlay showing an artefact's full structured content. */
 export function ArtefactModal({ artefact, onClose, onApprove, isApproving }: ArtefactModalProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  async function handleDownload() {
+    setIsDownloading(true);
+    setDownloadError(null);
+    try {
+      await downloadArtefactAsDocx(artefact);
+    } catch {
+      setDownloadError("Could not generate the document. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  }
+
   const content = artefact.content as {
     title?: string;
     sections?: ArtefactSection[];
@@ -87,24 +104,39 @@ export function ArtefactModal({ artefact, onClose, onApprove, isApproving }: Art
           )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-black/10 p-4 dark:border-white/10">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-black/10 px-4 py-1.5 text-sm font-medium text-black hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
-          >
-            Close
-          </button>
-          {artefact.status !== "approved" && (
+        <div className="flex items-center justify-between gap-2 border-t border-black/10 p-4 dark:border-white/10">
+          {downloadError ? (
+            <p className="text-xs text-red-600 dark:text-red-400">{downloadError}</p>
+          ) : (
+            <span />
+          )}
+          <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => onApprove(artefact.id)}
-              disabled={isApproving}
-              className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className="rounded-full border border-black/10 px-4 py-1.5 text-sm font-medium text-black hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
             >
-              {isApproving ? "Approving..." : "Approve"}
+              {isDownloading ? "Preparing..." : "Download .docx"}
             </button>
-          )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-black/10 px-4 py-1.5 text-sm font-medium text-black hover:bg-black/5 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+            >
+              Close
+            </button>
+            {artefact.status !== "approved" && (
+              <button
+                type="button"
+                onClick={() => onApprove(artefact.id)}
+                disabled={isApproving}
+                className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+              >
+                {isApproving ? "Approving..." : "Approve"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

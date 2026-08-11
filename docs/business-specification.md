@@ -469,7 +469,16 @@ Mapping's Modernisation Blueprint while in Forge) without affecting delivery sta
 Advance button (§ Phase advancement in Technical Documentation §7). An "upcoming" phase (one the
 programme hasn't reached yet) is shown but not selectable, since its agents are still locked.
 
-## 16. Known product gaps (intentional, not bugs)
+## 16. Download artefact as Word (BUILT)
+
+Every artefact — from either the Artefacts tab's **View** modal or the History page's row
+actions — can be downloaded as a formatted `.docx` file via a **Download .docx** button. The
+document mirrors the artefact's on-screen structure: title, a metadata line (version, date,
+programme, owner/approver), each section as a heading with its body, and the AI-generated
+disclaimer set apart at the end. Generated entirely in the browser from data already loaded —
+no new artefact content is fetched, and downloading doesn't create a record of any kind.
+
+## 17. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing — the per-million-token
   prices in `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current

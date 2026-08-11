@@ -129,6 +129,10 @@ completed, current, or not-started — and lets a PM click into a phase the prog
 passed to browse its agents and artefacts read-only, without affecting the programme's actual
 live phase or gate state.
 
+**Every artefact can be downloaded as a formatted Word document** — from the View modal or
+directly from the History page — for sharing outside the tool (email, a SteerCo pack) without
+losing the section structure or the AI-generated disclaimer.
+
 ## Who it's for
 
 Programme managers running structured delivery (especially legacy modernisation) at a bank or

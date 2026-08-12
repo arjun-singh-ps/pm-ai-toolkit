@@ -21,7 +21,7 @@ without a human approving it first.
 | Persona | Phases | Status |
 |---|---|---|
 | **Modernising Legacy Journey** | Foundation → Forge → Amplify | **Fully built — this persona is complete.** |
-| **Agentic Delivery** | Envision → Shape → Incubate → Prove → Scale | Not started. Visible in the UI as a disabled option when creating a programme. |
+| **Agentic Delivery** | Envision → Shape → Incubate → Prove → Scale | **Fully built — see §2.4.** |
 
 ### 2.1 Modernising Legacy Journey — Foundation phase (BUILT)
 

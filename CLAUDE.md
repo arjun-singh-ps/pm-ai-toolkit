@@ -38,35 +38,35 @@ Three phases: Foundation → Forge → Amplify
 
 src/agents/modernisation/foundation/
 
-- scope-sprint.ts → Programme Charter, Pilot Shortlist, Value Scorecard
-- estate-mapping.ts → Modernisation Blueprint, Delivery Compass
-- infrastructure-blueprint.ts → Platform Readiness Report
-- knowledge-forge.ts → Intelligence Fabric
-- backlog-architecture.ts → Delivery Backlog
-- delivery-intelligence.ts → Command Centre, Signal Engine, Quality Covenant
-- launch-readiness.ts → Forge Charter, Crew Blueprint, Forge Compass
+- scopeSprint.ts → Programme Charter, Pilot Shortlist, Value Scorecard
+- estateMapping.ts → Modernisation Blueprint, Delivery Compass
+- infrastructureBlueprint.ts → Platform Readiness Report
+- knowledgeForge.ts → Intelligence Fabric
+- backlogArchitecture.ts → Delivery Backlog
+- deliveryIntelligence.ts → Command Centre, Signal Engine, Quality Covenant
+- launchReadiness.ts → Forge Charter, Crew Blueprint, Forge Compass
   ⬡ PHASE GATE: all Foundation artefacts approved before Forge unlocks
 
 ### Forge phase — 3 agents
 
 src/agents/modernisation/forge/
 
-- pilot-ignition.ts → Pilot Intelligence Pack, Steel Thread Proof,
+- pilotIgnition.ts → Pilot Intelligence Pack, Steel Thread Proof,
   Adoption Accelerator
-- signal-watch.ts → Intelligence Pulse
-- scale-blueprint.ts → Scale Compass, Operations Playbook
+- signalWatch.ts → Intelligence Pulse
+- scaleBlueprint.ts → Scale Compass, Operations Playbook
 
 ### Amplify phase — 6 agents
 
 src/agents/modernisation/amplify/
 
-- backlog-pulse.ts → Living Backlog
-- context-flywheel.ts → Evolving Intelligence Fabric
-- factory-build.ts → Experience Blueprints, Modernised Service Catalogue
-- launch-runway.ts → Quality Gate Report, Launch Playbook
-- delivery-heartbeat.ts → Delivery Signal Report, Deployment Covenant,
+- backlogPulse.ts → Living Backlog
+- contextFlywheel.ts → Evolving Intelligence Fabric
+- factoryBuild.ts → Experience Blueprints, Modernised Service Catalogue
+- launchRunway.ts → Quality Gate Report, Launch Playbook
+- deliveryHeartbeat.ts → Delivery Signal Report, Deployment Covenant,
   Live Pulse Monitor
-- evolution-engine.ts → Capability Evolution Plan
+- evolutionEngine.ts → Capability Evolution Plan
 
 ### KPI framework — three levers
 
@@ -87,51 +87,51 @@ Five phases: Envision → Shape → Incubate → Prove → Scale
 
 src/agents/agentic/envision/
 
-- vision-ignition.ts → Agentic North Star, Vision Proof
-- mvp-covenant.ts → Solution Proposal, Engagement Charter
+- visionIgnition.ts → Agentic North Star, Vision Proof
+- mvpCovenant.ts → Solution Proposal, Engagement Charter
 
 ### Shape phase — 3 agents (4 weeks, discovery and architecture)
 
 src/agents/agentic/shape/
 
-- use-case-discovery.ts → Shared Vision Document, Impact Scorecard,
+- useCaseDiscovery.ts → Shared Vision Document, Impact Scorecard,
   Discovery Shortlist
-- agentic-blueprint.ts → Agent Architecture Blueprint,
+- agenticBlueprint.ts → Agent Architecture Blueprint,
   Human-Agent Workflow Map, Data Signal Map,
   Agent Intervention Backlog
-- team-launch.ts → Team Covenant, Delivery Flight Plan,
+- teamLaunch.ts → Team Covenant, Delivery Flight Plan,
   Access Readiness Log
 
 ### Incubate phase — 3 agents (8 weeks, build the foundation)
 
 src/agents/agentic/incubate/
 
-- environment-ignition.ts → Compliant Agent Environment,
+- environmentIgnition.ts → Compliant Agent Environment,
   Data Integration Layer
-- agent-foundations.ts → Agent Prompt Fabric, Responsible AI Shield,
+- agentFoundations.ts → Agent Prompt Fabric, Responsible AI Shield,
   Agent Engine Blueprint, Evaluation Covenant
-- proving-ground.ts → Agent Command Centre, Proving Charter,
+- provingGround.ts → Agent Command Centre, Proving Charter,
   Pioneer Agent Release
 
 ### Prove phase — 3 agents (12 weeks, MVP to production)
 
 src/agents/agentic/prove/
 
-- value-delivery-sprint.ts → Proven Feature Releases,
+- valueDeliverySprint.ts → Proven Feature Releases,
   Refined Intelligence Fabric,
   Adoption Accelerator Pack
-- performance-pulse.ts → Live Agent Signal, Full Spectrum KPI Report
-- scale-readiness.ts → Prompt Catalogue, Scale Agent Register,
+- performancePulse.ts → Live Agent Signal, Full Spectrum KPI Report
+- scaleReadiness.ts → Prompt Catalogue, Scale Agent Register,
   Organisation Rollout Plan
 
 ### Scale phase — 4 agents (principles-led, no fixed artefacts)
 
 src/agents/agentic/scale/
 
-- platform-expansion.ts → strategic adviser mode
-- governance-engine.ts → strategic adviser mode
-- value-sequencer.ts → strategic adviser mode
-- transformation-blueprint.ts → strategic adviser mode
+- platformExpansion.ts → strategic adviser mode
+- governanceEngine.ts → strategic adviser mode
+- valueSequencer.ts → strategic adviser mode
+- transformationBlueprint.ts → strategic adviser mode
   NOTE: Scale agents do not produce fixed artefacts. They act as
   strategic advisers. Do not add deliverable tracking to Scale agents.
 
@@ -152,19 +152,19 @@ src/agents/cross-cutting/
 
 - orchestrator.ts → master router, intent detection, phase tracking.
   Advisory only — produces no fixed artefacts.
-- persona-selector.ts → detects and switches between personas.
+- personaSelector.ts → detects and switches between personas.
   Produces: Persona Recommendation
-- artefact-state.ts → tracks completion status of every artefact across
+- artefactState.ts → tracks completion status of every artefact across
   both personas. Produces: Programme Status Report
-- kpi-monitor.ts → surfaces correct KPI framework per persona.
+- kpiMonitor.ts → surfaces correct KPI framework per persona.
   Produces: KPI Interpretation Report
-- responsible-ai.ts → guardrail review on all generated artefacts.
+- responsibleAi.ts → guardrail review on all generated artefacts.
   Produces: AI Safety Review (per artefact), Guardrail Compliance Report
   (programme-wide)
-- governance-guardian.ts → compliance, regulatory framework evaluation
-- cost-compass.ts → token cost tracking and optimisation
-- roadmap-architect.ts → Horizon Map, Sprint Canvas, Stakeholder Roadmap
-- comms-architect.ts → SteerCo Pack, Board Signal, Escalation Notice,
+- governanceGuardian.ts → compliance, regulatory framework evaluation
+- costCompass.ts → token cost tracking and optimisation
+- roadmapArchitect.ts → Horizon Map, Sprint Canvas, Stakeholder Roadmap
+- commsArchitect.ts → SteerCo Pack, Board Signal, Escalation Notice,
   Stakeholder Bulletin
 
 ### Governance Guardian — regulatory frameworks
@@ -225,7 +225,7 @@ Stakeholder Bulletin: wider team update, non-technical
 
 Framework: Next.js 16 App Router, TypeScript strict mode
 Database: Supabase — Postgres (pgvector for semantic search is speced but not yet
-  built — 6 tables exist today, see docs/technical-documentation.md §3)
+  built — 8 tables exist today, see docs/technical-documentation.md §3)
 AI: Anthropic Claude API — claude-sonnet-4-6 for all agents
 Styling: Tailwind CSS
 Testing: Vitest (unit), Playwright (E2E)
@@ -253,7 +253,7 @@ Auth: Supabase Auth
 
 programmes
 id, name, client, persona, active_phase,
-regulatory_frameworks[], notes, proactive_agents[], created_at
+regulatory_frameworks[], notes, proactive_agents[], archived, created_at
 
 artefacts
 id, programme_id, artefact_name, phase, activity,
@@ -271,6 +271,19 @@ metric_name, value, recorded_at
 cost_records
 id, programme_id, agent_name, tokens_in, tokens_out,
 cost_usd, artefact_id, created_at
+
+mcp_integrations
+id, name, type (jira/confluence/sharepoint/custom), server_url,
+auth_token, enabled, created_at
+
+agent_alerts
+id, programme_id, agent_name, what, why_matters[], suggested_action,
+triggered_at, status (active/dismissed), dismissed_at, dismissed_by,
+dismiss_reason
+
+programme_documents
+id, programme_id, filename, file_type (pdf/xlsx/xls/docx/doc),
+content_text, uploaded_by, created_at
 
 ---
 
@@ -310,6 +323,9 @@ Phase gate clear: green
 
 Routes:
 / landing — programme select or create
+/login Supabase Auth sign-in
+/signup Supabase Auth sign-up
+/auth/callback Supabase Auth callback (route handler, not a page)
 /programme/[id] main three-panel shell
 /programme/[id]/roadmap phase timeline, browse a completed phase read-only
 /programme/[id]/history all artefacts with filter and search

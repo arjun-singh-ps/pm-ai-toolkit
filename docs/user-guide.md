@@ -81,6 +81,10 @@ buttons are live — see §4.1–4.9 below. They sit in two groups:
    a line like "📄 Recorded artefact: Programme Charter" appear in the chat.
 5. You can keep chatting in the same conversation — history persists, so leaving and coming
    back later picks up exactly where you left off.
+6. The message box starts at four lines and can be dragged taller from its bottom-right
+   corner if you're writing something longer. Two small arrow buttons sit next to it — **↑**
+   jumps to the top of the conversation, **↓** jumps back to the latest message — handy once a
+   conversation has grown long.
 
 ### 4.1–4.9 Cross-cutting agents — available any time, from the header
 

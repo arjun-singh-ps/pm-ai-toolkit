@@ -478,7 +478,17 @@ programme, owner/approver), each section as a heading with its body, and the AI-
 disclaimer set apart at the end. Generated entirely in the browser from data already loaded —
 no new artefact content is fetched, and downloading doesn't create a record of any kind.
 
-## 17. Known product gaps (intentional, not bugs)
+## 17. Chat input and navigation (BUILT)
+
+The message input box in every agent chat starts larger (four lines instead of two) and is
+user-resizable — drag its corner to stretch it taller for a longer message, the same way a
+native browser textarea resizes vertically. Two small arrow buttons sit next to the input:
+**↑** jumps to the top of the conversation (e.g. back to the opening briefing), **↓** jumps to
+the latest message. On a short conversation, messages sit anchored to the bottom of the chat
+area next to the input bar rather than at the top with empty space beneath them — the same
+layout convention as any standard chat app.
+
+## 18. Known product gaps (intentional, not bugs)
 
 - Cost figures are directional, not accurate to current Anthropic pricing — the per-million-token
   prices in `src/lib/cost.ts` are approximate placeholders; verify against Anthropic's current

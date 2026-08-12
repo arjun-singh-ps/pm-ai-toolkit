@@ -417,6 +417,18 @@ a custom `components` map styled to the app's design tokens; user messages stay 
 `whitespace-pre-wrap` text — a PM's own typed message is never parsed as Markdown. This pairs with
 the `COMMON_AGENT_INSTRUCTIONS` formatting instruction (Business Specification §14).
 
+**`ChatPanel.tsx`'s scroll and input handling** (Business Specification §17): the message list is
+wrapped in an inner `mt-auto` block — without it, a `flex-1 overflow-y-auto` container top-aligns
+its content, leaving a large empty gap above the input bar on a short conversation; `mt-auto`
+pushes that block to the bottom when short and resolves to `0` (no effect) once it overflows, so
+long conversations still scroll normally. The **↑**/**↓** buttons in the input row call
+`topRef.current.scrollIntoView()`/`bottomRef.current.scrollIntoView()` on sentinel `<div>`s at
+the start and end of the message list — not `scrollContainerRef.scrollTo()`, which was the
+original (broken) implementation: it only works if that specific div is the element actually
+handling the overflow, and in this app's nested flex layout it isn't. `scrollIntoView()` walks up
+to whichever ancestor really scrolls, regardless of the DOM nesting. The textarea itself is a
+plain `rows={4}` + `resize-y` — no JS auto-grow, just the browser's native resize handle.
+
 The **Roadmap page** (`src/app/programme/[id]/roadmap/page.tsx`) is a server component: it loads
 the programme, fetches its artefacts once, and calls `buildRoadmap` (`src/lib/phaseRoadmap.ts`) to
 compute every phase's completed/current/upcoming status and each phase's agents' approval status —
